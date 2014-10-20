@@ -1,0 +1,7 @@
+# Ignore all files
+*
+
+# Whitelist directories, .py and gitignore file
+!*/
+!*.py
+!.gitignore
