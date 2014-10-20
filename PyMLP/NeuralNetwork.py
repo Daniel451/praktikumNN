@@ -2,7 +2,7 @@
 
 import numpy as n
 
-n.set_printoptions(precision=2)
+n.set_printoptions(precision=10)
 
 def _tanh(x):  
     return n.tanh(x)
@@ -18,19 +18,14 @@ class NeuralNetwork:
         Should be at least two values  
         """  
         
-        self.W = []  
-        for i in range(1, len(layer) - 1):  
-            self.W.append((2*n.random.random((layer[i - 1] + 1, layer[i] ))-1)*0.25)
-            self.W.append((2*n.random.random((layer[i]     + 1, layer[i + 1]    ))-1)*0.25)
-            print((2*n.random.random((layer[i - 1] + 1, layer[i]     ))-1)*0.25)
-            print((2*n.random.random((layer[i]     + 1, layer[i + 1]    ))-1)*0.25)
-            #print((layer[i]     + 1, layer[i + 1]    )-1)
+        self.W = []
+        self.B = []
+        for i in range(1, len(layer)):
+            self.W.append(n.random.random((layer[i],layer[i - 1]))) #erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron
+            self.B.append(n.random.random((layer[i]))) #erzeuge 1 Bias für jedes Neuron
             
-            print('i ist: ' + str(i))
-            print('layer[i] ist : ' + str(layer[i])) 
-            
-
-        print(self.W)
+        #print('W ist: ' + str(self.W))
+        #print('B ist: ' + str(self.B))
 
     def guess(self, s_in):
         """Feedforward Activation of the MLP.
@@ -38,16 +33,22 @@ class NeuralNetwork:
         Keyword arguments:
         s_in -- input value, should be a list of values, quantity like the input layer!
         """
-        s_in = n.array(s_in)
-        temp = n.ones(s_in.shape[0]+1)
-        temp[0:-1] = s_in
-        a = temp
-        for l in range(0, len(self.W)):
-            a = _tanh(n.dot(a, self.W[l]))
+        
+        a = n.atleast_2d(s_in)
+        #print('a ist: ' + str(a))
+        
+        for l in range(0, len(self.W)): #für alle Layer...
+            #print('self.W[l] ist ' + str(self.W[l]))
+            a = _tanh(n.dot(a, n.transpose(self.W[l]))) + self.B[l] #multipliziere die Arraygewichte...
+            # Achtung: a ist ein [[ x y z]] und self.B[l] ist ein [] array! Funktioniert trotzdem!
+            #print('a ist: ' + str(a))
+            #print('self.B[l] ist: ' + str(self.B[l]))
+              
+            #print('a ist: ' + str(a))
         return a
 
 
-    def teach(self, s_in, s_teach, epsilon=0.2, epochs=10000):
+    def teach(self, s_in, s_teach, epsilon=0.2, repeats=10000):
         """Learning function for the MLP.
         
         Keyword arguments:
@@ -56,18 +57,37 @@ class NeuralNetwork:
         epsilon -- Factor for learning rate (default 0.2)
         epochs -- number of repeated learning steps (default 1000)
         """
-        s_in = n.atleast_2d(s_in) #format the input data to good arrays
-        s_teach = n.array(s_teach)      # -> faster!
+        
+        s_teach = n.atleast_2d(s_teach)      # -> faster!
         
         
-        for k in range(epochs):
+        for k in range(repeats):
             i = n.random.randint(s_in.shape[0])
-            a = [s_in[i]]
+            a = n.atleast_2d(s_in)
+            R = n.array([])
             
-            print('w ist: ' + str(self.W)) 
-            print('i ist: ' + str(i)) 
-            print('a ist: ' + str(a)) 
-            print('k ist: ' + str(k)) 
+            #print('a ist: ' + str(a))
+            for l in range(0, len(self.W)): #für alle Layer...
+                #print('self.W[l] ist ' + str(self.W[l]))
+                a = _tanh(n.dot(a, n.transpose(self.W[l]))) + self.B[l] #      HIER müssen irgendwie die Daten gesichert werden! TODO
+            #print(R)
+            #print('a: ' + str(a[-1]))
+            #print('s_teach[i]: ' + str(s_teach[i]))
+            
+            #delta_out = s_teach[i] - a[-1]  #calculate error on output layer
+            
+            
+            delta_lambda = (s_teach[i] - a[-1]) * _tanh_deriv(a[-1]) #calculate error on all hidden layers
+            
+            #print('delta_out ist: ' + str(delta_out))
+            #print('delta_lambda ist: ' + str(delta_lambda))
+            
+            #for j in range(len(self.W)):
+                #self.W[j] = self.W[j] + epsilon * delta_lambda
+            
+            
+            
+            
         #print('Gewichte nach lernen:')
         #print(self.W)
 
