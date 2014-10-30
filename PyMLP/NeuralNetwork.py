@@ -22,10 +22,8 @@ class NeuralNetwork:
         self.B = []
         for i in range(1, len(layer)):
             self.W.append(n.random.random((layer[i],layer[i - 1]))) #erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron
-            self.B.append(n.random.random((layer[i]))) #erzeuge 1 Bias für jedes Neuron
+            self.B.append(n.random.random((layer[i],1))) #erzeuge 1 Bias für jedes Neuron
             
-        #print('W ist: ' + str(self.W))
-        #print('B ist: ' + str(self.B))
         
         print('')
         print('============================================================================')
@@ -43,7 +41,7 @@ class NeuralNetwork:
         
         for l in range(0, len(self.W)): #für alle Layer...
             #print('self.W[l] ist ' + str(self.W[l]))
-            a = _tanh(n.dot(a, n.transpose(self.W[l])) ) # + self.B[l]) #multipliziere die Arraygewichte...
+            a = _tanh(n.dot(a, n.transpose(self.W[l])) +  n.transpose(self.B[l])) #multipliziere die Arraygewichte...
             # Achtung: a ist ein [[ x y z]] und self.B[l] ist ein [] array! Funktioniert trotzdem!
             #print('a ist: ' + str(a))
             #print('self.B[l] ist: ' + str(self.B[l]))
@@ -66,6 +64,7 @@ class NeuralNetwork:
         
         
         
+        
         for k in range(repeats):
             i = n.random.randint(s_in.shape[0])
             a = n.atleast_2d(s_in[i])
@@ -78,7 +77,11 @@ class NeuralNetwork:
             
             for l in range(0, len(self.W)): #für alle Layer...
                 #zum merken der net-Werte
-                int_a=n.dot(a, n.transpose(self.W[l]))  # + self.B[l] erstmal ohne bias
+                int_a=n.dot(a, n.transpose(self.W[l])) + n.transpose(self.B[l])
+                
+                #print('int_a: ' + str(int_a))
+                #print('Bias: ' + str(self.B[l]))
+                
                 Activation.append(int_a)
                 a = _tanh(int_a) 
                 Output.append(a)
@@ -120,6 +123,8 @@ class NeuralNetwork:
                 #self.W[l] = self.W[l] + epsilon * n.outer(Output[l-1], delta)
                 
                 self.W[l] = self.W[l] + ((epsilon * n.transpose(delta)) * Output[l])
+                self.B[l] = self.B[l] + (epsilon * n.transpose(delta))
+                
                 #print('DeltaW ' + str(((epsilon * n.transpose(delta)) * Output[l])) )
                 
                 #print('---------------- End (W Calc) ----------------')

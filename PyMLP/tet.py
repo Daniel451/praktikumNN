@@ -52,3 +52,9 @@ delta = n.array ( [[ 39.27093641  ,  24.2338831372]])
 
 print( Output * (W * n.transpose(delta)).sum(axis=0))
 
+
+print('----------------------------------')
+
+
+print('W-Test:')
+print(n.dot(Output, n.transpose(W)))
