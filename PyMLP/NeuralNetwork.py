@@ -83,22 +83,25 @@ class NeuralNetwork:
                 a = _tanh(int_a) 
                 Output.append(a)
             
-            print('Activations:')
-            print(Activation)
+            #print('Activations:')
+            #print(Activation)
             
             #
             #Backpropagation:
             
-            delta_lambda = _tanh_deriv(int_a) * (s_teach[i] - a[-1])    #Erzeugt delta_Lamda zum ersten mal: interner Wert von den Ausgabeneuronen ohne 
+            delta = _tanh_deriv(int_a) * (s_teach[i] - a[-1])    #Erzeugt delta_Lamda zum ersten mal: f'(interner Wert) * (SollAusgabe - IstAusgabe)
             
-            print('Gewichte vor lernen:')
-            print(self.W)
+            #print('Gewichte vor lernen:')
+            #print(self.W)
+            
+            #print('Delta des Inputs: ' + str(delta))
+            
             
             for l in range(len(self.W)-1, -1, -1): #für alle Layer...
-                print('+++++++++++++++++++++++++')
-                print('Passe Layer an: ' + str(l))
+                #print('+++++++++++++++++++++++++')
+                #print('Passe Layer an: ' + str(l))
                 
-                #print('delta_lambda:   ' + str(delta_lambda))
+                #print('delta:   ' + str(delta))
                 #print('a:              ' + str(a))
                 #print('Activation:     ' + str(Activation[l]))
                 #print('Output[l] :     ' + str(Output[l]))
@@ -106,35 +109,51 @@ class NeuralNetwork:
                 #print('tanh_deriv:     ' + str(_tanh_deriv(Activation[l])))
                 
                 
-                #self.W[l] = self.W[l] + epsilon * n.outer(Output[l-1], delta_lambda)
-                
-                #n.outer(Output[l-1], delta_lambda)
+                #print('---------------- Start (W Calc) ----------------')
                 
                 
-                #print('n.outer:     ' + str(n.outer(delta_lambda, Output[l])))
-                #print('Output:      ' + str(Output[l]))
-                #print('delta_lambda:' + str(delta_lambda))
+                #print('old W(l):       ' + str(self.W[l]))
+                #print('delta:   ' + str(delta))
+                #print('Output[l] :     ' + str(Output[l]))
                 
                 
-                print('_tanh_deriv(Output[l]):' + str(_tanh_deriv(Output[l])))
-                print('delta_lambda:' + str(n.transpose(delta_lambda)))
-                print('self.W[l]:' + str(self.W[l-1]))
+                #self.W[l] = self.W[l] + epsilon * n.outer(Output[l-1], delta)
+                
+                self.W[l] = self.W[l] + ((epsilon * n.transpose(delta)) * Output[l])
+                #print('DeltaW ' + str(((epsilon * n.transpose(delta)) * Output[l])) )
+                
+                #print('---------------- End (W Calc) ----------------')
+                
+                
+                if l > 0:
+                    #print('Neues Delta für Layer ' + str(l - 1) + ' errechnen...')
+                
+                
+                    #print('---------------- Start (Delta)  ----------------')
                 
                 
                 
+                    #print('_tanh_deriv(Output[l]) : ' + str(_tanh_deriv(Output[l])))
+                    #print('self.W[l] : ' + str(self.W[l]))
+                    #print('self.W[l-1] : ' + str(self.W[l-1]))
+                    #print('delta : ' + str(delta))
                 
-                print('n.dot:' + str(n.dot(n.transpose(delta_lambda), (self.W[l-1]))))
+                
+                    delta = _tanh_deriv(Output[l]) * (self.W[l] * n.transpose(delta)).sum(axis=0)
                 
                 
-                delta_lambda = _tanh_deriv(Output[l]) * n.dot(self.W[l-1],delta_lambda)
+                    #print('delta new:' + str(delta))
                 
-                print('+++++++++++++++++++++++++')
+                    #print('----------------- End (Delta)  -----------------')
+                
+                
+                #print('+++++++++++++++++++++++++')
                 
             
             
             
-            print('ENDE!!!!')
-            print('Output:   ' + str(Output))
+            #print('ENDE!!!!')
+            #print('Output:   ' + str(Output))
             
                 
             
