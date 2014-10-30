@@ -21,8 +21,8 @@ class NeuralNetwork:
         self.W = []
         self.B = []
         for i in range(1, len(layer)):
-            self.W.append(n.random.random((layer[i],layer[i - 1]))) #erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron
-            self.B.append(n.random.random((layer[i],1))) #erzeuge 1 Bias für jedes Neuron
+            self.W.append(n.random.random((layer[i],layer[i - 1]))-0.5) #erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron
+            self.B.append(n.random.random((layer[i],1))-0.5) #erzeuge 1 Bias für jedes Neuron
             
         
         print('')
@@ -77,10 +77,11 @@ class NeuralNetwork:
             
             for l in range(0, len(self.W)): #für alle Layer...
                 #zum merken der net-Werte
-                int_a=n.dot(a, n.transpose(self.W[l])) + n.transpose(self.B[l])
+                int_a=a.dot(n.transpose(self.W[l])) + n.transpose(self.B[l]) # scheint ok zu sein.
                 
-                #print('int_a: ' + str(int_a))
-                #print('Bias: ' + str(self.B[l]))
+                #print('a: ' + str(a))
+                #print('self.W[l]: ' + str(self.W[l]))
+                #print('self.B[l]: ' + str(self.B[l]))
                 
                 Activation.append(int_a)
                 a = _tanh(int_a) 
@@ -94,8 +95,8 @@ class NeuralNetwork:
             
             delta = _tanh_deriv(int_a) * (s_teach[i] - a[-1])    #Erzeugt delta_Lamda zum ersten mal: f'(interner Wert) * (SollAusgabe - IstAusgabe)
             
-            #print('Gewichte vor lernen:')
-            #print(self.W)
+            print('Gewichte vor lernen:')
+            print(self.W)
             
             #print('Delta des Inputs: ' + str(delta))
             
@@ -144,7 +145,7 @@ class NeuralNetwork:
                     #print('delta : ' + str(delta))
                 
                 
-                    delta = _tanh_deriv(Output[l]) * (self.W[l] * n.transpose(delta)).sum(axis=0)
+                    delta = _tanh_deriv(Activation[l]) * (self.W[l] * n.transpose(delta)).sum(axis=0)
                 
                 
                     #print('delta new:' + str(delta))
