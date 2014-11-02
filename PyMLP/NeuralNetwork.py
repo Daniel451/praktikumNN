@@ -8,7 +8,7 @@ def _tanh(x):
     return n.tanh(x)
 
 def _tanh_deriv(x):  
-    return 1.0 - x**2
+    return 1.0 - n.tanh(x)**2
 
 
 class NeuralNetwork:
@@ -24,6 +24,30 @@ class NeuralNetwork:
             self.W.append(n.random.random((layer[i],layer[i - 1]))-0.5) #erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron
             self.B.append(n.random.random((layer[i],1))-0.5) #erzeuge 1 Bias für jedes Neuron
             
+        
+        #Temporär zum testen zurücksetzen:
+        
+        
+        #Gewichte vor lernen:
+        #[array([[-0.133301604 ,  0.0008572114],
+        #       [ 0.0777116726, -0.3206972183],
+        #       [-0.0198465845, -0.4098421422]]), array([[-0.2522253992,  0.093474046 , -0.1166710151]])]
+        #Bias vor lernen:
+        #[array([[ 0.0848112323],
+        #       [ 0.4111778799],
+        #       [ 0.0436669983]]), array([[ 0.1515373456]])]
+        
+        
+        
+        self.W = [n.array([[-0.133301604 ,  0.0008572114],
+               [ 0.0777116726, -0.3206972183],
+               [-0.0198465845, -0.4098421422]]), n.array([[-0.2522253992,  0.093474046 , -0.1166710151]])]
+        
+        self.B = [n.array([[ 0.0848112323],
+               [ 0.4111778799],
+               [ 0.0436669983]]), n.array([[ 0.1515373456]])]
+        
+        
         
         print('')
         print('============================================================================')
@@ -77,14 +101,25 @@ class NeuralNetwork:
             
             for l in range(0, len(self.W)): #für alle Layer...
                 #zum merken der net-Werte
-                int_a=a.dot(n.transpose(self.W[l])) + n.transpose(self.B[l]) # scheint ok zu sein.
+                
+                #int_a=a.dot(n.transpose(self.W[l])) + n.transpose(self.B[l]) 
+                
+                print('a: ' + str(a))
+                print('self.W[l]: ' + str(self.W[l]))
+                print('self.B[l]: ' + str(self.B[l]))
+                
+                #int_a=a.dot(self.W[l].transpose) + self.B[l].transpose Bullshit!
+                int_a=n.atleast_2d((a * self.W[l]).sum(axis=1)) + n.transpose(self.B[l]) 
                 
                 #print('a: ' + str(a))
                 #print('self.W[l]: ' + str(self.W[l]))
                 #print('self.B[l]: ' + str(self.B[l]))
                 
                 Activation.append(int_a)
-                a = _tanh(int_a) 
+                if l == len(self.W):
+                    a = _tanh(int_a)
+                else:
+                    a = int_a
                 Output.append(a)
             
             #print('Activations:')
@@ -93,20 +128,22 @@ class NeuralNetwork:
             #
             #Backpropagation:
             
-            delta = _tanh_deriv(int_a) * (s_teach[i] - a[-1])    #Erzeugt delta_Lamda zum ersten mal: f'(interner Wert) * (SollAusgabe - IstAusgabe)
+            delta = (s_teach[i] - a[-1])    #Erzeugt delta_Lamda zum ersten mal:  (SollAusgabe - IstAusgabe)
             
             print('Gewichte vor lernen:')
             print(self.W)
+            print('Bias vor lernen:')
+            print(self.B)
             
-            #print('Delta des Inputs: ' + str(delta))
+            print('Delta des Inputs: ' + str(delta))
             
             
-            for l in range(len(self.W)-1, -1, -1): #für alle Layer...
-                #print('+++++++++++++++++++++++++')
-                #print('Passe Layer an: ' + str(l))
+            for l in range(len(self.W)-1, 0, -1): #für alle Layer...
+                print('+++++++++++++++++++++++++')
+                print('Passe Layer an: ' + str(l))
                 
-                #print('delta:   ' + str(delta))
-                #print('a:              ' + str(a))
+                print('mit delta:    ' + str(delta))
+                print('mit a:        ' + str(a))
                 #print('Activation:     ' + str(Activation[l]))
                 #print('Output[l] :     ' + str(Output[l]))
                 #print('W(l):           ' + str(self.W[l]))
@@ -138,8 +175,8 @@ class NeuralNetwork:
                     #print('---------------- Start (Delta)  ----------------')
                 
                 
-                
-                    #print('_tanh_deriv(Output[l]) : ' + str(_tanh_deriv(Output[l])))
+                    print('Output[l] : ' + str(Output[l]))
+                    print('_tanh_deriv(Output[l]) : ' + str(_tanh_deriv(Output[l])))
                     #print('self.W[l] : ' + str(self.W[l]))
                     #print('self.W[l-1] : ' + str(self.W[l-1]))
                     #print('delta : ' + str(delta))
@@ -148,17 +185,17 @@ class NeuralNetwork:
                     delta = _tanh_deriv(Activation[l]) * (self.W[l] * n.transpose(delta)).sum(axis=0)
                 
                 
-                    #print('delta new:' + str(delta))
+                    print('delta next:' + str(delta))
                 
                     #print('----------------- End (Delta)  -----------------')
                 
                 
-                #print('+++++++++++++++++++++++++')
+                print('+++++++++++++++++++++++++')
                 
             
+            print('Output ist: ' + str(Output))
             
-            
-            #print('ENDE!!!!')
+            print('ENDE!!!!')
             #print('Output:   ' + str(Output))
             
                 
@@ -167,6 +204,8 @@ class NeuralNetwork:
             
         print('Gewichte nach lernen:')
         print(self.W)
+        print('Bias nach lernen:')
+        print(self.B)
 
 
 
