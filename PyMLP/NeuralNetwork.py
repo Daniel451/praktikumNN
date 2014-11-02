@@ -116,11 +116,12 @@ class NeuralNetwork:
                 #print('self.B[l]: ' + str(self.B[l]))
                 
                 Activation.append(int_a)
-                if l == len(self.W):
-                    a = _tanh(int_a)
-                else:
+                if len(self.W) - 1 == l:
                     a = int_a
+                else:
+                    a = _tanh(int_a)
                 Output.append(a)
+                #print(a == int_a)
             
             #print('Activations:')
             #print(Activation)
@@ -138,63 +139,71 @@ class NeuralNetwork:
             print('Delta des Inputs: ' + str(delta))
             
             
+            
             for l in range(len(self.W)-1, 0, -1): #für alle Layer...
                 print('+++++++++++++++++++++++++')
                 print('Passe Layer an: ' + str(l))
                 
-                print('mit delta:    ' + str(delta))
-                print('mit a:        ' + str(a))
+                #print('mit delta:    ' + str(delta))
+                #print('mit a:        ' + str(a))
                 #print('Activation:     ' + str(Activation[l]))
                 #print('Output[l] :     ' + str(Output[l]))
-                #print('W(l):           ' + str(self.W[l]))
                 #print('tanh_deriv:     ' + str(_tanh_deriv(Activation[l])))
-                
-                
-                #print('---------------- Start (W Calc) ----------------')
-                
-                
-                #print('old W(l):       ' + str(self.W[l]))
-                #print('delta:   ' + str(delta))
-                #print('Output[l] :     ' + str(Output[l]))
-                
-                
-                #self.W[l] = self.W[l] + epsilon * n.outer(Output[l-1], delta)
-                
-                self.W[l] = self.W[l] + ((epsilon * n.transpose(delta)) * Output[l])
-                self.B[l] = self.B[l] + (epsilon * n.transpose(delta))
-                
-                #print('DeltaW ' + str(((epsilon * n.transpose(delta)) * Output[l])) )
-                
-                #print('---------------- End (W Calc) ----------------')
                 
                 
                 if l > 0:
                     #print('Neues Delta für Layer ' + str(l - 1) + ' errechnen...')
-                
-                
-                    #print('---------------- Start (Delta)  ----------------')
-                
-                
-                    print('Output[l] : ' + str(Output[l]))
+                    
+                    
+                    print('---------------- Start (Delta)  ----------------')
+                    
+                    
+                    print('Output[l] :              ' + str(Output[l]))
                     print('_tanh_deriv(Output[l]) : ' + str(_tanh_deriv(Output[l])))
-                    #print('self.W[l] : ' + str(self.W[l]))
-                    #print('self.W[l-1] : ' + str(self.W[l-1]))
-                    #print('delta : ' + str(delta))
+                    print('self.W[l] :              ' + str(self.W[l]))
+                    print('delta :                  ' + str(delta))
+                    print('delta*W sum:             ' + str((self.W[l] * n.transpose(delta)).sum(axis=0)))
+                    
+                    
+                    delta_next = _tanh_deriv(Activation[l]) * (self.W[l] * n.transpose(delta)).sum(axis=0)
+                    
+                    
+                    print('delta next:' + str(delta_next))
+                    
+                    print('----------------- End (Delta)  -----------------')
                 
                 
-                    delta = _tanh_deriv(Activation[l]) * (self.W[l] * n.transpose(delta)).sum(axis=0)
+                
+                print('---------------- Start (W Calc) ----------------')
                 
                 
-                    print('delta next:' + str(delta))
+                print('old W(l):       ' + str(self.W[l]))
+                print('delta:   ' + str(delta))
+                print('Output[l] :     ' + str(Output[l]))
+                print('epsilon :     ' + str(epsilon))
                 
-                    #print('----------------- End (Delta)  -----------------')
+                add = ((epsilon * n.transpose(delta)) * Output[l])
                 
+                
+                #self.W[l] = self.W[l] + epsilon * n.outer(Output[l-1], delta)
+                
+                
+                # minus oder Plus?!
+                self.W[l] = self.W[l] - self.W[l] * ((epsilon * n.transpose(delta)) * Output[l])
+                self.B[l] = self.B[l] - self.B[l] * (epsilon * n.transpose(delta))
+                
+                #print('DeltaW ' + str(((epsilon * n.transpose(delta)) * Output[l])) )
+                
+                print('---------------- End (W Calc) ----------------')
+                
+                
+                delta = delta_next
                 
                 print('+++++++++++++++++++++++++')
                 
             
-            print('Output ist: ' + str(Output))
-            
+            print('Output ist:     ' + str(Output))
+            print('Activation ist: ' + str(Activation))
             print('ENDE!!!!')
             #print('Output:   ' + str(Output))
             
