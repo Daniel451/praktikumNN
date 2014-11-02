@@ -10,6 +10,9 @@ def _tanh(x):
 def _tanh_deriv(x):  
     return 1.0 - n.tanh(x)**2
 
+#def _tanh_deriv(x):  
+#    return 1.0 - x**2
+
 
 class NeuralNetwork:
     def __init__(self, layer):  
@@ -23,30 +26,6 @@ class NeuralNetwork:
         for i in range(1, len(layer)):
             self.W.append(n.random.random((layer[i],layer[i - 1]))-0.5) #erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron
             self.B.append(n.random.random((layer[i],1))-0.5) #erzeuge 1 Bias für jedes Neuron
-            
-        
-        #Temporär zum testen zurücksetzen:
-        
-        
-        #Gewichte vor lernen:
-        #[array([[-0.133301604 ,  0.0008572114],
-        #       [ 0.0777116726, -0.3206972183],
-        #       [-0.0198465845, -0.4098421422]]), array([[-0.2522253992,  0.093474046 , -0.1166710151]])]
-        #Bias vor lernen:
-        #[array([[ 0.0848112323],
-        #       [ 0.4111778799],
-        #       [ 0.0436669983]]), array([[ 0.1515373456]])]
-        
-        
-        
-        self.W = [n.array([[-0.133301604 ,  0.0008572114],
-               [ 0.0777116726, -0.3206972183],
-               [-0.0198465845, -0.4098421422]]), n.array([[-0.2522253992,  0.093474046 , -0.1166710151]])]
-        
-        self.B = [n.array([[ 0.0848112323],
-               [ 0.4111778799],
-               [ 0.0436669983]]), n.array([[ 0.1515373456]])]
-        
         
         
         print('')
@@ -104,9 +83,9 @@ class NeuralNetwork:
                 
                 #int_a=a.dot(n.transpose(self.W[l])) + n.transpose(self.B[l]) 
                 
-                print('a: ' + str(a))
-                print('self.W[l]: ' + str(self.W[l]))
-                print('self.B[l]: ' + str(self.B[l]))
+                #print('a: ' + str(a))
+                #print('self.W[l]: ' + str(self.W[l]))
+                #print('self.B[l]: ' + str(self.B[l]))
                 
                 #int_a=a.dot(self.W[l].transpose) + self.B[l].transpose Bullshit!
                 int_a=n.atleast_2d((a * self.W[l]).sum(axis=1)) + n.transpose(self.B[l]) 
@@ -131,18 +110,18 @@ class NeuralNetwork:
             
             delta = (s_teach[i] - a[-1])    #Erzeugt delta_Lamda zum ersten mal:  (SollAusgabe - IstAusgabe)
             
-            print('Gewichte vor lernen:')
-            print(self.W)
-            print('Bias vor lernen:')
-            print(self.B)
+            #print('Gewichte vor lernen:')
+            #print(self.W)
+            #print('Bias vor lernen:')
+            #print(self.B)
             
-            print('Delta des Inputs: ' + str(delta))
+            #print('Delta des Inputs: ' + str(delta))
             
             
             
             for l in range(len(self.W)-1, 0, -1): #für alle Layer...
-                print('+++++++++++++++++++++++++')
-                print('Passe Layer an: ' + str(l))
+                #print('+++++++++++++++++++++++++')
+                #print('Passe Layer an: ' + str(l))
                 
                 #print('mit delta:    ' + str(delta))
                 #print('mit a:        ' + str(a))
@@ -155,66 +134,66 @@ class NeuralNetwork:
                     #print('Neues Delta für Layer ' + str(l - 1) + ' errechnen...')
                     
                     
-                    print('---------------- Start (Delta)  ----------------')
+                    #print('---------------- Start (Delta)  ----------------')
                     
                     
-                    print('Output[l] :              ' + str(Output[l]))
-                    print('_tanh_deriv(Output[l]) : ' + str(_tanh_deriv(Output[l])))
-                    print('self.W[l] :              ' + str(self.W[l]))
-                    print('delta :                  ' + str(delta))
-                    print('delta*W sum:             ' + str((self.W[l] * n.transpose(delta)).sum(axis=0)))
+                    #print('Output[l] :              ' + str(Output[l]))
+                    #print('_tanh_deriv(Output[l]) : ' + str(_tanh_deriv(Output[l])))
+                    #print('self.W[l] :              ' + str(self.W[l]))
+                    #print('delta :                  ' + str(delta))
+                    #print('delta*W sum:             ' + str((self.W[l] * n.transpose(delta)).sum(axis=0)))
                     
-                    
+                    # was muss hier hin? Aktivierung oder Output?
                     delta_next = _tanh_deriv(Activation[l]) * (self.W[l] * n.transpose(delta)).sum(axis=0)
+                    #müsste activation sein....
                     
+                    #print('delta next:' + str(delta_next))
                     
-                    print('delta next:' + str(delta_next))
-                    
-                    print('----------------- End (Delta)  -----------------')
+                    #print('----------------- End (Delta)  -----------------')
                 
                 
                 
-                print('---------------- Start (W Calc) ----------------')
+                #print('---------------- Start (W Calc) ----------------')
                 
                 
-                print('old W(l):       ' + str(self.W[l]))
-                print('delta:   ' + str(delta))
-                print('Output[l] :     ' + str(Output[l]))
-                print('epsilon :     ' + str(epsilon))
+                #print('old W(l):       ' + str(self.W[l]))
+                #print('delta:   ' + str(delta))
+                #print('Output[l] :     ' + str(Output[l]))
+                #print('epsilon :     ' + str(epsilon))
                 
-                add = ((epsilon * n.transpose(delta)) * Output[l])
                 
+                #print('Error: ' + str(delta))
                 
                 #self.W[l] = self.W[l] + epsilon * n.outer(Output[l-1], delta)
                 
                 
-                # minus oder Plus?!
-                self.W[l] = self.W[l] - self.W[l] * ((epsilon * n.transpose(delta)) * Output[l])
-                self.B[l] = self.B[l] - self.B[l] * (epsilon * n.transpose(delta))
+                # was muss hier hin? Aktivierung oder Output?
+                self.W[l] = self.W[l] +  ((epsilon * n.transpose(delta)) * Output[l])
+                self.B[l] = self.B[l] +  epsilon * n.transpose(delta)
                 
                 #print('DeltaW ' + str(((epsilon * n.transpose(delta)) * Output[l])) )
                 
-                print('---------------- End (W Calc) ----------------')
+                #print('---------------- End (W Calc) ----------------')
                 
                 
                 delta = delta_next
                 
-                print('+++++++++++++++++++++++++')
+                #print('+++++++++++++++++++++++++')
                 
             
-            print('Output ist:     ' + str(Output))
-            print('Activation ist: ' + str(Activation))
-            print('ENDE!!!!')
+            #print('Output ist:     ' + str(Output))
+            #print('Activation ist: ' + str(Activation))
+            #print('ENDE!!!!')
             #print('Output:   ' + str(Output))
             
                 
             
             
             
-        print('Gewichte nach lernen:')
-        print(self.W)
-        print('Bias nach lernen:')
-        print(self.B)
+        #print('Gewichte nach lernen:')
+        #print(self.W)
+        #print('Bias nach lernen:')
+        #print(self.B)
 
 
 
