@@ -52,5 +52,7 @@ class world_digits:
       self.t += 1
 
    def sensor(self):
-      # return one image as an 8x8 long vector
+      # returns a list
+      # [0] -> one image as an 8x8 long vector
+      # [1] -> alphanumerical thing
       return [self.values[self.t], self.digitsalph[self.t]]
