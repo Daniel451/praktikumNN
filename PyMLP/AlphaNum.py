@@ -3,20 +3,34 @@
 import numpy as n
 
 import glob
-print( str(glob.glob("/*.*")))
+
+s_in =n.array([])
+s_teach =n.array([])
+for file in glob.glob("./digits_alph/*.pgm"):
+    
+    char = file[file.rfind("/")+6:-4]
+    path = file
+    code = ord(char) - 48
+    binary = list(("{0:b}".format(code)).zfill(6))
+    binary = [int(i) for i in binary]
+    print(char,path, code, str(binary))
+    #s_teach.append(a)
+
+
+
+
 
 from NeuralNetwork import NeuralNetwork
 
-nn = NeuralNetwork([2,6,1]) 
-
-s_in = n.array([[0, 0], [0, 1], [1, 0], [1, 1]]) #Trainingsdaten Input
-s_teach = n.array([[0], [1], [1], [0]])          #Trainingsdaten Output
-
-nn.teach(s_in, s_teach ,0.3,25000)  # Trainiren: 
+nn = NeuralNetwork([64,100,6]) 
 
 
-for i in [[0, 0], [0, 1], [1, 0], [1,1]]:
-    print(i,nn.guess(i))
+
+#nn.teach(s_in, s_teach ,0.3,25000)  # Trainiren: 
+
+
+#for i in [[0, 0], [0, 1], [1, 0], [1,1]]:
+#    print(i,nn.guess(i))
 
 # whoaaaa: sichern von Daten zum laden fürs nächste Mal ;)
 #nn.save('savetest') # erzeugt eine 'savetest.npz' Datei! (alles unchecked!, überschreiben ohne Warnung!)
