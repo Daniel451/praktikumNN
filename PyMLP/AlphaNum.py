@@ -53,29 +53,26 @@ data = picture.getall()
 for char in data[1]:
     code = ord(char) - 48
     binary = list(("{0:b}".format(code)).zfill(6))
-    binary = [float(i) for i in binary]
-    print(char, code, str(binary))
+    binary = n.array([float(i) for i in binary])
+    #print(char, code, str(binary))
     s_teach.append(binary)
 
 
 s_in = n.array(data[0])
-s_teach = n.array(s_teach)
+
+print( str(type(s_in[0])) ) 
+print( str(type(s_teach[0])) )
 
 
-print( str(s_in.shape)) 
-print( str(s_teach.shape) )
-
-print( str(type(s_in))) 
-print( str(type(s_teach)) )
 
 
 from NeuralNetwork import NeuralNetwork
 
-nn = NeuralNetwork([64,100,6]) 
+nn = NeuralNetwork([64,10,6]) 
 
-print(type(s_in[1]))
 
-nn.teach(n.array(s_in), n.array(s_teach) ,0.3,25000)  # Trainiren: 
+
+nn.teach(n.array(s_in), n.array(s_teach) ,0.03,25000)  # Trainiren: 
 
 #nn.teach(s_in, s_teach ,0.3,25000)  # Trainiren: 
 for i in [3, 7, 9, 14, 25]:
