@@ -5,3 +5,6 @@
 !*/
 !*.py
 !.gitignore
+*.pyc
+*.npz
+
