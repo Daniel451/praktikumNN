@@ -2,14 +2,14 @@
 
 import numpy as n
 
-n.set_printoptions(precision=10)
 
-def _tanh(x):  
+def _tanh(x):                 # diese Funktion stellt die Übertragungsfunktion der Neuronen dar. Forwardpropagation 
     return n.tanh(x)
 
-def _tanh_deriv(x):  
+def _tanh_deriv(x):           # diese Funktion stellt die Ableitung der Übertragungsfunktion dar. Sie ist für die Backpropagation nötig.
     return 1.0 - n.tanh(x)**2
 
+# Welche ist nun Richtig?
 #def _tanh_deriv(x):  
 #    return 1.0 - x**2
 
@@ -21,11 +21,11 @@ class NeuralNetwork:
         Should be at least two values  
         """  
         
-        self.W = []
-        self.B = []
+        self.W = [] #Erstelle das Array der Gewichte zwischen den Neuronen. 
+        self.B = [] #Erstelle das Array der Biase für alle Neuronen.
         for i in range(1, len(layer)):
-            self.W.append(n.random.random((layer[i],layer[i - 1]))-0.5) #erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron
-            self.B.append(n.random.random((layer[i],1))-0.5) #erzeuge 1 Bias für jedes Neuron
+            self.W.append(n.random.random((layer[i],layer[i - 1]))-0.5) #erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron zufällig im Bereich von -0.5 bis 0.5.
+            self.B.append(n.random.random((layer[i],1))-0.5) #ebenso zufällige Werte für Bias. Bereich: -0.5 bis 0.5.
         
         
         print('')
@@ -39,18 +39,23 @@ class NeuralNetwork:
         s_in -- input value, should be a list of values, quantity like the input layer!
         """
         
-        a = n.atleast_2d(s_in)
-        #print('a ist: ' + str(a))
-        
-        for l in range(0, len(self.W)): #für alle Layer...
-            #print('self.W[l] ist ' + str(self.W[l]))
-            a = _tanh(n.dot(a, n.transpose(self.W[l])) +  n.transpose(self.B[l])) #multipliziere die Arraygewichte...
-            # Achtung: a ist ein [[ x y z]] und self.B[l] ist ein [] array! Funktioniert trotzdem!
-            #print('a ist: ' + str(a))
-            #print('self.B[l] ist: ' + str(self.B[l]))
-              
-            #print('a ist: ' + str(a))
-        return a
+        a = n.atleast_2d(s_in) # Das Eingabe-Array, der input für den Input-Layer sollten als 2D Array aufgebaut sein: [[ 0, 0.7, 1 ]] Somit ist sichergestellt, dass im ganzen Programm, einfache Transpositionen möglich sind. Alle Gewichte/Biase/Output sehen "immer" so aus.
+        # +====================================+
+        # +********* Feedforward-Algo *********+
+        # +====================================+
+        for l in range(0, len(self.W)): #für alle Layer... 
+        #(Die Neuronen werden in einem Layer immer Gleichzeitig bearbeitet! Hier wir ausgenutzt, dass alle Informationen in den Arrays synchron und gleich groß sind. Es gibt (muss geben!) also zu jedem Neuron in einem Layer ein Subarray mit den Gewichten. Ebenso gibt es für jedes Neuron ein Bias und später vieleicht auch noch weitere Daten...)
+            
+            int_a=n.atleast_2d((a * self.W[l]).sum(axis=1)) + n.transpose(self.B[l])
+            # Summe der Produkte (von jeweiligen Gewichten und Output der Neuronen) und des Biases des Neurons wird... 
+            
+            if len(self.W) - 1 == l: #... wenn es sich um ein Output Neuron handelt (LastLayer!)...
+                a = int_a            # direkt ausgegeben (Linear!)
+            else:
+                a = _tanh(int_a)     # an sonsten wird diese mit der Übertragungsfunktion "angepasst" und dann an das nachste Layer weitergegeben.
+                
+            #TODO: Könnte man auch auseinanderziehen, weiß noch nicht, obs schöner wird, die Output Neuronen separat zu berechnen. Dies spart dann die if-Abfrage. Besser?!
+        return a #Es wird hier ein Array mit Count(Ausgangsneuronen) zurückgegeben. Die Output Werte 
 
 
     def teach(self, s_in, s_teach, epsilon=0.2, repeats=10000):
@@ -63,137 +68,60 @@ class NeuralNetwork:
         epochs -- number of repeated learning steps (default 1000)
         """
         
-        s_teach = n.atleast_2d(s_teach)      # -> faster!
-        
-        
-        
+        s_teach = n.atleast_2d(s_teach)      # Wie Oben beschriben, sollten alle Werte 2D-Arrays sein.
         
         for k in range(repeats):
-            i = n.random.randint(s_in.shape[0])
-            a = n.atleast_2d(s_in[i])
-            R = n.array([])
+            i = n.random.randint(s_in.shape[0]) #Wähle zufällig einen Lern-Datensatz aus
+            a = n.atleast_2d(s_in[i])           # der gegebenen Menge der Beispieldaten aus.
             
-            Activation = []
-            Activation.append(a)
-            Output = []
-            Output.append(a)
+            Activation = []           # init des Activation Zwischenspeichers: Summe(Gewichte, Output vom vorherigen Layer) + Bias
+            Activation.append(a)      # Das erste Layer braucht nicht berechnet zu werden, es sind gleichzeitig die Activation wie auch Input Daten des NN.
+            Output = []               # init des Activation Zwischenspeichers: Übertragungsfunktion( Activation )
+            Output.append(a)          # Die Inputlayer haben keine Übertragungsfunktion sie sind nur "dumme Werteträger", Input Neuronen eben!
             
-            for l in range(0, len(self.W)): #für alle Layer...
-                #zum merken der net-Werte
-                
-                #int_a=a.dot(n.transpose(self.W[l])) + n.transpose(self.B[l]) 
-                
-                #print('a: ' + str(a))
-                #print('self.W[l]: ' + str(self.W[l]))
-                #print('self.B[l]: ' + str(self.B[l]))
-                
+            # +====================================+
+            # +********* Feedforward-Algo *********+
+            # +====================================+
+            for l in range(0, len(self.W)): #für alle Layer... 
+                #Wie in guess(self, s_in), werden auch hier identisch (!!) die Activation und Output Daten mittels Feedforward-Algo berechnet. Der Unterschied ist jedoch, dass wir uns hier nun die Daten für den folgenden Backpropagation-Algo merken müssen!
                 #int_a=a.dot(self.W[l].transpose) + self.B[l].transpose Bullshit!
-                int_a=n.atleast_2d((a * self.W[l]).sum(axis=1)) + n.transpose(self.B[l]) 
+                int_a=n.atleast_2d((a * self.W[l]).sum(axis=1)) + n.transpose(self.B[l])
                 
-                #print('a: ' + str(a))
-                #print('self.W[l]: ' + str(self.W[l]))
-                #print('self.B[l]: ' + str(self.B[l]))
-                
-                Activation.append(int_a)
-                if len(self.W) - 1 == l:
+                Activation.append(int_a) #merken des Activation-Wertes!
+                if len(self.W) - 1 == l: # siehe oben...
                     a = int_a
                 else:
                     a = _tanh(int_a)
-                Output.append(a)
-                #print(a == int_a)
-            
-            #print('Activations:')
-            #print(Activation)
-            
-            #
-            #Backpropagation:
-            
-            delta = (s_teach[i] - a[-1])    #Erzeugt delta_Lamda zum ersten mal:  (SollAusgabe - IstAusgabe)
-            
-            #print('Gewichte vor lernen:')
-            #print(self.W)
-            #print('Bias vor lernen:')
-            #print(self.B)
-            
-            #print('Delta des Inputs: ' + str(delta))
-            
-            
-            
-            for l in range(len(self.W)-1, 0, -1): #für alle Layer...
-                #print('+++++++++++++++++++++++++')
-                #print('Passe Layer an: ' + str(l))
+                Output.append(a) #merken des Output-Wertes!
                 
-                #print('mit delta:    ' + str(delta))
-                #print('mit a:        ' + str(a))
-                #print('Activation:     ' + str(Activation[l]))
-                #print('Output[l] :     ' + str(Output[l]))
-                #print('tanh_deriv:     ' + str(_tanh_deriv(Activation[l])))
-                
-                
-                if l > 0:
-                    #print('Neues Delta für Layer ' + str(l - 1) + ' errechnen...')
-                    
-                    
-                    #print('---------------- Start (Delta)  ----------------')
-                    
-                    
-                    #print('Output[l] :              ' + str(Output[l]))
-                    #print('_tanh_deriv(Output[l]) : ' + str(_tanh_deriv(Output[l])))
-                    #print('self.W[l] :              ' + str(self.W[l]))
-                    #print('delta :                  ' + str(delta))
-                    #print('delta*W sum:             ' + str((self.W[l] * n.transpose(delta)).sum(axis=0)))
-                    
-                    # was muss hier hin? Aktivierung oder Output?
+            
+            # +========================================+
+            # +********* Backpropagation-Algo *********+
+            # +========================================+
+            
+            # Das NN ist im untrainierten Zustand (Zufallszahlen in den Gewichten) sehr warscheinlich falsch, es gibt einen Error-Wert: delta:
+            delta = (s_teach[i] - a[-1])    #Erzeugt delta zum ersten Mal: SollAusgabe - IstAusgabe mittels der Trainingsdaten. 
+            
+            
+            for l in range(len(self.W)-1, 0, -1): #für alle Layer, diesmal jedoch von hinten nach von!
+                if l > 0: #solange wir uns über dem Input-Layer befinden, berechnen wir schon mal den delta-Wert für die nächste Iteration, den Delta-Wert dieses Layers wird jedoch noch für das Anpassen der Gewichte benötigt 
+                    #TODO was muss hier hin? Activation oder Output? -> müsste Activation sein....
                     delta_next = _tanh_deriv(Activation[l]) * (self.W[l] * n.transpose(delta)).sum(axis=0)
-                    #müsste activation sein....
-                    
-                    #print('delta next:' + str(delta_next))
-                    
-                    #print('----------------- End (Delta)  -----------------')
                 
+                #TODO Evtl. könnte aus der _tanh_deriv Funktion die tanh(x) Funktion entfernt werden, wenn ich unten nun statt Output[] Activation[] nutzen würde. Richtig? Falsch?!
                 
+                #TODO was muss hier hin? Activation oder Output? -> müsste Output sein....
+                self.W[l] = self.W[l] + ((epsilon * n.transpose(delta)) * Output[l]) #Anpassen der Gewichte
+                self.B[l] = self.B[l] + epsilon * n.transpose(delta) # Anpassen des Bias
                 
-                #print('---------------- Start (W Calc) ----------------')
+                delta = delta_next # wie oben schon kurz angesprochen, hier wird nun delta_next zu delta, damit der passende Wert für das nächste Layer zur Verfügung steht.
+                # Da delta von der Gewichtsanpassung und die Gewichte für das delta_next gebraucht wird, muss es so auseinander gezogen werden.
                 
-                
-                #print('old W(l):       ' + str(self.W[l]))
-                #print('delta:   ' + str(delta))
-                #print('Output[l] :     ' + str(Output[l]))
-                #print('epsilon :     ' + str(epsilon))
-                
-                
-                #print('Error: ' + str(delta))
-                
-                #self.W[l] = self.W[l] + epsilon * n.outer(Output[l-1], delta)
-                
-                
-                # was muss hier hin? Aktivierung oder Output?
-                self.W[l] = self.W[l] +  ((epsilon * n.transpose(delta)) * Output[l])
-                self.B[l] = self.B[l] +  epsilon * n.transpose(delta)
-                
-                #print('DeltaW ' + str(((epsilon * n.transpose(delta)) * Output[l])) )
-                
-                #print('---------------- End (W Calc) ----------------')
-                
-                
-                delta = delta_next
-                
-                #print('+++++++++++++++++++++++++')
-                
-            
-            #print('Output ist:     ' + str(Output))
-            #print('Activation ist: ' + str(Activation))
-            #print('ENDE!!!!')
-            #print('Output:   ' + str(Output))
-            
-                
-            
-            
-            
-        #print('Gewichte nach lernen:')
-        #print(self.W)
-        #print('Bias nach lernen:')
-        #print(self.B)
-
-
-
+    def save(self, file): #untested: sichere Gewichte und Bias
+        n.savez(file + '.npz', W=self.W,B=self.B)
+        
+    def load(self, file): #untested: lade Gewichte und Bias
+        data = n.load(file + '.npz')
+        self.W = data['W']
+        self.B = data['B']
+    
