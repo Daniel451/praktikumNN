@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.4
 
 import numpy as n
-import KTimage as KT
+
 
 def _tanh(x):                 # diese Funktion stellt die Übertragungsfunktion der Neuronen dar. Forwardpropagation 
     return n.tanh(x)
@@ -116,10 +116,6 @@ class NeuralNetwork:
                 
                 delta = delta_next # wie oben schon kurz angesprochen, hier wird nun delta_next zu delta, damit der passende Wert für das nächste Layer zur Verfügung steht.
                 # Da delta von der Gewichtsanpassung und die Gewichte für das delta_next gebraucht wird, muss es so auseinander gezogen werden.
-            if k%100 == 0:
-                print('Ja')
-                self.visu()
-                
                 
     def save(self, file): #untested: sichere Gewichte und Bias
         n.savez(file + '.npz', W=self.W,B=self.B)
@@ -128,14 +124,4 @@ class NeuralNetwork:
         data = n.load(file + '.npz')
         self.W = data['W']
         self.B = data['B']
-        
-        
-    def visu(self):
-        for i in range(len(self.W)-1):
-            print(self.W[i].T)
-            print(len(self.W[i].T))
-            print(self.W[i+1].T)
-            print(len(self.W[i+1].T))
-            KT.exporttiles (self.W[i], len(self.W[i].T), 1, '/tmp/coco/obs_W_' + str(i) + '_'+str(i+1)+'.pgm', len(self.W[i+1].T), 1)
-        
     

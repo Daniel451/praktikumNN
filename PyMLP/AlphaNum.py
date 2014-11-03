@@ -64,7 +64,13 @@ print( str(type(s_in[0])) )
 print( str(type(s_teach[0])) )
 
 
+f = open('bla.txt','w')
 
+#f.write(str(s_in))  
+for i in s_in:
+    f.write(str(i) + "nnn")
+    f.write(str(i.shape))
+f.close()
 
 from NeuralNetwork import NeuralNetwork
 

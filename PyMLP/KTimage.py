@@ -165,7 +165,7 @@ def exporttiles (X, h, w, filename, x=None, y=None):
         f.seek(0,2)
         f.write(c)
     else:
-        f.seek(-1,2)
+        f.seek(0,2)
         f.write(c.encode("ISO-8859-1"))
     f.close()
 
