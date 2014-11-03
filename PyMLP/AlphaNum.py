@@ -20,6 +20,8 @@ for file in glob.glob("./digits_alph/*.pgm"):
 
 
 
+
+
 from NeuralNetwork import NeuralNetwork
 
 nn = NeuralNetwork([64,100,6]) 
