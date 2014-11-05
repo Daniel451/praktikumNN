@@ -9,7 +9,7 @@ class Speedtest:
 
     usage:
     tester = Speedtest()
-    tester.recore("someName") <-- custom name
+    tester.record("someName") <-- custom name
     tester.record() <-- default name
     tester.printRecords() <-- print all time records
     """

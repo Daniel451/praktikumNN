@@ -1,4 +1,5 @@
 #!/usr/bin/env python3.4
+#-*- coding: utf-8 -*-
 
 import numpy as n
 import KTimage as KT
