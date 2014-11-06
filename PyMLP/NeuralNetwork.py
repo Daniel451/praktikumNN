@@ -101,8 +101,7 @@ class NeuralNetwork:
             # +========================================+
             
             # Das NN ist im untrainierten Zustand (Zufallszahlen in den Gewichten) sehr warscheinlich falsch, es gibt einen Error-Wert: delta:
-            delta = (s_teach[i] - a[-1])    #Erzeugt delta zum ersten Mal: SollAusgabe - IstAusgabe mittels der Trainingsdaten. 
-            
+            delta = n.atleast_2d((s_teach[i] - a[-1]))    #Erzeugt delta zum ersten Mal: SollAusgabe - IstAusgabe mittels der Trainingsdaten. 
             
             for l in range(len(self.W)-1, 0, -1): #für alle Layer, diesmal jedoch von hinten nach von!
                 if l > 0: #solange wir uns über dem Input-Layer befinden, berechnen wir schon mal den delta-Wert für die nächste Iteration, den Delta-Wert dieses Layers wird jedoch noch für das Anpassen der Gewichte benötigt 
@@ -118,7 +117,6 @@ class NeuralNetwork:
                 delta = delta_next # wie oben schon kurz angesprochen, hier wird nun delta_next zu delta, damit der passende Wert für das nächste Layer zur Verfügung steht.
                 # Da delta von der Gewichtsanpassung und die Gewichte für das delta_next gebraucht wird, muss es so auseinander gezogen werden.
             if k%100 == 0:
-                print('Ja')
                 self.visu()
                 
                 
@@ -133,10 +131,7 @@ class NeuralNetwork:
         
     def visu(self):
         for i in range(len(self.W)-1):
-            print(self.W[i].T)
-            print(len(self.W[i].T))
-            print(self.W[i+1].T)
-            print(len(self.W[i+1].T))
-            KT.exporttiles (self.W[i], len(self.W[i].T), 1, '/tmp/coco/obs_W_' + str(i) + '_'+str(i+1)+'.pgm', len(self.W[i+1].T), 1)
+            KT.exporttiles (self.W[i]
+            , len(self.W[i].T), 1, '/tmp/coco/obs_W_' + str(i) + '_'+str(i+1)+'.pgm', len(self.W[i+1].T), 1)
         
     
