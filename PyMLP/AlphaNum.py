@@ -60,8 +60,6 @@ for char in data[1]:
 
 s_in = n.array(data[0])
 
-print( str(type(s_in[0])) ) 
-print( str(type(s_teach[0])) )
 
 
 f = open('bla.txt','w')
@@ -74,22 +72,23 @@ f.close()
 
 from NeuralNetwork import NeuralNetwork
 
-nn = NeuralNetwork([64,10,6]) 
+nn = NeuralNetwork([64,40,6]) 
 
 
 
 nn.teach(n.array(s_in), n.array(s_teach) ,0.03,25000)  # Trainiren: 
 
 #nn.teach(s_in, s_teach ,0.3,25000)  # Trainiren: 
+print('char / char (bin) / NN output (bin) / NN output (raw)')
 for i in [3, 7, 9, 14, 25]:
-    print(data[1][i],nn.guess(s_in[i]))
+    dataout = nn.guess(s_in[i])
+    print(data[1][i], s_teach[i] , n.around(dataout) , dataout)
 
 # whoaaaa: sichern von Daten zum laden fürs nächste Mal ;)
 #nn.save('savetest') # erzeugt eine 'savetest.npz' Datei! (alles unchecked!, überschreiben ohne Warnung!)
     
 #nn.load('savetest') # läd eine 'savetest.npz' Datei! (alles unchecked!)
 
-print('fertig')
 
 
 
