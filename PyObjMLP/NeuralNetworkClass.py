@@ -7,21 +7,23 @@ import LayerClass
 
 class NeuralNetwork:
 
-    def __init__(self, l_in, hiddenLayer):
+    def __init__(self, in_input, hiddenLayerList, out_input, out_expected):
         """
-
-        :param l_in: InputLayer -> List of input values
-        :param hiddenLayer: List of Hidden Layer
+        :param in_input: InputLayer -> List of input values lists
+                            Example for XOR-Problem:
+                            [ [0,0], [0,1], [1,0], [1,1] ]
+        :param hiddenLayerList: List of Hidden Layers
                             [2,3,2] would create 3 Hidden Layers with 2, 3 and 2 Neurons
-        :return:
+        :param out_input: 
         """
 
-        self.input = l_in
-        self.layers = []
-        self.output = []
+        self.inputLayer = in_input
+        self.outExpected = out_expected
+        self.hiddenLayer = []
+        self.outputLayer = []
 
-        for i in range(0, len(hiddenLayer)):
-            self.layers.append(LayerClass.Layer(hiddenLayer[i], i))
+        for i in range(0, len(hiddenLayerList)):
+            self.hiddenLayer.append(LayerClass.Layer(hiddenLayerList[i], i))
 
 
     def printNetWeights(self):
