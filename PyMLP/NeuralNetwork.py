@@ -40,6 +40,7 @@ class NeuralNetwork:
         s_in -- input value, should be a list of values, quantity like the input layer!
         """
         
+        
         a = n.atleast_2d(s_in) # Das Eingabe-Array, der input für den Input-Layer sollten als 2D Array aufgebaut sein: [[ 0, 0.7, 1 ]] Somit ist sichergestellt, dass im ganzen Programm, einfache Transpositionen möglich sind. Alle Gewichte/Biase/Output sehen "immer" so aus.
         # +====================================+
         # +********* Feedforward-Algo *********+
