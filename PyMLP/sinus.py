@@ -21,10 +21,10 @@ for t in range(-200,200,1):
 s_in = n.array(s_in)
 s_teach = n.array(s_teach)
 
-
-
-
 nn.teach(s_in, s_teach ,0.02,50000)  # Trainiren: 
+
+
+# Anzeige: 
 
 
 t = n.arange(-2.0, 2.0, 0.05)
@@ -34,9 +34,6 @@ for _t in t:
     nnPlot.append(nn.guess(_t)[-1][-1])
     
 
-# note that plot returns a list of lines.  The "l1, = plot" usage
-# extracts the first element of the list into l1 using tuple
-# unpacking.  So l1 is a Line2D instance, not a sequence of lines
 l1, = plt.plot(t, n.sin(n.pi*t))
 l2, = plt.plot(t, nnPlot)
 
