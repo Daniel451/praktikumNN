@@ -9,12 +9,12 @@ class Neuron:
     class which simulates a single neuron
     """
 
-    def __init__(self, layerLength, bias, name="no-name"):
+    def __init__(self, parentLayerLength, bias, label="no-name"):
         """
 
-        :param layerLength: Integer -> Length of the parent layer
+        :param parentLayerLength: Integer -> Length of the parent layer (needed for dimension of weights)
         :param bias: Bias of the neuron
-        :param name: Name of the Neuron
+        :param label: Name of the Neuron
         :return:
         """
 
@@ -24,24 +24,27 @@ class Neuron:
         # low <= randomFloat < high
         low = 0.1
         high = 2
-        self.weights = numpy.random.uniform(low, high, layerLength)
+        self.weights = numpy.random.uniform(low, high, parentLayerLength)
 
         # set bias
         self.bias = numpy.array([bias])
 
-        self.name = str(name)
+        self.label = str(label)
 
 
-    def retWeights(self):
+    def getWeights(self):
         return self.weights
 
 
-    def retBias(self):
+    def getBias(self):
+        """ returns the bias """
         return self.bias
 
 
-    def retWeightsAndBias(self):
+    def getWeightsAndBias(self):
+        """ returns Weights and Bias as one concatenated numpy array """
         return numpy.concatenate((self.weights, self.bias))
 
-    def getName(self):
-        return self.name
+
+    def getLabel(self):
+        return self.label
