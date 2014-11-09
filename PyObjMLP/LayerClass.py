@@ -32,6 +32,28 @@ class Layer:
         return self.neurons
 
 
+    def getAllWeightsOfNeurons(self):
+
+        buffer = []
+
+        for neuron in self.neurons:
+
+            buffer.append(neuron.getWeights())
+
+        return numpy.array(buffer)
+
+
+    def getAllBiasOfNeurons(self):
+
+        buffer = []
+
+        for neuron in self.neurons:
+
+            buffer.append(neuron.getBias())
+
+        return numpy.array(buffer)
+
+
     def getLength(self):
         return self.layerLength
 

@@ -66,9 +66,69 @@ class NeuralNetwork:
         return
 
 
-    def calculate(self):
-        return
+    def calculate(self, c_input):
+        """
+        calculate the output for some given input (feedforward activation)
+        
+        :param c_input: a list, containing the input data for input layer
+        """
 
+
+        ######################
+        ### error checking ###
+        ######################
+
+        # check if c_input is set correctly
+        if not ( (type(c_input) is list) and (len(c_input) == self.inputLayerLength)  ):
+            sys.exit("Error: c_input has to be a list containing the input data of length " + str(self.inputLayerLength))
+        
+
+        ############################
+        ### initialization stuff ###
+        ############################
+
+        # initialize a local list containing all layers
+        layers = []
+
+        # get hidden layers
+        for layer in self.hiddenLayer:
+            layers.append(layer)
+
+        # get output layer
+        layers.append(self.outputLayer)
+        
+
+        #########################
+        ### start calculating ###
+        #########################
+
+        last_out = numpy.array(c_input)
+
+        for layer in layers:
+            
+            # calculate inner activation without bias
+            # numpy.dot of all neuron weights of the actual layer and the output of the parent layer
+            innerActivation = numpy.dot(layer.getAllWeightsOfNeurons(), last_out)
+
+            # add the bias of each neuron to the innerActivation
+            innerActivation += layer.getAllBiasOfNeurons() 
+
+            # calculate new output of the actual layer
+            last_out = self.__tanh(innerActivation) 
+
+        print("")
+        print("###################################")
+        print("## Input was:")
+        print("## " + str(c_input))
+        print("##")
+        print("## Output is:")
+        print("## " + str(last_out))
+        print("###################################")
+        print("")
+
+    def __tanh(self, x):
+        return numpy.tanh(x)
+        
 
     def printNetWeights(self):
 

@@ -27,7 +27,7 @@ class Neuron:
         self.weights = numpy.random.uniform(low, high, parentLayerLength)
 
         # set bias
-        self.bias = numpy.array([bias])
+        self.bias = numpy.array(bias)
 
         self.label = str(label)
 

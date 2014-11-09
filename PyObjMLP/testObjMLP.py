@@ -12,4 +12,7 @@ expectedOutput = [ [0], [1], [1], [0] ]
 
 
 net = NNC.NeuralNetwork(input, hidden, outputLength, expectedOutput)
+
 net.printNetWeights()
+
+net.calculate([1,1])
