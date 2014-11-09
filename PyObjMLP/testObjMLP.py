@@ -16,3 +16,5 @@ net = NNC.NeuralNetwork(input, hidden, outputLength, expectedOutput)
 net.printNetWeights()
 
 net.calculate([1,1])
+
+net.teach()

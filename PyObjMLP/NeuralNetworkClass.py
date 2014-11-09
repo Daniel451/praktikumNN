@@ -32,7 +32,7 @@ class NeuralNetwork:
                             [ [0], [1], [1], [0] ]
         """
         
-        self.checkForErrors(in_input, hiddenLayerList, outputLayerLength, out_expected)
+        self.__checkForErrors(in_input, hiddenLayerList, outputLayerLength, out_expected)
 
         # set the label of the net
         self.label = str(label)
@@ -60,10 +60,115 @@ class NeuralNetwork:
         # create the output layer
         # Layer( neuronCount, parentLayerLength, label )
         self.outputLayer = LayerClass.Layer(outputLayerLength, self.hiddenLayer[len(self.hiddenLayer)-1].getLength(), "Output") 
+        
+        # make all layers easy accessable
+        self.hiddenAndOutputLayer = []
+        self.hiddenAndOutputLayer += self.hiddenLayer
+        self.hiddenAndOutputLayer.append(self.outputLayer)
+        
+
+    def teach(self, iterations = 1000, epsilon=0.1):
+        """
+            train the net
+
+            :param iterations: number of learning steps to make
+            :param epsilon: learning rate
+        """
+        
+        input = numpy.array([1,1])
+        self.currentOutExpected = numpy.array([0])
+
+        # feedforward
+        self.output = self.__feedforward(input)
+
+        # calculate errors
+        self.__updateErrors()       
+
+        # update weights
+        self.__updateWeights()
 
 
-    def teach(self):
+    def __updateErrors(self):
+
+        # calculate the erros
+       
+        # for index in range ( endOfTheList, beginningOfTheList, decrement index by 1 )
+        # so this loop starts at the end of all layers (outputLayer)
+        # and iterates its way to the top
+        for i in range( len(self.hiddenAndOutputLayer) - 1, -1, -1 ):
+            
+
+            # error for output layer --- first iteration
+            if i == (len(self.hiddenAndOutputLayer)-1):
+                self.outputLayer.setError( self.currentOutExpected - self.output )
+            
+            # error for hidden layers
+            else: 
+                
+                # get current layer to update its error
+                currentLayer = self.hiddenAndOutputLayer[i]
+
+                # get the underlyingLayer (lambda+1) for backpropagation/calculation
+                underlyingLayer = self.hiddenAndOutputLayer[i+1]
+
+                # calculate new error
+                currentLayer.setError( 
+                       self.__tanh_deriv( currentLayer.getLastInnerActivation() )
+                        *
+                        numpy.dot( 
+                            underlyingLayer.getError(),
+                            underlyingLayer.getAllWeightsOfNeurons()
+                            )
+                        ) 
+
+
+    def __updateWeights(self):
+        
+        for layer in self.hiddenAndOutputLayer:
+           return 
         return
+
+
+    def __feedforward(self, f_input):
+        """
+            does an feedforward activation of the whole net
+
+            :param f_input: has to be a numpy array matching the dimension of InputLayer
+        """
+
+        ######################
+        ### initialization ###
+        ######################
+
+        # set last_out to current input
+        last_out = f_input
+
+        #######################################
+        ### start calculating - feedforward ###
+        #######################################
+
+        # feedforward - loop through all layers    
+        for layer in self.hiddenAndOutputLayer:
+            
+            # calculate inner activation without bias
+            # numpy.dot of all neuron weights of the current layer and the output of the parent layer
+            innerActivation = numpy.dot(layer.getAllWeightsOfNeurons(), last_out)
+
+            # add the bias of each neuron to the innerActivation
+            innerActivation += layer.getAllBiasOfNeurons() 
+
+            # save new innerActivation values in layer
+            layer.setLastInnerActivation(innerActivation)
+
+            # calculate new output of the current layer
+            # this is used as input for the next layer in the next iteration
+            # or as output for the output layer when the loop is finished
+            last_out = self.__tanh(innerActivation) 
+            
+            # save new output values in layer
+            layer.setLastOutput(last_out)
+
+        return last_out
 
 
     def calculate(self, c_input):
@@ -82,53 +187,27 @@ class NeuralNetwork:
         if not ( (type(c_input) is list) and (len(c_input) == self.inputLayerLength)  ):
             sys.exit("Error: c_input has to be a list containing the input data of length " + str(self.inputLayerLength))
         
-
-        ############################
-        ### initialization stuff ###
-        ############################
-
-        # initialize a local list containing all layers
-        layers = []
-
-        # get hidden layers
-        for layer in self.hiddenLayer:
-            layers.append(layer)
-
-        # get output layer
-        layers.append(self.outputLayer)
+        # set the output of the net
+        self.output = self.__feedforward(numpy.array(c_input))
         
-
-        #########################
-        ### start calculating ###
-        #########################
-
-        last_out = numpy.array(c_input)
-
-        for layer in layers:
-            
-            # calculate inner activation without bias
-            # numpy.dot of all neuron weights of the actual layer and the output of the parent layer
-            innerActivation = numpy.dot(layer.getAllWeightsOfNeurons(), last_out)
-
-            # add the bias of each neuron to the innerActivation
-            innerActivation += layer.getAllBiasOfNeurons() 
-
-            # calculate new output of the actual layer
-            last_out = self.__tanh(innerActivation) 
-
         print("")
         print("###################################")
         print("## Input was:")
         print("## " + str(c_input))
         print("##")
         print("## Output is:")
-        print("## " + str(last_out))
+        print("## " + str(self.output))
         print("###################################")
         print("")
+
 
     def __tanh(self, x):
         return numpy.tanh(x)
         
+
+    def __tanh_deriv(self, x):
+        return 1 - numpy.power(numpy.tanh(x),2)
+
 
     def printNetWeights(self):
 
@@ -151,8 +230,8 @@ class NeuralNetwork:
             print "Neuron " + neuron.getLabel() + "\n" + str(neuron.getWeights())
 
 
-    def checkForErrors(self, in_input, hiddenLayerList, outputLayerLength, out_expected):
-        """ checks for errors before starting actual init things """
+    def __checkForErrors(self, in_input, hiddenLayerList, outputLayerLength, out_expected):
+        """ checks for errors before starting current init things """
 
         errStr = "!!!!!!!!!!!!!\n"
         errStr += "!!! ERROR !!!\n"
