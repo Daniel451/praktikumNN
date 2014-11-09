@@ -47,7 +47,6 @@ class NeuralNetwork:
         for l in range(0, len(self.W)): #für alle Layer... 
         #(Die Neuronen werden in einem Layer immer Gleichzeitig bearbeitet! Hier wir ausgenutzt, dass alle Informationen in den Arrays synchron und gleich groß sind. Es gibt (muss geben!) also zu jedem Neuron in einem Layer ein Subarray mit den Gewichten. Ebenso gibt es für jedes Neuron ein Bias und später vieleicht auch noch weitere Daten...)
             
-            #int_a=n.atleast_2d((a * self.W[l]).sum(axis=1)) + n.transpose(self.B[l])
             int_a=n.atleast_2d(a.dot(self.W[l].T))+self.B[l].T
             # Summe der Produkte (von jeweiligen Gewichten und Output der Neuronen) und des Biases des Neurons wird... 
             
@@ -58,8 +57,7 @@ class NeuralNetwork:
                 
             #TODO: Könnte man auch auseinanderziehen, weiß noch nicht, obs schöner wird, die Output Neuronen separat zu berechnen. Dies spart dann die if-Abfrage. Besser?!
         return a #Es wird hier ein Array mit Count(Ausgangsneuronen) zurückgegeben. Die Output Werte 
-
-
+    
     def teach(self, s_in, s_teach, epsilon=0.2, repeats=10000):
         """Learning function for the MLP.
         
@@ -86,7 +84,6 @@ class NeuralNetwork:
             # +====================================+
             for l in range(0, len(self.W)): #für alle Layer... 
                 #Wie in guess(self, s_in), werden auch hier identisch (!!) die Activation und Output Daten mittels Feedforward-Algo berechnet. Der Unterschied ist jedoch, dass wir uns hier nun die Daten für den folgenden Backpropagation-Algo merken müssen!
-                #int_a=a.dot(self.W[l].transpose) + self.B[l].transpose Bullshit!
                 int_a=n.atleast_2d(a.dot(self.W[l].T))+self.B[l].T
                 
                 Activation.append(int_a) #merken des Activation-Wertes!
