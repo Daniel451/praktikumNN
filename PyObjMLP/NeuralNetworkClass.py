@@ -1,6 +1,8 @@
 __author__ = 'daniel'
 
 
+from scipy.special import expit
+
 import numpy
 import LayerClass
 import sys
@@ -67,7 +69,7 @@ class NeuralNetwork:
         self.hiddenAndOutputLayer.append(self.outputLayer)
         
 
-    def teach(self, iterations = 1000, epsilon=0.1):
+    def teach(self, iterations = 1000, epsilon=0.2):
         """
             train the net
 
@@ -78,14 +80,21 @@ class NeuralNetwork:
         input = numpy.array([1,1])
         self.currentOutExpected = numpy.array([0])
 
-        # feedforward
-        self.output = self.__feedforward(input)
+       
+        for i in range(0, iterations):
+            # set input and expectedOutput
+            randomSelect = numpy.random.randint(0, self.inputLayerLength)
+            input = numpy.array(self.inputLayer[randomSelect])
+            self.currentOutExpected = numpy.array(self.outExpected[randomSelect])
 
-        # calculate errors
-        self.__updateErrors()       
+            # feedforward
+            self.output = self.__feedforward(input)
 
-        # update weights
-        self.__updateWeights()
+            # calculate errors
+            self.__updateErrors()       
+
+            # update weights
+            self.__updateWeights(input, epsilon)
 
 
     def __updateErrors(self):
@@ -97,36 +106,86 @@ class NeuralNetwork:
         # and iterates its way to the top
         for i in range( len(self.hiddenAndOutputLayer) - 1, -1, -1 ):
             
-
             # error for output layer --- first iteration
             if i == (len(self.hiddenAndOutputLayer)-1):
                 self.outputLayer.setError( self.currentOutExpected - self.output )
             
             # error for hidden layers
             else: 
-                
                 # get current layer to update its error
                 currentLayer = self.hiddenAndOutputLayer[i]
 
                 # get the underlyingLayer (lambda+1) for backpropagation/calculation
                 underlyingLayer = self.hiddenAndOutputLayer[i+1]
-
                 # calculate new error
                 currentLayer.setError( 
-                       self.__tanh_deriv( currentLayer.getLastInnerActivation() )
+                       self.transferFunctionDeriv( currentLayer.getLastInnerActivation() )
                         *
                         numpy.dot( 
                             underlyingLayer.getError(),
                             underlyingLayer.getAllWeightsOfNeurons()
                             )
-                        ) 
+                        )
+
+                debug = False 
+                if debug:
+                    print("")
+                    self.__print("activation",
+                            currentLayer.getLastInnerActivation())
+                    self.__print("sigmoid_deriv(activation)",
+                            self.transferFunctionDeriv(currentLayer.getLastInnerActivation()))
+                    self.__print("underlyingLayer.error",
+                            underlyingLayer.getError())
+                    self.__print("underlyingLayer.weights",
+                            underlyingLayer.getAllWeightsOfNeurons())
+                    self.__print("error x weights",
+                            numpy.dot(underlyingLayer.getError(),underlyingLayer.getAllWeightsOfNeurons()) )
+                    self.__print("new error",
+                            currentLayer.getError())
+
+    def __print(self, label, item):
+        print(str(label) + " :\n" + str(item))
 
 
-    def __updateWeights(self):
-        
-        for layer in self.hiddenAndOutputLayer:
-           return 
-        return
+    def __updateWeights(self, u_input, epsilon):
+        """
+           update the weights of the net
+        """
+
+        # for each layer update the weights at once
+        for key, layer in enumerate(self.hiddenAndOutputLayer):
+            
+            # for the first hidden layer it is epsilon * error * input
+            if key == 0:
+                layer.setWeights(
+                        layer.getAllWeightsOfNeurons()
+                        +
+                        (
+                         epsilon
+                         *
+                         (
+                          layer.getError()[numpy.newaxis].T
+                          *
+                          u_input
+                         )
+                        )
+                        )
+            # for all other hidden layers and output layer the calculation
+            # is epsilon * error * output_of_parent_layer
+            else:
+                layer.setWeights(
+                        layer.getAllWeightsOfNeurons()
+                        +
+                        ( 
+                         epsilon 
+                         * 
+                         (
+                             layer.getError()[numpy.newaxis].T
+                             *
+                             self.hiddenAndOutputLayer[key-1].getLastOutput()
+                         )
+                        )
+                        )
 
 
     def __feedforward(self, f_input):
@@ -163,7 +222,7 @@ class NeuralNetwork:
             # calculate new output of the current layer
             # this is used as input for the next layer in the next iteration
             # or as output for the output layer when the loop is finished
-            last_out = self.__tanh(innerActivation) 
+            last_out = self.transferFuction(innerActivation) 
             
             # save new output values in layer
             layer.setLastOutput(last_out)
@@ -191,44 +250,51 @@ class NeuralNetwork:
         self.output = self.__feedforward(numpy.array(c_input))
         
         print("")
-        print("###################################")
-        print("## Input was:")
-        print("## " + str(c_input))
-        print("##")
-        print("## Output is:")
-        print("## " + str(self.output))
-        print("###################################")
+        print("#################################################################")
+        print("## calculating...                                              ##")
+        print("#################################################################")
+        print("## Input was:                                                  ##")
+        print( c_input ) 
+        print("##                                                             ##")
+        print("## Output is:                                                  ##")
+        print( self.output )
+        print("##                                                             ##")
+        print("#################################################################")
         print("")
 
 
-    def __tanh(self, x):
+    def transferFuction(self, x):
         return numpy.tanh(x)
         
 
-    def __tanh_deriv(self, x):
-        return 1 - numpy.power(numpy.tanh(x),2)
+    def transferFunctionDeriv(self, x):
+        return 1 - numpy.power(numpy.tanh(x), 2)
 
 
     def printNetWeights(self):
 
-        print "######################################################"
-        print "     neural net: " + self.label
-        print "######################################################"
-        print ""
-        print "###############"
-        print "### weights ###"
-        print "###############"
+        print("######################################################")
+        print("     neural net: " + self.label)
+        print("######################################################")
+        print("")
+        print("###############")
+        print("### weights ###")
+        print("###############")
 
-        for layer in self.hiddenLayer:
-            print "\n--- Layer: " + layer.getLabel() + " --- (" + str(layer.getLength()) + " neurons total)"
+        print("")
 
-            for neuron in layer.getNeurons():
-                print "Neuron " + neuron.getLabel() + "\n" + str(neuron.getWeights())
+        print("-> " + str(len(self.hiddenAndOutputLayer)) + " layers total (hidden + output layer, input is not counted)")
+        print("-> layer " + str(len(self.hiddenAndOutputLayer)-1) + " is the output layer") 
+        print("")
+    
+        for key, layer in enumerate(self.hiddenAndOutputLayer):
 
-        print "\n--- Layer: " + self.outputLayer.getLabel() + " --- (" + str(self.outputLayer.getLength()) + " neurons total)"
-        for neuron in self.outputLayer.getNeurons():
-            print "Neuron " + neuron.getLabel() + "\n" + str(neuron.getWeights())
-
+            print("--- Layer: " + str(key) 
+                    + " --- (" + str(layer.getLength()) 
+                    + " neurons total | each row represents the weights of one neuron)")
+            print(layer.getAllWeightsOfNeurons())
+            print("")
+            
 
     def __checkForErrors(self, in_input, hiddenLayerList, outputLayerLength, out_expected):
         """ checks for errors before starting current init things """

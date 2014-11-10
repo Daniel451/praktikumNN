@@ -2,7 +2,6 @@ __author__ = 'daniel'
 
 
 import numpy
-import NeuronClass
 
 
 class Layer:
@@ -28,19 +27,21 @@ class Layer:
         self.lastOutput = numpy.zeros(self.layerLength)
 
         # last error of all neurons on this layer 
-        self.error = numpy.zeros(self.layerLength)
+        self.error = numpy.ones(self.layerLength)
 
         # last innerActivation
-        self.innerActivation = numpy.zeros(self.layerLength)
+        self.innerActivation = numpy.ones(self.layerLength)
 
-        # weights
+        # weights ( rows x columns, each row stands for one neuron, each column for its weights )
+        # this is always ( layerLength x parentLayerLength )
+        low = 0.1
+        high = 0.9
+        self.weights = numpy.random.uniform(low, high, (self.layerLength, parentLayerLength) )
         
-        
-        # bias
-        self.bias = numpy.ones(self.layerLength)    
-
-        for i in range (0, self.layerLength):
-            self.neurons.append(NeuronClass.Neuron(parentLayerLength, self.defaultBias, i))
+        # bias ( rows x columns, each row stands for one neuron, each column for its bias )
+        # this is always ( layerLength x 1 )
+        self.bias = numpy.zeros(self.layerLength)
+        self.bias.fill(self.defaultBias)
 
 
     def getLastOutput(self):
@@ -72,25 +73,19 @@ class Layer:
 
 
     def getAllWeightsOfNeurons(self):
+        return self.weights
 
-        buffer = []
 
-        for neuron in self.neurons:
-
-            buffer.append(neuron.getWeights())
-
-        return numpy.array(buffer)
+    def setWeights(self, nparray):
+        self.weights = nparray
 
 
     def getAllBiasOfNeurons(self):
+        return self.bias
 
-        buffer = []
 
-        for neuron in self.neurons:
-
-            buffer.append(neuron.getBias())
-
-        return numpy.array(buffer)
+    def setBias(self, nparray):
+        self.bias = nparray
 
 
     def getLength(self):
