@@ -24,6 +24,8 @@ s_teach = n.array(s_teach)
 nn.teach(s_in, s_teach ,0.02,50000)  # Trainiren: 
 
 
+
+
 # Anzeige: 
 
 

@@ -3,6 +3,8 @@
 
 import numpy as n
 import KTimage as KT
+import threading
+from time import sleep
 
 def _tanh(x):                 # diese Funktion stellt die Übertragungsfunktion der Neuronen dar. Forwardpropagation 
     return n.tanh(x)
@@ -13,9 +15,10 @@ def _tanh_deriv(x):           # diese Funktion stellt die Ableitung der Übertra
 # Welche ist nun Richtig?
 #def _tanh_deriv(x):  
 #    return 1.0 - x**2
-
+W =[]
 
 class NeuralNetwork:
+    global W
     def __init__(self, layer):  
         """  
         :param layer: A list containing the number of units in each layer.
@@ -28,6 +31,11 @@ class NeuralNetwork:
             self.W.append(n.random.random((layer[i],layer[i - 1]))-0.5) #erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron zufällig im Bereich von -0.5 bis 0.5.
             self.B.append(n.random.random((layer[i],1))-0.5) #ebenso zufällige Werte für Bias. Bereich: -0.5 bis 0.5.
         
+        
+        thread1 = Visu(1, "Thread-1")
+        thread1.start()
+        
+         W = self.W
         
         print('')
         print('============================================================================')
@@ -116,7 +124,7 @@ class NeuralNetwork:
                 delta = delta_next # wie oben schon kurz angesprochen, hier wird nun delta_next zu delta, damit der passende Wert für das nächste Layer zur Verfügung steht.
                 # Da delta von der Gewichtsanpassung und die Gewichte für das delta_next gebraucht wird, muss es so auseinander gezogen werden.
             if k%100 == 0:
-                self.visu()
+                W = self.W
                 
                 
     def save(self, file): #untested: sichere Gewichte und Bias
@@ -127,14 +135,20 @@ class NeuralNetwork:
         self.W = data['W']
         self.B = data['B']
         
+    def getW(self):
+        return self.W
         
-    def visu(self):
-        
-        
-        for i in range(len(self.W)):
-            KT.exporttiles (self.W[i]
-            , self.W[i].shape[0], self.W[i].shape[1], '/tmp/coco/obs_W_' + str(i) + '_'+str(i+1)+'.pgm' )# ,  len(self.W[i+1].T)  , 1)
-            #print('Generiere Grafik '+str(i))
-            
-        
+######################################
+
+class Visu (threading.Thread):
+    global W
+    def __init__(self, threadID, name):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+    def run(self):
+        print("Starting " + self.name)
+        sleep(3)
+        print(W)
+        print("Exiting " + self.name)
     
