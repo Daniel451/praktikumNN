@@ -28,6 +28,8 @@ class NeuralNetwork:
             self.W.append(n.random.random((layer[i],layer[i - 1]))-0.5) #erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron zufällig im Bereich von -0.5 bis 0.5.
             self.B.append(n.random.random((layer[i],1))-0.5) #ebenso zufällige Werte für Bias. Bereich: -0.5 bis 0.5.
         
+        print(self.W)
+        print(len(self.W))
         
         print('')
         print('============================================================================')
@@ -129,8 +131,15 @@ class NeuralNetwork:
         
         
     def visu(self):
-        for i in range(len(self.W)-1):
+        
+        print('Layer 1 zu 2:' + str(self.W[0].shape[0]) )
+        print('Layer 2 zu 3:' + str(self.W[1].shape[0]) )
+        
+        
+        for i in range(len(self.W)):
             KT.exporttiles (self.W[i]
-            , len(self.W[i].T), 1, '/tmp/coco/obs_W_' + str(i) + '_'+str(i+1)+'.pgm', len(self.W[i+1].T), 1)
+            , self.W[i].shape[0], self.W[i].shape[1], '/tmp/coco/obs_W_' + str(i) + '_'+str(i+1)+'.pgm' )# ,  len(self.W[i+1].T)  , 1)
+            print('Generiere Grafik '+str(i))
+            
         
     
