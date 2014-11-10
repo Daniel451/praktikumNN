@@ -8,7 +8,7 @@ option add *background gray26
 
 # global variables can also be set after the proc's
 set AUTOREFRESH 0
-set ZOOM 2
+set ZOOM 10
 set TMPPATH /tmp/coco
 
 set activations_side top    ;# set: top  or  left
@@ -127,10 +127,7 @@ proc make_pics {} {
                  obs_W_${ar}_10 obs_W_${ar}_11 obs_W_${ar}_12 obs_W_${ar}_13 obs_W_${ar}_14 obs_W_${ar}_15 obs_W_${ar}_16 obs_W_${ar}_17 obs_W_${ar}_18 obs_W_${ar}_19\
                  obs_V_${ar}_0  obs_V_${ar}_1  obs_V_${ar}_2  obs_V_${ar}_3  obs_V_${ar}_4  obs_V_${ar}_5  obs_V_${ar}_6  obs_V_${ar}_7  obs_V_${ar}_8  obs_V_${ar}_9\
                  obs_V_${ar}_10 obs_V_${ar}_11 obs_V_${ar}_12 obs_V_${ar}_13 obs_V_${ar}_14 obs_V_${ar}_15 obs_V_${ar}_16 obs_V_${ar}_17 obs_V_${ar}_18 obs_V_${ar}_19\
-                 obs_w_${ar}_0  obs_w_${ar}_1  obs_w_${ar}_2  obs_w_${ar}_3  obs_w_${ar}_4  obs_w_${ar}_5  obs_w_${ar}_6  obs_w_${ar}_7  obs_w_${ar}_8  obs_w_${ar}_9\
-                 obs_w_${ar}_10 obs_w_${ar}_11 obs_w_${ar}_12 obs_w_${ar}_13 obs_w_${ar}_14 obs_w_${ar}_15 obs_w_${ar}_16 obs_w_${ar}_17 obs_w_${ar}_18 obs_w_${ar}_19\
-                 obs_v_${ar}_0  obs_v_${ar}_1  obs_v_${ar}_2  obs_v_${ar}_3  obs_v_${ar}_4  obs_v_${ar}_5  obs_v_${ar}_6  obs_v_${ar}_7  obs_v_${ar}_8  obs_v_${ar}_9\
-                 obs_v_${ar}_10 obs_v_${ar}_11 obs_v_${ar}_12 obs_v_${ar}_13 obs_v_${ar}_14 obs_v_${ar}_15 obs_v_${ar}_16 obs_v_${ar}_17 obs_v_${ar}_18 obs_v_${ar}_19]
+                 ]
 
         if {$DISPLAYACTS} {
 
