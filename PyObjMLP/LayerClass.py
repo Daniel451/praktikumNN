@@ -21,7 +21,7 @@ class Layer:
         self.label = str(label)
         self.neurons = []
         self.layerLength = neuronCount
-        self.defaultBias = 1
+        self.defaultBias = 0.1 
 
         # last output of all neurons on this layer
         self.lastOutput = numpy.zeros(self.layerLength)

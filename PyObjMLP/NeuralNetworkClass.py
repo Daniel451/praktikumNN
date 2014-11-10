@@ -77,13 +77,11 @@ class NeuralNetwork:
             :param epsilon: learning rate
         """
         
-        input = numpy.array([1,1])
-        self.currentOutExpected = numpy.array([0])
-
        
         for i in range(0, iterations):
             # set input and expectedOutput
-            randomSelect = numpy.random.randint(0, self.inputLayerLength)
+            randomSelect = numpy.random.randint(0, len(self.inputLayer))
+
             input = numpy.array(self.inputLayer[randomSelect])
             self.currentOutExpected = numpy.array(self.outExpected[randomSelect])
 
@@ -98,6 +96,8 @@ class NeuralNetwork:
 
 
     def __updateErrors(self):
+        
+        debug = False 
 
         # calculate the erros
        
@@ -105,11 +105,11 @@ class NeuralNetwork:
         # so this loop starts at the end of all layers (outputLayer)
         # and iterates its way to the top
         for i in range( len(self.hiddenAndOutputLayer) - 1, -1, -1 ):
-            
             # error for output layer --- first iteration
             if i == (len(self.hiddenAndOutputLayer)-1):
                 self.outputLayer.setError( self.currentOutExpected - self.output )
-            
+                if debug:
+                    self.__print("output error:", self.outputLayer.getError())
             # error for hidden layers
             else: 
                 # get current layer to update its error
@@ -127,12 +127,12 @@ class NeuralNetwork:
                             )
                         )
 
-                debug = False 
                 if debug:
                     print("")
+                    self.__print("layer", i)
                     self.__print("activation",
                             currentLayer.getLastInnerActivation())
-                    self.__print("sigmoid_deriv(activation)",
+                    self.__print("_deriv(activation)",
                             self.transferFunctionDeriv(currentLayer.getLastInnerActivation()))
                     self.__print("underlyingLayer.error",
                             underlyingLayer.getError())
@@ -140,7 +140,7 @@ class NeuralNetwork:
                             underlyingLayer.getAllWeightsOfNeurons())
                     self.__print("error x weights",
                             numpy.dot(underlyingLayer.getError(),underlyingLayer.getAllWeightsOfNeurons()) )
-                    self.__print("new error",
+                    self.__print("new error (acti * (error x weights))",
                             currentLayer.getError())
 
     def __print(self, label, item):
@@ -151,6 +151,8 @@ class NeuralNetwork:
         """
            update the weights of the net
         """
+        
+        debug = False
 
         # for each layer update the weights at once
         for key, layer in enumerate(self.hiddenAndOutputLayer):
@@ -170,6 +172,31 @@ class NeuralNetwork:
                          )
                         )
                         )
+                if debug:
+                    print("")
+                    self.__print("weights", layer.getAllWeightsOfNeurons())
+                    self.__print("epsilon", epsilon)
+                    self.__print("layer error", layer.getError()[numpy.newaxis].T)
+                    self.__print("input", u_input)
+                    self.__print("error x input", layer.getError()[numpy.newaxis].T * u_input)
+                    self.__print("epsilon * (error x input)", epsilon
+                             *
+                             (
+                              layer.getError()[numpy.newaxis].T
+                              *
+                              u_input
+                             ))
+                    self.__print("new weights: ", layer.getAllWeightsOfNeurons()
+                            +
+                            (
+                             epsilon
+                             *
+                             (
+                              layer.getError()[numpy.newaxis].T
+                              *
+                              u_input
+                             )
+                            ))
             # for all other hidden layers and output layer the calculation
             # is epsilon * error * output_of_parent_layer
             else:
@@ -186,6 +213,31 @@ class NeuralNetwork:
                          )
                         )
                         )
+                if debug:
+                    print("")
+                    self.__print("weights", layer.getAllWeightsOfNeurons())
+                    self.__print("epsilon", epsilon)
+                    self.__print("layer error", layer.getError()[numpy.newaxis].T)
+                    self.__print("input (parent output)", self.hiddenAndOutputLayer[key-1].getLastOutput())
+                    self.__print("error x input", layer.getError()[numpy.newaxis].T * self.hiddenAndOutputLayer[key-1].getLastOutput())
+                    self.__print("epsilon * (error x input)", epsilon
+                             *
+                             (
+                              layer.getError()[numpy.newaxis].T
+                              *
+                              self.hiddenAndOutputLayer[key-1].getLastOutput()
+                             ))
+                    self.__print("new weights: ", layer.getAllWeightsOfNeurons()
+                            +
+                            (
+                             epsilon
+                             *
+                             (
+                              layer.getError()[numpy.newaxis].T
+                              *
+                              self.hiddenAndOutputLayer[key-1].getLastOutput()
+                             )
+                            ))
 
 
     def __feedforward(self, f_input):

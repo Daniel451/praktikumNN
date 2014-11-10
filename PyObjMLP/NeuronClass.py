@@ -4,6 +4,7 @@ __author__ = 'daniel'
 import numpy
 
 
+
 class Neuron:
     """
     class which simulates a single neuron
