@@ -93,6 +93,9 @@ class NeuralNetwork:
 
             # update weights
             self.__updateWeights(input, epsilon)
+            
+            # update bias
+            self.__updateBias(epsilon)
 
 
     def __updateErrors(self):
@@ -143,13 +146,19 @@ class NeuralNetwork:
                     self.__print("new error (acti * (error x weights))",
                             currentLayer.getError())
 
+
     def __print(self, label, item):
         print(str(label) + " :\n" + str(item))
 
 
-    def __updateBias(self):
-        return
+    def __updateBias(self, epsilon):
+        """
+            update the bias of the net
+        """
 
+        for layer in self.hiddenAndOutputLayer:
+
+            layer.setBias( layer.getAllBiasOfNeurons() + ( epsilon * layer.getError() )  )
 
 
     def __updateWeights(self, u_input, epsilon):
