@@ -21,7 +21,7 @@ net = NNC.NeuralNetwork(input, hidden, outputLength, expectedOutput)
 net.printNetWeights()
 
 mysp.record("start")
-net.teach(50000, 0.2)
+net.teach(10000, 0.2)
 mysp.record("ende")
 
 net.printNetWeights()

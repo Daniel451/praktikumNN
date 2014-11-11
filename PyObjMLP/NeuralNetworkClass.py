@@ -147,6 +147,11 @@ class NeuralNetwork:
         print(str(label) + " :\n" + str(item))
 
 
+    def __updateBias(self):
+        return
+
+
+
     def __updateWeights(self, u_input, epsilon):
         """
            update the weights of the net
