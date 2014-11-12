@@ -1,8 +1,6 @@
 __author__ = 'daniel'
 
 
-from scipy.special import expit
-
 import numpy
 import LayerClass
 import sys
