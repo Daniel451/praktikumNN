@@ -294,7 +294,7 @@ class NeuralNetwork:
         return last_out
 
 
-    def calculate(self, c_input):
+    def calculate(self, c_input, expOut = None):
         """
         calculate the output for some given input (feedforward activation)
         
@@ -319,6 +319,10 @@ class NeuralNetwork:
         print("#################################################################")
         print("## Input was:                                                  ##")
         print( c_input ) 
+        if expOut:
+            print("##                                                             ##")
+            print("## Expected Output is:                                         ##")
+            print(expOut)
         print("##                                                             ##")
         print("## Output is:                                                  ##")
         print( self.output )
@@ -356,7 +360,8 @@ class NeuralNetwork:
             print("--- Layer: " + str(key) 
                     + " --- (" + str(layer.getLength()) 
                     + " neurons total | each row represents the weights of one neuron)")
-            print(layer.getAllWeightsOfNeurons())
+            for neuronweight in layer.getAllWeightsOfNeurons():
+                print(neuronweight)
             print("")
             
 
