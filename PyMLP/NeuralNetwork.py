@@ -8,7 +8,7 @@ def _tanh(x):                 # diese Funktion stellt die Übertragungsfunktion 
     return n.tanh(x)
 
 def _tanh_deriv(x):           # diese Funktion stellt die Ableitung der Übertragungsfunktion dar. Sie ist für die Backpropagation nötig.
-    return 1.0 - n.tanh(x)**2
+    return 1.0 - n.power(n.tanh(x),2)
 
 # Welche ist nun Richtig?
 #def _tanh_deriv(x):  
