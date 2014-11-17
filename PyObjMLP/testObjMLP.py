@@ -14,7 +14,7 @@ mywd = wd()
 
 input = list(mywd.sensor())
 
-hidden = [20]
+hidden = [30]
 outputLength = 7
 
 Output = OrderedDict()
@@ -28,14 +28,17 @@ expectedOutput = [ val for key,val in Output.items() ]
 net = NNC.NeuralNetwork(input, hidden, outputLength, expectedOutput)
 
 mysp.record("start")
-net.teach(10000000, 0.01)
+net.teach(20000, 0.2)
 mysp.record("ende")
 
 net.printNetWeights()
 
-net.calculate(list(input[0]), Output[0])
-net.calculate(list(input[1]), Output[1])
-net.calculate(list(input[2]), Output[2])
-net.calculate(list(input[3]), Output[3])
+net.calculate(list(input[0]), Output[0]) # guess zero
+net.calculate(list(input[1]), Output[1]) # guess one
+net.calculate(list(input[2]), Output[2]) # guess two
+net.calculate(list(input[3]), Output[3]) # guess three
+net.calculate(list(input[10]), Output[10]) # guess a
+net.calculate(list(input[17]), Output[17]) # guess h
+net.calculate(list(input[18]), Output[18]) # guess i
 
 mysp.printRecords()

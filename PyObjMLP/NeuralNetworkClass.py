@@ -271,14 +271,20 @@ class NeuralNetwork:
         #######################################
 
         # feedforward - loop through all layers    
-        for layer in self.hiddenAndOutputLayer:
-            
+        for key, layer in enumerate(self.hiddenAndOutputLayer):
+
+            layer = self.hiddenAndOutputLayer[key]
+            parentLayer = self.hiddenAndOutputLayer[key-1]
+
             # calculate inner activation without bias
             # numpy.dot of all neuron weights of the current layer and the output of the parent layer
             innerActivation = numpy.dot(layer.getAllWeightsOfNeurons(), last_out)
 
             # add the bias of each neuron to the innerActivation
-            innerActivation += layer.getAllBiasOfNeurons() 
+            innerActivation += layer.getAllBiasOfNeurons()
+
+            # standardize innerActivation
+            innerActivation /= parentLayer.getLength()
 
             # save new innerActivation values in layer
             layer.setLastInnerActivation(innerActivation)
@@ -286,12 +292,12 @@ class NeuralNetwork:
             # calculate new output of the current layer
             # this is used as input for the next layer in the next iteration
             # or as output for the output layer when the loop is finished
-            last_out = self.transferFuction(innerActivation) 
+            last_out = self.transferFuction(innerActivation)
             
             # save new output values in layer
             layer.setLastOutput(last_out)
 
-        return last_out
+        return layer.getLastOutput()
 
 
     def calculate(self, c_input, expOut = None):
@@ -318,14 +324,20 @@ class NeuralNetwork:
         print("## calculating...                                              ##")
         print("#################################################################")
         print("## Input was:                                                  ##")
-        print( c_input ) 
+        print(c_input)
         if expOut:
             print("##                                                             ##")
             print("## Expected Output is:                                         ##")
             print(expOut)
         print("##                                                             ##")
         print("## Output is:                                                  ##")
-        print( self.output )
+        print(self.output)
+        print("##                                                             ##")
+        print("## Output is (3 decimal places):                               ##")
+        print( numpy.round(self.output,3) )
+        print("##                                                             ##")
+        print("## Output is (0 decimal places):                               ##")
+        print( numpy.round(self.output,0) )
         print("##                                                             ##")
         print("#################################################################")
         print("")
