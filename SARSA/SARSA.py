@@ -93,19 +93,19 @@ def plot(init):
     Z = rand(4,6)
 
     plt.subplot(3,3,2)
-    c = plt.pcolor(w[0].reshape(4,6))
+    c = plt.pcolor(w[0].reshape(4,6),cmap=plt.get_cmap('RdYlGn'))
     plt.title('Weight up')
     
     plt.subplot(3,3,8)
-    c = plt.pcolor(w[1].reshape(4,6))
+    c = plt.pcolor(w[1].reshape(4,6),cmap=plt.get_cmap('RdYlGn'))
     plt.title('Weight down')
     
     plt.subplot(3,3,4)
-    c = plt.pcolor(w[2].reshape(4,6))
+    c = plt.pcolor(w[2].reshape(4,6),cmap=plt.get_cmap('RdYlGn'))
     plt.title('Weight left')
     
     plt.subplot(3,3,6)
-    c = plt.pcolor(w[3].reshape(4,6))
+    c = plt.pcolor(w[3].reshape(4,6),cmap=plt.get_cmap('RdYlGn'))
     plt.title('Weight right')
     
     #plt.subplot(3,3,5)
@@ -117,7 +117,6 @@ def plot(init):
         plt.pause(1)
     else:
         plt.draw()
-    plt.pause(1)
     print(w)
 
     
@@ -138,7 +137,7 @@ beta = 50.0
 
 plot(True)
 
-for iter in range (1000):
+for iter in range (10000):
 
     world.newRandomStartPosition()
     I = world.get_sensor()
@@ -179,9 +178,9 @@ for iter in range (1000):
         doAction = doAction_tic
     
 
-    print('---------------------------------------')
-    print(w)
-    plot(False)
+    #print('---------------------------------------')
+    if iter%100 == 0:
+        plot(False)
     
 exit = True
 
