@@ -65,9 +65,6 @@ class world:
         return p
 
 
-
-
-
 def nextAction (S_from, beta):
     sum = 0.0
     p_i = 0.0
@@ -142,7 +139,7 @@ plot(True)
 
 for iter in range (1000):
 
-    world.newRandomStart()
+    world.newRandomStartPosition()
     I = world.get_sensor()
     h = numpy.dot (w, I)
     doAction = nextAction (h, beta)    # nächste action bestimmen...
@@ -161,12 +158,12 @@ for iter in range (1000):
         SensorVal = world.get_sensor()
         
         h = numpy.dot (w, SensorVal)
-        doAction_next = nextAction (h, beta)
+        doAction_tic = nextAction (h, beta)
         
         doAction_vec = numpy.zeros (size_mot)
         doAction_vec[doAction] = 1.0
         
-        wDotSensorVal = numpy.dot (w[doAction_next], SensorVal)
+        wDotSensorVal = numpy.dot (w[doAction_tic], SensorVal)
         
         if  r == 1.0:  # This is cleaner than defining
             target = r                                  # target as r + 0.9 * wDotSensorVal,
@@ -178,7 +175,7 @@ for iter in range (1000):
         
         I[0:size_map] = SensorVal[0:size_map]
         val = wDotSensorVal
-        doAction = doAction_next
+        doAction = doAction_tic
     
 
     print('---------------------------------------')
