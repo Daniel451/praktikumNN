@@ -96,36 +96,37 @@ def nextAction (S_from, beta):
 def plot(init):
     Z = rand(6,10)
     
-    plt.subplot(3,3,2)
-    c = plt.pcolor(w[0].reshape((size_x, size_y)))
-    plt.title('Weight up')
+    #plt.subplot(3,3,2)
+    #c = plt.pcolor(w[0].reshape((size_x, size_y)))
+    #plt.title('Weight up')
     
+    #print('w_up: ' + w[0].reshape((size_x, size_y)))
+    print('Z: ' + str(Z))
     
-    plt.subplot(3,3,8)
-    c = plt.pcolor(w[1].reshape((size_x, size_y)))
-    plt.title('Weight down')
+    #plt.subplot(3,3,8)
+    #c = plt.pcolor(w[1].reshape((size_x, size_y)))
+    #plt.title('Weight down')
     
-    plt.subplot(3,3,4)
-    c = plt.pcolor(w[2].reshape((size_x, size_y)))
-    plt.title('Weight left')
+    #plt.subplot(3,3,4)
+    #c = plt.pcolor(w[2].reshape((size_x, size_y)))
+    #plt.title('Weight left')
     
-    plt.subplot(3,3,6)
-    c = plt.pcolor(w[3].reshape((size_x, size_y)))
-    plt.title('Weight right')
+    #plt.subplot(3,3,6)
+    #c = plt.pcolor(w[3].reshape((size_x, size_y)))
+    #plt.title('Weight right')
     
-    plt.subplot(3,3,5)
-    c = plt.pcolor(Z)
-    plt.title('Best Direction')
+    #plt.subplot(3,3,5)
+    #c = plt.pcolor(Z)
+    #plt.title('Best Direction')
     
-    if init:
-        plt.draw()
-        plt.pause(1)
-    else:
-        plt.draw()
+    #if init:
+    #    plt.draw()
+    #    plt.pause(1)
+    #else:
+    #    plt.draw()
     #plt.pause(1)
     #print(w)
     
-    return True
     
 
 
