@@ -1,23 +1,34 @@
 __author__ = 'daniel'
 
 
-"""Simple matshow() example."""
 from matplotlib.pylab import *
 
-
-def samplemat(dims):
-    """Make a matrix with all zeros and increasing elements on the diagonal"""
-    aa = zeros(dims)
-    for i in range(min(dims)):
-        aa[i, i] = i
-    return aa
+import numpy
 
 
-# Display 2 matrices of different sizes
-matshow(samplemat(d))
+
+arr = numpy.random.random((10, 10))
 
 # Display a random matrix with a specified figure number and a grayscale
 # colormap
-matshow(rand(64, 64), fignum=100, cmap=cm.gray)
+#plt.matshow(arr, fignum=0, cmap=cm.gray)
 
-show()
+#plt.ylabel("rows")
+#plt.xlabel("columns")
+
+#plt.colorbar()
+
+
+im1 = plt.subplot(2,1,1)
+im1.imshow(arr, cmap=cm.gray, interpolation="nearest")
+
+im2 = plt.subplot(2,1,2)
+im2.imshow(arr, cmap=cm.gist_heat, interpolation="nearest")
+
+plt.ylabel("rows")
+plt.xlabel("columns")
+
+
+
+
+plt.show()
