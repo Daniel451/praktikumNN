@@ -5,7 +5,9 @@ import random
 import time
 import numpy
 import matplotlib.pyplot as plt 
+import matplotlib.pylab 
 from numpy.random import rand
+
 
 
 class world:
@@ -88,42 +90,41 @@ def nextAction (S_from, beta):
 
 
 def plot(init):
-    Z = rand(6,10)
+    Z = rand(4,6)
 
     plt.subplot(3,3,2)
-    c = plt.pcolor(Z)
+    c = plt.pcolor(w[0].reshape(4,6))
     plt.title('Weight up')
     
-    
     plt.subplot(3,3,8)
-    c = plt.pcolor(Z)
+    c = plt.pcolor(w[1].reshape(4,6))
     plt.title('Weight down')
     
     plt.subplot(3,3,4)
-    c = plt.pcolor(Z)
+    c = plt.pcolor(w[2].reshape(4,6))
     plt.title('Weight left')
     
     plt.subplot(3,3,6)
-    c = plt.pcolor(Z)
+    c = plt.pcolor(w[3].reshape(4,6))
     plt.title('Weight right')
     
-    plt.subplot(3,3,5)
-    c = plt.pcolor(Z)
-    plt.title('Best Direction')
+    #plt.subplot(3,3,5)
+    #c = plt.pcolor(Z)
+    #plt.title('Best Direction')
     
     if init:
         plt.draw()
         plt.pause(1)
     else:
         plt.draw()
-    #plt.pause(1)
-    #print(w)
-    
-    return True
+    plt.pause(1)
+    print(w)
+
     
 
 
-size_x, size_y = 4, 6
+size_x = 4 
+size_y = 6
 size_map = size_x * size_y
 size_mot = 4
 w = numpy.random.uniform (0.0, 0.0, (size_mot, size_map))
