@@ -9,17 +9,27 @@ from numpy.random import rand
 
 
 class world:
+
+
     def __init__(self, size_x, size_y):
-        self.x = random.randint(0, size_x-1)
-        self.y = random.randint(0, size_y-1)
+        """
+        :param size_x: column size of the world
+        :param size_y: row size of the world
+        """
+
         self.size_x = size_x
         self.size_y = size_y
-        self.ind  = numpy.arange(0, self.size_x * self.size_y)
-        
-    def newRandomStart(self):
+
+        self.newRandomStartPosition()
+
+        self.ind = numpy.arange(0, self.size_x * self.size_y)
+
+
+    def newRandomStartPosition(self):
         self.x = random.randint(0, size_x-1)
         self.y = random.randint(0, size_y-1)
-        
+
+
     def doAction(self, action):
         # position world redoActionion
         if  numpy.random.random_sample() > 0.0:
@@ -113,6 +123,7 @@ def plot(init):
     
 
 
+
 size_x, size_y = 4, 6
 size_map = size_x * size_y
 size_mot = 4
@@ -129,7 +140,7 @@ plot(True)
 
 for iter in range (1000):
 
-    world.newRandomStart()
+    world.newRandomStartPosition()
     I = world.get_sensor()
     h = numpy.dot (w, I)
     doAction = nextAction (h, beta)    # nächste action bestimmen...
