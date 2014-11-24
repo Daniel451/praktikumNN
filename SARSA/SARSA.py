@@ -9,14 +9,9 @@ from numpy.random import rand
 
 
 class world:
-
-
     def __init__(self, size_x, size_y):
-        """
-        :param size_x: column size of the world
-        :param size_y: row size of the world
-        """
-
+        self.x = random.randint(0, size_x-1)
+        self.y = random.randint(0, size_y-1)
         self.size_x = size_x
         self.size_y = size_y
 
@@ -29,8 +24,7 @@ class world:
         """
         self.x = random.randint(0, size_x-1)
         self.y = random.randint(0, size_y-1)
-
-
+        
     def doAction(self, action):
 
         # position world redoActionion
@@ -69,14 +63,6 @@ class world:
         p = numpy.zeros(self.size_x * self.size_y)
         p[self.x * self.size_x + self.y] = 1.0
         return p
-    
-
-    def get_size_X():
-        return self.size_x
-        
-
-    def get_size_Y():
-        return self.size_y
 
 
 
@@ -106,22 +92,22 @@ def nextAction (S_from, beta):
 
 def plot(init):
     Z = rand(6,10)
-    
+
     plt.subplot(3,3,2)
-    c = plt.pcolor(w[0].reshape((size_x, size_y)))
+    c = plt.pcolor(Z)
     plt.title('Weight up')
     
     
     plt.subplot(3,3,8)
-    c = plt.pcolor(w[1].reshape((size_x, size_y)))
+    c = plt.pcolor(Z)
     plt.title('Weight down')
     
     plt.subplot(3,3,4)
-    c = plt.pcolor(w[2].reshape((size_x, size_y)))
+    c = plt.pcolor(Z)
     plt.title('Weight left')
     
     plt.subplot(3,3,6)
-    c = plt.pcolor(w[3].reshape((size_x, size_y)))
+    c = plt.pcolor(Z)
     plt.title('Weight right')
     
     plt.subplot(3,3,5)
@@ -140,7 +126,6 @@ def plot(init):
     
 
 
-
 size_x, size_y = 4, 6
 size_map = size_x * size_y
 size_mot = 4
@@ -153,10 +138,11 @@ beta = 50.0
 #job_for_another_core = multiprocessing.Process(target=plot,args=())
 #job_for_another_core.start()
 
+plot(True)
 
 for iter in range (1000):
 
-    world.newRandomStartPosition()
+    world.newRandomStart()
     I = world.get_sensor()
     h = numpy.dot (w, I)
     doAction = nextAction (h, beta)    # nächste action bestimmen...
@@ -186,8 +172,9 @@ for iter in range (1000):
             target = r                                  # target as r + 0.9 * wDotSensorVal,
         else:                                           # because weights now converge.
             target = 0.9 * wDotSensorVal                      # gamma = 0.9
+        delta = target - val                            # prediction error
         
-        w += 0.5 * target - val * numpy.outer (doAction_vec, I)
+        w += 0.5 * (target - val) * numpy.outer (doAction_vec, I)
         
         I[0:size_map] = SensorVal[0:size_map]
         val = wDotSensorVal
