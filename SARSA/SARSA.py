@@ -63,6 +63,12 @@ class world:
         p = numpy.zeros(self.size_x * self.size_y)
         p[self.x * self.size_x + self.y] = 1.0
         return p
+    
+    def get_size_X():
+        return self.size_x
+        
+    def get_size_Y():
+        return self.size_y
 
 
 def nextAction (S_from, beta):
@@ -89,22 +95,22 @@ def nextAction (S_from, beta):
 
 def plot(init):
     Z = rand(6,10)
-
+    
     plt.subplot(3,3,2)
-    c = plt.pcolor(Z)
+    c = plt.pcolor(w[0].reshape((size_x, size_y)))
     plt.title('Weight up')
     
     
     plt.subplot(3,3,8)
-    c = plt.pcolor(Z)
+    c = plt.pcolor(w[1].reshape((size_x, size_y)))
     plt.title('Weight down')
     
     plt.subplot(3,3,4)
-    c = plt.pcolor(Z)
+    c = plt.pcolor(w[2].reshape((size_x, size_y)))
     plt.title('Weight left')
     
     plt.subplot(3,3,6)
-    c = plt.pcolor(Z)
+    c = plt.pcolor(w[3].reshape((size_x, size_y)))
     plt.title('Weight right')
     
     plt.subplot(3,3,5)
@@ -136,7 +142,6 @@ beta = 50.0
 #job_for_another_core = multiprocessing.Process(target=plot,args=())
 #job_for_another_core.start()
 
-plot(True)
 
 for iter in range (1000):
 
@@ -159,24 +164,23 @@ for iter in range (1000):
         SensorVal = world.get_sensor()
         
         h = numpy.dot (w, SensorVal)
-        doAction_tic = nextAction (h, beta)
+        doAction_next = nextAction (h, beta)
         
         doAction_vec = numpy.zeros (size_mot)
         doAction_vec[doAction] = 1.0
         
-        wDotSensorVal = numpy.dot (w[doAction_tic], SensorVal)
+        wDotSensorVal = numpy.dot (w[doAction_next], SensorVal)
         
         if  r == 1.0:  # This is cleaner than defining
             target = r                                  # target as r + 0.9 * wDotSensorVal,
         else:                                           # because weights now converge.
             target = 0.9 * wDotSensorVal                      # gamma = 0.9
-        delta = target - val                            # prediction error
         
-        w += 0.5 * delta * numpy.outer (doAction_vec, I)
+        w += 0.5 * target - val * numpy.outer (doAction_vec, I)
         
         I[0:size_map] = SensorVal[0:size_map]
         val = wDotSensorVal
-        doAction = doAction_tic
+        doAction = doAction_next
     
 
     print('---------------------------------------')
