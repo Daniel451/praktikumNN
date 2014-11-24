@@ -89,41 +89,48 @@ def nextAction (S_from, beta):
     return sel
 
 
-def plot(init):
+def plot(state):
     Z = rand(4,6)
 
     plt.subplot(3,3,2)
-    c = plt.pcolor(w[0].reshape(4,6),cmap=plt.get_cmap('RdYlGn'))
+    c = plt.pcolor(w[0].reshape(size_x,size_y),cmap=plt.get_cmap('RdYlGn'))
     plt.title('Weight up')
     
     plt.subplot(3,3,8)
-    c = plt.pcolor(w[1].reshape(4,6),cmap=plt.get_cmap('RdYlGn'))
+    d = plt.pcolor(w[1].reshape(size_x,size_y),cmap=plt.get_cmap('RdYlGn'))
     plt.title('Weight down')
     
     plt.subplot(3,3,4)
-    c = plt.pcolor(w[2].reshape(4,6),cmap=plt.get_cmap('RdYlGn'))
+    e = plt.pcolor(w[2].reshape(size_x,size_y),cmap=plt.get_cmap('RdYlGn'))
     plt.title('Weight left')
     
     plt.subplot(3,3,6)
-    c = plt.pcolor(w[3].reshape(4,6),cmap=plt.get_cmap('RdYlGn'))
+    f = plt.pcolor(w[3].reshape(size_x,size_y),cmap=plt.get_cmap('RdYlGn'))
     plt.title('Weight right')
     
     #plt.subplot(3,3,5)
-    #c = plt.pcolor(Z)
+    #g = plt.axes()
+    #g.set_ylim([0,size_y])
+    #g.set_xlim([0,size_x])
     #plt.title('Best Direction')
-    
-    if init:
-        plt.draw()
-        plt.pause(1)
-    else:
-        plt.draw()
-    print(w)
+
+
+    #for _x in range (0,size_x):
+    #    for _y in range (0,size_y):
+    #        vektor = numpy.array([w[0][_x] - w[2][_x], w[1][_y] - w[3][_y] ])
+    #        point = numpy.array([_x, _y])
+    #        start = point + vektor
+    #        g.arrow(start[0], start[1],vektor[0], vektor[1])
+
+    plt.draw()
+    plt.pause(0.01)
+
 
     
 
 
-size_x = 4 
-size_y = 6
+size_x = 10 
+size_y = 10
 size_map = size_x * size_y
 size_mot = 4
 w = numpy.random.uniform (0.0, 0.0, (size_mot, size_map))
@@ -135,9 +142,10 @@ beta = 50.0
 #job_for_another_core = multiprocessing.Process(target=plot,args=())
 #job_for_another_core.start()
 
-plot(True)
+plot(0)
+plt.pause(1)
 
-for iter in range (10000):
+for iter in range (100000):
 
     world.newRandomStartPosition()
     I = world.get_sensor()
@@ -163,7 +171,7 @@ for iter in range (10000):
         doAction_vec = numpy.zeros (size_mot)
         doAction_vec[doAction] = 1.0
         
-        wDotSensorVal = numpy.dot (w[doAction_tic], SensorVal)
+        wDotSensorVal = numpy.dot(w[doAction_tic], SensorVal)
         
         if  r == 1.0:  # This is cleaner than defining
             target = r                                  # target as r + 0.9 * wDotSensorVal,
@@ -171,16 +179,18 @@ for iter in range (10000):
             target = 0.9 * wDotSensorVal                      # gamma = 0.9
         delta = target - val                            # prediction error
         
-        w += 0.5 * (target - val) * numpy.outer (doAction_vec, I)
+        w += 0.5 * (target - val) * numpy.outer(doAction_vec, I)
         
         I[0:size_map] = SensorVal[0:size_map]
         val = wDotSensorVal
         doAction = doAction_tic
     
-
-    #print('---------------------------------------')
+    print('------------- Needed hops: ' + str(duration) + '-------------')
     if iter%100 == 0:
-        plot(False)
+        plot(1)
+print('Done')
+plot(3)
+plt.show()
     
-exit = True
+
 
