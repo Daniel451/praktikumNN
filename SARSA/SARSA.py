@@ -7,55 +7,93 @@ import numpy
 import matplotlib.pyplot as plt 
 import matplotlib.pylab 
 from numpy.random import rand
+from numpy.random import random_integers as randInteger
 
 
-
-class world:
+class maze():
     def __init__(self, size_x, size_y):
         self.x = random.randint(0, size_x-1)
         self.y = random.randint(0, size_y-1)
         self.size_x = size_x
         self.size_y = size_y
-
+        self.mazemap = self.createmaze(size_x,size_y)
         self.newRandomStartPosition()
+        self.goal_x = self.x
+        self.goal_y = self.y
+        self.newRandomStartPosition()
+        print(self.mazemap.shape)
+        print(self.mazemap[0,0])
+        print('Goal_x: ' + str( self.goal_x))
+        print('Goal_y: ' + str( self.goal_y))
+        print(self.mazemap[self.goal_x,self.goal_y])
 
+    def createmaze(self,width, height, complexity=.75, density=0.25):
+        # Only odd shapes
+        shape = ((height // 2) * 2 + 1, (width // 2) * 2 + 1)
+        # Adjust complexity and density relative to maze size
+        complexity = int(complexity * (5 * (shape[0] + shape[1])))
+        density    = int(density * (shape[0] // 2 * shape[1] // 2))
+        # Build actual maze
+        Z = numpy.zeros(shape, dtype=bool)
+        # Fill borders
+        Z[0, :] = Z[-1, :] = 1
+        Z[:, 0] = Z[:, -1] = 1
+        # Make aisles
+        for i in range(density):
+            x, y = randInteger(0, shape[1] // 2) * 2, randInteger(0, shape[0] // 2) * 2
+            Z[y, x] = 1
+            for j in range(complexity):
+                neighbours = []
+                if x > 1:             neighbours.append((y, x - 2))
+                if x < shape[1] - 2:  neighbours.append((y, x + 2))
+                if y > 1:             neighbours.append((y - 2, x))
+                if y < shape[0] - 2:  neighbours.append((y + 2, x))
+                if len(neighbours):
+                    y_,x_ = neighbours[randInteger(0, len(neighbours) - 1)]
+                    if Z[y_, x_] == 0:
+                        Z[y_, x_] = 1
+                        Z[y_ + (y - y_) // 2, x_ + (x - x_) // 2] = 1
+                        x, y = x_, y_
+        return Z
 
     def newRandomStartPosition(self):
         """
         calculates a new random start position (x,y) for our robot
         """
-        self.x = random.randint(0, size_x-1)
-        self.y = random.randint(0, size_y-1)
-        
+        while True:
+            self.x = random.randint(0, size_x-1)
+            self.y = random.randint(0, size_y-1)
+            if self.mazemap[self.x,self.y] == False:
+                break
+    
+    def getMaze(self):
+        mazemap = (numpy.copy(self.mazemap)).astype(float)
+        mazemap[self.goal_x][self.goal_y] = 0.5
+        return mazemap
+    
     def doAction(self, action):
-
-        # position world redoActionion
-        if  numpy.random.random_sample() > 0.0:
-            if  action == 0:      #down
-                self.x -= 1
-            elif action == 1:     #right
-                self.y += 1
-            elif action == 2:     #up
-                self.x += 1
-            elif action == 3:     #left
-                self.y -= 1
-            else:
-                print('unknown action')
-                # borders remain, movement stops 
-
-        if   self.x < 0:
+        if self.x < 0:
             self.x = 0
         elif self.x >= self.size_x:
             self.x = self.size_x - 1
-
-        if   self.y < 0:
+        if self.y < 0:
             self.y = 0
         elif self.y >= self.size_y:
             self.y = self.size_y - 1
-
-
+        
+        
+        if action == 0 and self.mazemap[self.x-1,self.y] == False and self.x > 0:      #left
+            self.x -= 1
+        elif action == 1 and self.mazemap[self.x,self.y+1] == False and self.y < self.size_y:     #up
+            self.y += 1
+        elif action == 2 and self.mazemap[self.x+1,self.y] == False and self.x < self.size_x:     #right
+            self.x += 1
+        elif action == 3 and self.mazemap[self.x,self.y-1] == False and self.y > 0:     #down
+            self.y -= 1
+        #print('Point: x=' + str(self.x) + ' y= ' + str(self.y))
+        
     def get_reward(self):
-        if  self.x == 2 and self.y == 3:
+        if  self.goal_x == self.x and self.goal_y == self.y:
             return 1.0
         else:
             return 0.0
@@ -90,29 +128,31 @@ def nextAction (S_from, beta):
 
 
 def plot(state):
-    Z = rand(4,6)
 
     plt.subplot(3,3,2)
     c = plt.pcolor(w[0].reshape(size_x,size_y),cmap=plt.get_cmap('RdYlGn'))
+    plt.axis([0,size_x,0,size_y])
     plt.title('Weight up')
     
     plt.subplot(3,3,8)
     d = plt.pcolor(w[1].reshape(size_x,size_y),cmap=plt.get_cmap('RdYlGn'))
+    plt.axis([0,size_x,0,size_y])
     plt.title('Weight down')
     
     plt.subplot(3,3,4)
     e = plt.pcolor(w[2].reshape(size_x,size_y),cmap=plt.get_cmap('RdYlGn'))
+    plt.axis([0,size_x,0,size_y])
     plt.title('Weight left')
     
     plt.subplot(3,3,6)
     f = plt.pcolor(w[3].reshape(size_x,size_y),cmap=plt.get_cmap('RdYlGn'))
+    plt.axis([0,size_x,0,size_y])
     plt.title('Weight right')
     
-    #plt.subplot(3,3,5)
-    #g = plt.axes()
-    #g.set_ylim([0,size_y])
-    #g.set_xlim([0,size_x])
-    #plt.title('Best Direction')
+    plt.subplot(3,3,5)
+    f = plt.pcolor(world.getMaze(),cmap=plt.get_cmap('RdYlGn'))
+    plt.axis([0,size_x,0,size_y])
+    plt.title('Maze')
 
 
     #for _x in range (0,size_x):
@@ -129,12 +169,12 @@ def plot(state):
     
 
 
-size_x = 50 
-size_y = 50
+size_x = 21 
+size_y = 21
 size_map = size_x * size_y
 size_mot = 4
 w = numpy.random.uniform (0.0, 0.0, (size_mot, size_map))
-world = world(size_x, size_y)
+world = maze(size_x, size_y)
 
 beta = 5.0
 
@@ -184,6 +224,8 @@ for iter in range (100000):
         I[0:size_map] = SensorVal[0:size_map]
         val = wDotSensorVal
         doAction = doAction_tic
+        if duration > 2000:
+            break
     
     print('------------- Needed hops: ' + str(duration) + '-------------')
     if iter%10 == 0:
