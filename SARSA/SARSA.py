@@ -129,14 +129,14 @@ def plot(state):
     
 
 
-size_x = 10 
-size_y = 10
+size_x = 50 
+size_y = 50
 size_map = size_x * size_y
 size_mot = 4
 w = numpy.random.uniform (0.0, 0.0, (size_mot, size_map))
 world = world(size_x, size_y)
 
-beta = 50.0
+beta = 5.0
 
 #use the multiprocessing module to perform the plotting doActionivity in another process (i.e., on another core):
 #job_for_another_core = multiprocessing.Process(target=plot,args=())
@@ -179,14 +179,14 @@ for iter in range (100000):
             target = 0.9 * wDotSensorVal                      # gamma = 0.9
         delta = target - val                            # prediction error
         
-        w += 0.5 * (target - val) * numpy.outer(doAction_vec, I)
+        w += 0.3 * (target - val) * numpy.outer(doAction_vec, I)
         
         I[0:size_map] = SensorVal[0:size_map]
         val = wDotSensorVal
         doAction = doAction_tic
     
     print('------------- Needed hops: ' + str(duration) + '-------------')
-    if iter%100 == 0:
+    if iter%10 == 0:
         plot(1)
 print('Done')
 plot(3)
