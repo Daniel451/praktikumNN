@@ -9,6 +9,17 @@ class SARSAloop:
 
     
     def learn(self, world, action, plot, beta, w, size_motion, size_map, size_x, size_y):
+        """
+            :param world: reference to a SARSA_world.py world-class, represents the world
+            :param action: reference to a SARSA_action.py action-class, represents actions
+            :param plot: reference to a SARSA_plot.py plot-class, does the plotting stuff
+            :param beta:
+            :param w:
+            :param size_motion:
+            :param size_map:
+            :param size_x:
+            :param size_y:
+        """
 
         for iter in xrange(100000):
 
