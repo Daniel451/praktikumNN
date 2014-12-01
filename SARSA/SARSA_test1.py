@@ -27,13 +27,13 @@ beta = 5.0
 world = SW(size_x, size_y)
 action = SA()
 plot = SP()
+loop = SL()
 
 plot.plot(w, size_x, size_y)
 plot.plotPause(1)
 
 
-
-
+loop.learn(world, action, plot, beta, w, size_motion, size_map, size_x, size_y)
 
 
 print('Done')

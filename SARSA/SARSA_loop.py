@@ -1,4 +1,4 @@
-
+#-*- coding: utf-8 -*-
 
 
 import numpy
@@ -8,7 +8,8 @@ import numpy
 class SARSAloop:
 
     
-    def loop(self, world, action, plot, beta, w):
+    def learn(self, world, action, plot, beta, w, size_motion, size_map, size_x, size_y):
+
         for iter in xrange(100000):
 
             world.newRandomStartPosition()
