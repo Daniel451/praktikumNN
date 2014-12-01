@@ -5,7 +5,8 @@ import random
 import time
 import numpy
 import matplotlib.pyplot as plt 
-import matplotlib.pylab 
+from matplotlib import cm
+
 from numpy.random import rand
 
 
@@ -93,19 +94,19 @@ def plot(init):
     Z = rand(4,6)
 
     plt.subplot(3,3,2)
-    c = plt.pcolor(w[0].reshape(4,6))
+    c = plt.pcolor(w[0].reshape(4,6), cmap=cm.RdYlGn)
     plt.title('Weight up')
     
     plt.subplot(3,3,8)
-    c = plt.pcolor(w[1].reshape(4,6))
+    c = plt.pcolor(w[1].reshape(4,6), cmap=cm.RdYlGn)
     plt.title('Weight down')
     
     plt.subplot(3,3,4)
-    c = plt.pcolor(w[2].reshape(4,6))
+    c = plt.pcolor(w[2].reshape(4,6), cmap=cm.RdYlGn)
     plt.title('Weight left')
     
     plt.subplot(3,3,6)
-    c = plt.pcolor(w[3].reshape(4,6))
+    c = plt.pcolor(w[3].reshape(4,6), cmap=cm.RdYlGn)
     plt.title('Weight right')
     
     #plt.subplot(3,3,5)
