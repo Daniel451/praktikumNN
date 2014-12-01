@@ -94,18 +94,22 @@ def plot(state):
 
     plt.subplot(3,3,2)
     c = plt.pcolor(w[0].reshape(size_x,size_y),cmap=plt.get_cmap('RdYlGn'))
+    plt.axis([0, size_x, 0, size_y])
     plt.title('Weight up')
     
     plt.subplot(3,3,8)
     d = plt.pcolor(w[1].reshape(size_x,size_y),cmap=plt.get_cmap('RdYlGn'))
+    plt.axis([0, size_x, 0, size_y])
     plt.title('Weight down')
     
     plt.subplot(3,3,4)
     e = plt.pcolor(w[2].reshape(size_x,size_y),cmap=plt.get_cmap('RdYlGn'))
+    plt.axis([0, size_x, 0, size_y])
     plt.title('Weight left')
     
     plt.subplot(3,3,6)
     f = plt.pcolor(w[3].reshape(size_x,size_y),cmap=plt.get_cmap('RdYlGn'))
+    plt.axis([0, size_x, 0, size_y])
     plt.title('Weight right')
     
     #plt.subplot(3,3,5)
@@ -129,8 +133,8 @@ def plot(state):
     
 
 
-size_x = 50 
-size_y = 50
+size_x = 10 
+size_y = 10
 size_map = size_x * size_y
 size_mot = 4
 w = numpy.random.uniform (0.0, 0.0, (size_mot, size_map))
