@@ -169,8 +169,8 @@ def plot(state):
     
 
 
-size_x = 21 
-size_y = 21
+size_x = 31 
+size_y = 31
 size_map = size_x * size_y
 size_mot = 4
 w = numpy.random.uniform (0.0, 0.0, (size_mot, size_map))
@@ -224,8 +224,8 @@ for iter in range (100000):
         I[0:size_map] = SensorVal[0:size_map]
         val = wDotSensorVal
         doAction = doAction_tic
-        if duration > 2000:
-            break
+        #if duration > 100000:
+            #break
     
     print('------------- Needed hops: ' + str(duration) + '-------------')
     if iter%10 == 0:
