@@ -49,11 +49,11 @@ class SARSAloop:
                 
                 wDotSensorVal = numpy.dot(w[doAction_tic], SensorVal)
                 
-                if  r == 1.0:  # This is cleaner than defining
-                    target = r                                  # target as r + 0.9 * wDotSensorVal,
-                else:                                           # because weights now converge.
-                    target = 0.9 * wDotSensorVal                # gamma = 0.9
-                delta = target - val                            # prediction error
+                if  r == 1.0: 
+                    target = r # bei 1 brauche ich nicht viel rechnen... (meist Goal erreicht!)
+                else:
+                    target = 0.9 * wDotSensorVal                
+                delta = target - val                           
                 
                 w += 0.3 * (target - val) * numpy.outer(doAction_vec, I)
                 
