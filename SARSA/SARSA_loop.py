@@ -21,7 +21,7 @@ class SARSAloop:
             :param size_y:
         """
 
-        for iter in xrange(100000):
+        for iter in range(100000):
 
             world.newRandomStartPosition()
             I = world.get_sensor()
@@ -64,4 +64,5 @@ class SARSAloop:
             print('------------- Needed hops: ' + str(duration) + '-------------')
 
             if iter%10 == 0:
-                plot.plot(w, size_x, size_y) 
+                #plot.plot(w, size_x, size_y)
+                plot.plot(w, size_x, size_y,world)
