@@ -17,12 +17,12 @@ class SARSAaction:
         d_r = len (S_from)
         sel = 0
 
-        for i in xrange(d_r):
+        for i in range(d_r):
             sum += numpy.exp (beta * S_from[i])
 
         S_target = numpy.zeros (d_r)
 
-        for i in xrange(d_r):
+        for i in range(d_r):
             p_i += numpy.exp (beta * S_from[i]) / sum
 
             if p_i > rnd:
