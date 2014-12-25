@@ -3,6 +3,7 @@
 
 import numpy as n
 
+
 def _tanh(x):                 # diese Funktion stellt die Übertragungsfunktion der Neuronen dar. Forwardpropagation 
     return n.tanh(x)
 
@@ -38,7 +39,8 @@ class NeuralNetwork:
             RWI = []
             for i in range(1, len(layer)):
                 RD.append( n.zeros((1,layer[i])) )
-                RWI.append(n.random.random((1,layer[i]))-0.5)
+                #RWI.append(n.random.random((1,layer[i]))-0.5)
+                RWI.append( n.zeros((1,layer[i])) )
             self.RD.append(RD)
             self.RWI.append(RWI)
                 
@@ -76,7 +78,7 @@ class NeuralNetwork:
             recurrentData = n.atleast_2d(n.zeros(len(self.B[l])))
             
             for r in range(0, self.tmax):
-                recurrentData += self.RD[r][l].dot(self.RWI[r][l].T)   # multipliziere die Recurenten Daten mit den entsprechenden Gewichten und addiere sie dann miteinander...
+                recurrentData += self.RD[r][l] * self.RWI[r][l]   # multipliziere die Recurenten Daten mit den entsprechenden Gewichten und addiere sie dann miteinander...
             
             
             int_a=n.atleast_2d(a.dot(self.W[l].T)) + self.B[l].T + recurrentData
@@ -117,12 +119,25 @@ class NeuralNetwork:
             Output = []               # init des Activation Zwischenspeichers: Übertragungsfunktion( Activation )
             Output.append(a)          # Die Inputlayer haben keine Übertragungsfunktion sie sind nur "dumme Werteträger", Input Neuronen eben!
             
+            RDtemp = []
+            
+            
             # +====================================+
             # +********* Feedforward-Algo *********+
             # +====================================+
             for l in range(0, len(self.W)): #für alle Layer... 
                 #Wie in guess(self, s_in), werden auch hier identisch (!!) die Activation und Output Daten mittels Feedforward-Algo berechnet. Der Unterschied ist jedoch, dass wir uns hier nun die Daten für den folgenden Backpropagation-Algo merken müssen!
-                int_a=n.atleast_2d(a.dot(self.W[l].T))+self.B[l].T
+                
+                
+                recurrentData = n.atleast_2d(n.zeros(len(self.B[l])))
+                
+                for r in range(0, self.tmax):
+                    #print(r, self.RD[r][l] , self.RWI[r][l], recurrentData)
+                    recurrentData += self.RD[r][l] * self.RWI[r][l]   # multipliziere die Recurenten Daten mit den entsprechenden Gewichten und addiere sie dann miteinander...
+                
+                
+                
+                int_a=n.atleast_2d(a.dot(self.W[l].T)) + self.B[l].T + recurrentData
                 
                 Activation.append(int_a) #merken des Activation-Wertes!
                 if len(self.W) - 1 == l: # siehe oben...
@@ -131,6 +146,13 @@ class NeuralNetwork:
                     a = _tanh(int_a)
                 Output.append(a) #merken des Output-Wertes!
                 
+                
+                RDtemp.append(a)
+                #TODO: evtl als Funktion Exportieren, ist ja eingentlich doppelt... 
+            
+            self.RD.insert(0,RDtemp)
+            del self.RD[-1] # letzen Datensatz löschen, da dann self.tmax+1 lang
+            
             
             # +========================================+
             # +********* Backpropagation-Algo *********+
@@ -139,7 +161,7 @@ class NeuralNetwork:
             # Das NN ist im untrainierten Zustand (Zufallszahlen in den Gewichten) sehr warscheinlich falsch, es gibt einen Error-Wert: delta:
             delta = n.atleast_2d((s_teach[i] - a[-1]))    #Erzeugt delta zum ersten Mal: SollAusgabe - IstAusgabe mittels der Trainingsdaten. 
             
-            for l in range(len(self.W)-1, 0, -1): #für alle Layer, diesmal jedoch von hinten nach von!
+            for l in range(len(self.W)-1, -1, -1): #für alle Layer, diesmal jedoch von hinten nach von!
                 if l > 0: #solange wir uns über dem Input-Layer befinden, berechnen wir schon mal den delta-Wert für die nächste Iteration, den Delta-Wert dieses Layers wird jedoch noch für das Anpassen der Gewichte benötigt 
                     #TODO was muss hier hin? Activation oder Output? -> müsste Activation sein....
                     delta_next = _tanh_deriv(Activation[l]) * (self.W[l] * n.transpose(delta)).sum(axis=0)
@@ -147,11 +169,19 @@ class NeuralNetwork:
                 #TODO Evtl. könnte aus der _tanh_deriv Funktion die tanh(x) Funktion entfernt werden, wenn ich unten nun statt Output[] Activation[] nutzen würde. Richtig? Falsch?!
                 
                 #TODO was muss hier hin? Activation oder Output? -> müsste Output sein....
-                self.W[l] = self.W[l] + ((epsilon * n.transpose(delta)) * Output[l]) #Anpassen der Gewichte
-                self.B[l] = self.B[l] + epsilon * n.transpose(delta) # Anpassen des Bias
+                self.W[l] +=  epsilon * delta.T * Output[l] #Anpassen der Gewichte
+                self.B[l] +=  epsilon * delta.T # Anpassen des Bias
+                
+                
+                
+                for r in range(0, self.tmax):
+                    self.RWI[r][l] += epsilon * delta * self.RD[r][l] * 0.001
+                
+                
                 
                 delta = delta_next # wie oben schon kurz angesprochen, hier wird nun delta_next zu delta, damit der passende Wert für das nächste Layer zur Verfügung steht.
                 # Da delta von der Gewichtsanpassung und die Gewichte für das delta_next gebraucht wird, muss es so auseinander gezogen werden.
+                
                 
                 
     def save(self, file): #untested: sichere Gewichte und Bias

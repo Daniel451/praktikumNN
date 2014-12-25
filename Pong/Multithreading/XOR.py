@@ -10,7 +10,7 @@ from NeuralNetwork import NeuralNetwork
 
 
 
-nn = NeuralNetwork([2,6,1],7) # Erstelle neues Neurales Netzwerk mit 2 Eingangsneuronen, 6 Hidden-Neuronen und 1 Ausgangsneuronen.
+nn = NeuralNetwork([2,6,1],6) # Erstelle neues Neurales Netzwerk mit 2 Eingangsneuronen, 6 Hidden-Neuronen und 1 Ausgangsneuronen.
 # Möglich wäre auch: NeuralNetwork([2,6,7,3,1]) also mit mehren Hidden Layern!
 
 s_in = n.array([[0, 0], [0, 1], [1, 0], [1, 1]]) #Trainingsdaten Input
@@ -21,7 +21,7 @@ s_teach = n.array([[0], [1], [1], [0]])          #Trainingsdaten Output
 
 
 
-nn.teach(s_in, s_teach ,0.2,5000)  # Trainiren: 
+nn.teach(s_in, s_teach ,0.1,10000)  # Trainiren: 
 
 
 
