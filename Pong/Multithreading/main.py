@@ -11,6 +11,7 @@ import socketserver
 import time
 
 
+
 from DataFrame import DataFrame 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -94,7 +95,7 @@ def startPlayer(conn,playername, loadConfig = None):
             elif frame.instruction == 'reward': # 
                 reward(player,frame)
             elif frame.instruction == 'saveConfig': # 
-                reward(player,frame)
+                player.SaveConfig('save/config_' + playername + '_' + time.strftime("%Y-%m-%d_%H:%M:%S", time.time()) + '.pcf' )
             else:
                 print('unknown instruction: ' + frame.instruction)
     conn.close()
@@ -164,7 +165,7 @@ if __name__ == '__main__':
         frame.add('ypos',court.sensor_Y)
         frame.add('mypos',court.sensor_bat(1))
         connPlayerB.send(frame)
-        
+
         time.sleep(0.3)
         #while True:
         #    time.sleep(0.1)
