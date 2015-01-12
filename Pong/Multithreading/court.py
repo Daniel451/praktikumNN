@@ -50,19 +50,19 @@ class court:
         return self.bat[player] + (random.random() - 0.5 ) * self.outputNoiseMax
         
         
-    def scaled_sensor_X(self): 
+    def scaled_sensor_x(self):
         return self.sensor_X() / (self.x_max/2.0) - 1.0
         
-    def scaled_sensor_Y(self): 
+    def scaled_sensor_y(self):
         return self.sensor_Y() / (self.y_max/2.0) - 1.0 
         
     def scaled_sensor_bat(self, player): 
         return self.sensor_bat(player) / (self.y_max/2.0) - 1.0 
         
-    def hitBat(self, player):
+    def hitbat(self, player):
         return self.bathit[player]
     
-    def getPoints(self, player):
+    def getpoints(self, player):
         return self.Points[player]
     
     def tic(self):
@@ -107,11 +107,11 @@ class court:
                 self.dirVec[0] = self.dirVec[0] * -1.0
         
     def move(self, player, action):
-        if action == 'u' : #up
+        if action == 'd' : #up
             self.bat[player] += self.batstep
             if self.bat[player] > self.y_max:
                 self.bat[player] = self.y_max
-        if action == 'd': #down
+        if action == 'u': #down
             self.bat[player] -= self.batstep
             if self.bat[player] < 0.0:
                 self.bat[player] = 0.0

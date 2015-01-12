@@ -10,6 +10,7 @@ import json
 import socketserver
 import time
 
+from pprint import pprint
 
 
 from DataFrame import DataFrame 
@@ -85,17 +86,23 @@ def startPlayer(conn,playername, loadConfig = None):
     
     
     while True:
+        print('Player ' + str(playername) + ' waiting for new instruction...' )
         if conn.poll(None):  # warte auf neue Daten...
             frame = conn.recv() # Daten sind da...
             
             if frame.instruction == 'EXIT': # Beenden.
+                print('Player ' + str(playername) + ' Call: ' +  frame.instruction )
                 break
-            elif frame.instruction == 'predictNext': # 
+            elif frame.instruction == 'predictNext': #
+                print('Player ' + str(playername) + ' Call: ' + frame.instruction )
                 conn.send(predictNext(player,frame))
-            elif frame.instruction == 'reward': # 
+            elif frame.instruction == 'reward_pos': #
+                print('Player ' + str(playername) + ' Call: ' + frame.instruction )
                 reward(player,frame)
-            elif frame.instruction == 'saveConfig': # 
-                player.SaveConfig('save/config_' + playername + '_' + time.strftime("%Y-%m-%d_%H:%M:%S", time.time()) + '.pcf' )
+            elif frame.instruction == 'saveConfig': #
+                path = 'save/config_' + str(playername) + '_' + time.strftime("%Y-%m-%d_%H:%M:%S", time.time()) + '.pcf'
+                print('Player ' + str(playername) + ' Call: '+ frame.instruction + ' in ' + path )
+                player.SaveConfig(path)
             else:
                 print('unknown instruction: ' + frame.instruction)
     conn.close()
@@ -104,13 +111,31 @@ def saveConfig(player,frame):
     player.SaveConfig(frame.getdata('filename'))
     
 def predictNext(player,frame):
-    action = player.predict(frame.getdata('xpos'), frame.getdata('ypos'), frame.getdata('mypos'))
+
+
+    print('frame: ' + frame.getdata('xpos'))
+
+    xpos = float(frame.getdata('xpos'))
+    ypos = float(frame.getdata('ypos'))
+    mypos = float(frame.getdata('mypos'))
+
+
+
+    print ('xpos: ' + str(xpos))
+    print ('ypos: ' + str(ypos))
+    print ('mypos: ' + str(mypos))
+
+
+    #action = player.predict(frame.getdata('xpos'), frame.getdata('ypos'), frame.getdata('mypos'))
+
+
+    action = 'u'
     returnframe = DataFrame('Return')
     returnframe.add('move',action)
     return returnframe
     
 def reward(player,frame):
-    player.reward(frame.getdata('error'))
+    player.reward_pos(frame.getdata('error'))
     
 
 if __name__ == '__main__':
@@ -120,8 +145,8 @@ if __name__ == '__main__':
     
     court = court()
     
-    sendPlayerA, connPlayerA = Pipe()
-    sendPlayerB, connPlayerB = Pipe()
+    sendPlayerA, connPlayer0 = Pipe()
+    sendPlayerB, connPlayer1 = Pipe()
     p1 = Process(target=startPlayer, args=(sendPlayerA,0))
     p2 = Process(target=startPlayer, args=(sendPlayerB,1))
     p1.start()
@@ -143,40 +168,50 @@ if __name__ == '__main__':
     
     print('Press a Key to exit')
     while True:
-        
+
+        print('new tick!')
         court.tic()
-        if court.hitBat(0):
-            frame = DataFrame('reward')
+        if court.hitbat(0):
+            frame = DataFrame('reward_pos')
             frame.add('error',0)
-            connPlayerA.send(frame)
-        if court.hitBat(1):
-            frame = DataFrame('reward')
+            connPlayer0.send(frame)
+        if court.hitbat(1):
+            frame = DataFrame('reward_pos')
             frame.add('error',1)
-            connPlayerB.send(frame)
-            
+            connPlayer1.send(frame)
+
+        print('send data to player 0!')
         frame = DataFrame('predictNext')
         frame.add('xpos',court.sensor_X)
         frame.add('ypos',court.sensor_Y)
         frame.add('mypos',court.sensor_bat(0))
-        connPlayerA.send(frame)
-        
+        connPlayer0.send(frame)
+
+        print('send data to player 1!')
         frame = DataFrame('predictNext')
         frame.add('xpos',court.sensor_X)
         frame.add('ypos',court.sensor_Y)
         frame.add('mypos',court.sensor_bat(1))
-        connPlayerB.send(frame)
+        connPlayer1.send(frame)
 
-        time.sleep(0.3)
+
         #while True:
-        #    time.sleep(0.1)
-         #   #if connPlayerA.full() and connPlayerA.full():
-          #      frame = connPlayerA.recv() # Daten sind da...
-           #     if frame.instruction == 'Return':
-            #        court.move(frame.getdata('move'))
-             #   frame = connPlayerB.recv() # Daten sind da...
-              #  if frame.instruction == 'Return':
-               #     court.move(frame.getdata('move'))
-            
+
+        print('wait for player answers!')
+        time.sleep(0.3) # muss warten!!
+            #if not (connPlayer0.empty() or connPlayer1.empty()):
+        if connPlayer0.poll(None): # Daten sind da...
+            frame = connPlayer0.recv()
+            if frame.instruction == 'Return':
+                court.move(0,frame.getdata('move'))
+
+
+
+        if connPlayer1.poll(None): # Daten sind da...
+            frame = connPlayer1.recv()
+            if frame.instruction == 'Return':
+                court.move(1,frame.getdata('move'))
+
             
         
     
@@ -185,8 +220,8 @@ if __name__ == '__main__':
     #    x = input("Do what?: ")
     #    if x == 'EXIT'
     frame = DataFrame('EXIT')
-    connPlayerA.send(frame)
-    connPlayerB.send(frame)
+    connPlayer0.send(frame)
+    connPlayer1.send(frame)
     #        break
                 
                   
