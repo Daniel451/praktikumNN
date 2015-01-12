@@ -21,8 +21,8 @@ class MyTCPServer(socketserver.ThreadingTCPServer):
 
 class MyTCPServerHandler(socketserver.BaseRequestHandler):
     def handle(self):
-        while True:
-            try:
+
+
                 data = json.loads(self.request.recv(8*1024).decode('UTF-8').strip())
                 # process the data, i.e. print it:
                 #print(json.dumps(data, sort_keys=True,indent=4, separators=(',', ': ')))
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     
     sendPlayerA, connPlayerA = Pipe()
     sendPlayerB, connPlayerB = Pipe()
-    p1 = Process(target=startPlayer, args=(sendPlayerA,0))
+    p1 = Process(target=startPlayer, vargs=(sendPlayerA,0))
     p2 = Process(target=startPlayer, args=(sendPlayerB,1))
     p1.start()
     p2.start()
