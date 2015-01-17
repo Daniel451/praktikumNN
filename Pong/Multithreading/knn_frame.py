@@ -36,21 +36,27 @@ class mlp:
         print('hold position!')
         return 'n'
 
-    def reward_pos(self,error):
+    def reward_pos(self):
         #was good, but show error to center of bat!
         self.knn.reward(self.fakediff)
-        if self.hitratio < 1.0:
-            self.hitratio += 1.0/self.timesteps
+
+        self.hitratio += 1.0/self.timesteps
+        if self.hitratio > 1.0:
+            self.hitratio = 0.0
         print('Player ' + self.name + ': got positive reward! Hitratio is now: ' + str(self.hitratio))
+        self.newfakediff()
 
     def reward_neg(self):
-        if self.hitratio > 1.0:
-            self.hitratio -= 1.0/self.timesteps
+        self.hitratio -= 1.0/self.timesteps
+        if self.hitratio < 0.0:
+            self.hitratio = 0.0
         print('Player ' + self.name + ': got negative reward! Hitratio is now: ' + str(self.hitratio))
+        self.newfakediff()
 
     def newfakediff(self):
         self.fakediff = numpy.random.normal(0.0,1.0/3.0)*(1.0-self.hitratio)
         # Gauss Normalverteilung von etwa -1 - +1 bei  self.hitratio = 0
+        print('Player ' + self.name + ': fakediff is now: ' + str(self.fakediff))
 
 
 

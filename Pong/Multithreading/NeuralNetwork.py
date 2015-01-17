@@ -25,7 +25,7 @@ class NeuralNetwork:
         Should be at least two values  
         """
 
-        self.tmax = tmax  #del lst[-1]
+        self.tmax = tmax + 5  #del lst[-1]
 
         self.W = []  # Erstelle das Array der Gewichte zwischen den Neuronen.
         self.B = []  # Erstelle das Array der Biase für alle Neuronen.
@@ -87,11 +87,9 @@ class NeuralNetwork:
 
 
         self.Activation = []  # init des Activation Zwischenspeichers: Summe(Gewichte, Output vom vorherigen Layer) + Bias
-        self.Activation.append(
-            a)  # Das erste Layer braucht nicht berechnet zu werden, es sind gleichzeitig die Activation wie auch Input Daten des NN.
+        self.Activation.append(a)  # Das erste Layer braucht nicht berechnet zu werden, es sind gleichzeitig die Activation wie auch Input Daten des NN.
         self.Output = []  # init des Activation Zwischenspeichers: Übertragungsfunktion( Activation )
-        self.Output.append(
-            a)  # Die Inputlayer haben keine Übertragungsfunktion sie sind nur "dumme Werteträger", Input Neuronen eben!
+        self.Output.append(a)  # Die Inputlayer haben keine Übertragungsfunktion sie sind nur "dumme Werteträger", Input Neuronen eben!
 
         self.RDtemp = []
 
@@ -101,17 +99,20 @@ class NeuralNetwork:
         for l in range(0, len(self.W)):  #für alle Layer...
             #Wie in guess(self, s_in), werden auch hier identisch (!!) die Activation und Output Daten mittels Feedforward-Algo berechnet. Der Unterschied ist jedoch, dass wir uns hier nun die Daten für den folgenden Backpropagation-Algo merken müssen!
 
+            #todo Normieren der acticvation
+
+
 
             recurrentData = n.atleast_2d(n.zeros(len(self.B[l])))
 
             for r in range(0, self.tmax):
                 #print(r, self.RD[r][l] , self.RWI[r][l], recurrentData)
-                recurrentData += self.RD[r][l] * self.RWI[r][
-                    l]  # multipliziere die Recurenten Daten mit den entsprechenden Gewichten und addiere sie dann miteinander...
+                recurrentData += self.RD[r][l] * self.RWI[r][l]  # multipliziere die Recurenten Daten mit den entsprechenden Gewichten und addiere sie dann miteinander...
 
-            int_a = n.atleast_2d(a.dot(self.W[l].T)) + self.B[l].T + recurrentData
+            int_a = (n.atleast_2d(a.dot(self.W[l].T)) + self.B[l].T + recurrentData) / len(self.B[l])
 
             self.Activation.append(int_a)  #merken des Activation-Wertes!
+
             if len(self.W) - 1 == l:  # siehe oben...
                 a = int_a
             else:

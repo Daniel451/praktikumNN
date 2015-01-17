@@ -99,7 +99,10 @@ def startplayer(conn,playername, loadconfig = None):
                 conn.send(predictnext(player,frame))
             elif frame.instruction == 'reward_pos': #
                 print('Player ' + str(playername) + ' Call: ' + frame.instruction )
-                reward(player,frame)
+                player.reward_pos()
+            elif frame.instruction == 'reward_neg': #
+                print('Player ' + str(playername) + ' Call: ' + frame.instruction )
+                player.reward_neg()
             elif frame.instruction == 'saveConfig': #
                 path = 'save/config_' + str(playername) + '_' + time.strftime("%Y-%m-%d_%H:%M:%S", time.time()) + '.pcf'
                 print('Player ' + str(playername) + ' Call: '+ frame.instruction + ' in ' + path )
@@ -117,16 +120,11 @@ def predictnext(player,frame):
     #action = player.predict(frame.getdata('xpos'), frame.getdata('ypos'), frame.getdata('mypos'))
 
 
-    action = 'u'
+    action = 'u' #todo!!
     returnframe = DataFrame('Return')
     returnframe.add('move',action)
     return returnframe
-    
-def reward(player,frame):
-    if frame.getdata('') == 'positiv':
-        player.reward_pos(frame.getdata('error'))
-    else:
-        player.reward_neg(frame.getdata('error'))
+
 
 
 
@@ -166,12 +164,16 @@ if __name__ == '__main__':
         court.tic()
         if court.hitbat(0):
             frame = DataFrame('reward_pos')
+            frame.add('feedback','positiv')
             frame.add('error',0)
             connPlayer0.send(frame)
         if court.hitbat(1):
             frame = DataFrame('reward_pos')
+            frame.add('feedback','positiv')
             frame.add('error',1)
             connPlayer1.send(frame)
+
+        #todo send negativ reward
 
         print('send data to player 0!')
         frame = DataFrame('predictNext')
