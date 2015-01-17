@@ -1,6 +1,7 @@
 import logging
 from NeuralNetwork import NeuralNetwork
 import numpy
+import bcolors
 
 class knnframe:
     def __init__(self, loadConfig, name):
@@ -25,6 +26,7 @@ class knnframe:
 
         pred = self.knn.predict([[xpos,ypos]])
 
+        print( bcolors.WARNING + pred[0][0] + bcolors.ENDC)
 
         diff = pred[0][0] + self.fakediff - mypos
 
