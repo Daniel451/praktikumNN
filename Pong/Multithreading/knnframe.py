@@ -1,11 +1,27 @@
 import logging
 from NeuralNetwork import NeuralNetwork
 import numpy
-from bcolors import bcolors
+import os.path
+import bcolors
 
 class knnframe:
     def __init__(self, loadConfig, name):
-        logging.basicConfig(filename='log/player_' + str(name) + '.log', level=logging.DEBUG)
+        """
+        :param loadConfig:
+        :param name:
+        :return:
+        """
+
+        # Logging
+        path = 'log_player_' + str(name) + '.log' # logging file path
+
+        # check if logfile exists
+        if not os.path.exists(path):
+            file = open(path, "w+")
+            file.close()
+
+        # logging stuff
+        logging.basicConfig(filename=path, level=logging.DEBUG)
 
         self.name = str(name)
         self.timesteps = 100.0

@@ -5,11 +5,11 @@ import logging
 
 import sys
 import threading
+import os.path
 
 import json
 import socketserver
 import time
-
 
 
 from data_frame import DataFrame
@@ -135,8 +135,16 @@ def predictnext(player,frame):
 
 
 if __name__ == '__main__':
-    
-    logging.basicConfig(filename='log/pong.log', level=logging.DEBUG)
+
+    # logging path
+    path = "log_pong.log"
+
+    # check if logfile exists
+    if not os.path.exists(path):
+        file = open(path, "w+")
+        file.close()
+
+    logging.basicConfig(filename=path, level=logging.DEBUG)
     logging.info('Started')
     
     court = court()
@@ -165,7 +173,7 @@ if __name__ == '__main__':
     while True:
 
         print('new tick!')
-        court.tic()
+        court.tick()
         rewardframepos = DataFrame('reward_pos')
         rewardframeneg = DataFrame('reward_neg')
         if court.hitbat(0):
