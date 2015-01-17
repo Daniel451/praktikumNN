@@ -2,7 +2,7 @@ import logging
 from NeuralNetwork import NeuralNetwork
 import numpy
 import os.path
-import bcolors
+from bcolors import bcolors
 
 class knnframe:
     def __init__(self, loadConfig, name):
@@ -48,12 +48,12 @@ class knnframe:
 
         print( bcolors.HEADER + 'Player ' + self.name + ' diff: ' + str(diff) + bcolors.ENDC)
 
-        if diff > 0.03:
+        if diff > 0.1:
             print('Player ' + self.name +': up!')
-            return 'u'
-        elif diff < -0.03:
-            print('Player ' + self.name +': down!')
             return 'd'
+        elif diff < -0.1:
+            print('Player ' + self.name +': down!')
+            return 'u'
         print('hold position!')
         return 'n'
 

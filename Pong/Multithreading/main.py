@@ -1,6 +1,7 @@
 from multiprocessing import Process, Pipe
 from knnframe import knnframe
 from court import court
+from bcolors import bcolors
 import logging
 
 import sys
@@ -91,6 +92,7 @@ def startplayer(conn,playername, loadconfig = None):
             
             if frame.instruction == 'EXIT': # Beenden.
                 print('Player ' + str(playername) + ' Call: ' +  frame.instruction )
+                exit()
                 break
 
             elif frame.instruction == 'predictNext': #
@@ -120,11 +122,10 @@ def saveconfig(player,frame):
 def predictnext(player,frame):
 
 
-    #actiontest = player.predict(frame.getdata('xpos'), frame.getdata('ypos'), frame.getdata('mypos'))
-    actiontest = player.predict(0.1, 0.2, 0.3)
-    print(actiontest)
+    action = player.predict(frame.getdata('xpos'), frame.getdata('ypos'), frame.getdata('mypos'))
+    #action = player.predict(0.1, 0.2, 0.3)
+    print(action)
 
-    action = 'u' #todo!!
     returnframe = DataFrame('Return')
     returnframe.add('move',action)
 
@@ -192,20 +193,22 @@ if __name__ == '__main__':
 
 
         prednextreqPlayer0 = DataFrame('predictNext')
-        prednextreqPlayer0.add('xpos',court.sensor_X())
-        prednextreqPlayer0.add('ypos',court.sensor_Y())
-        prednextreqPlayer0.add('mypos',court.sensor_bat(0))
+        prednextreqPlayer0.add('xpos',court.scaled_sensor_x())
+        prednextreqPlayer0.add('ypos',court.scaled_sensor_y())
+        prednextreqPlayer0.add('mypos',court.scaled_sensor_bat(0))
         connPlayer0.send(prednextreqPlayer0)
         print('send data to player 0: ' + str(prednextreqPlayer0))
-        print('Player0 Bat: ' + str(court.sensor_bat(0)))
+        print('Player0 Bat: ' + str(court.scaled_sensor_bat(0)))
+        print('Player0 X: ' + str(court.scaled_sensor_x()))
+        print('Player0 Y: ' + str(court.scaled_sensor_y()))
 
         prednextreqPlayer1 = DataFrame('predictNext')
-        prednextreqPlayer1.add('xpos',court.sensor_X())
-        prednextreqPlayer1.add('ypos',court.sensor_Y())
-        prednextreqPlayer1.add('mypos',court.sensor_bat(1))
+        prednextreqPlayer1.add('xpos',court.scaled_sensor_x())
+        prednextreqPlayer1.add('ypos',court.scaled_sensor_y())
+        prednextreqPlayer1.add('mypos',court.scaled_sensor_bat(1))
         connPlayer1.send(prednextreqPlayer1)
         print('send data to player 1: ' + str(prednextreqPlayer1))
-        print('Player1 Bat: ' + str(court.sensor_bat(1)))
+        print('Player1 Bat: ' + str(court.scaled_sensor_bat(1)))
 
 
         #while True:

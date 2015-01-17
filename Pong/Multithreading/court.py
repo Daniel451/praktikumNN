@@ -37,7 +37,8 @@ class court:
         self.dirVec = None
         self._initVectors()
         self.speed = self.initspeed
-        self.bathit = [False, False]
+        self._bathit = [False, False]
+        self._out = [False, False]
         self.Points = [0, 0]
         self.bat = [self.y_max/2.0 , self.y_max/2.0]
         
@@ -84,8 +85,11 @@ class court:
 
 
     def hitbat(self, player):
-        return self.bathit[player]
+        return self._bathit[player]
 
+    def out(self, player):
+        return True #Funktion soll information geben über keinen Treffer, dh. Ball ist über der eigenen Linie
+        return self._out[player]
 
     def getpoints(self, player):
         """
@@ -111,7 +115,7 @@ class court:
         # Hat der Schläger den Ball getroffen?
         # bathit[0] -> linker Schläger
         # bathit[1] -> rechter Schläger
-        self.bathit = [False, False]
+        self._bathit = [False, False]
 
         ###################
         ### Anweisungen ###
@@ -152,14 +156,14 @@ class court:
             # Wenn der Ball über der unteren Kante und unter der oberen Kante des Schlägers
             # auftrifft, so würde der Schläger den Ball treffen
             if (poi[0] > self.bat[0] - self.batsize) and (poi[0] < self.bat[0] + self.batsize):
-                self.bathit[0] = True # Schläger hat getroffen
+                self._bathit[0] = True # Schläger hat getroffen
             else:
                 self.Points[1] +=1 # Punkte von Spieler 1 (rechts) erhöhen
 
             # Ball abprallen lassen, falls:
             # -> Das infinite true ist, also das Spiel endlos dauern soll ohne Zurücksetzen der Ballposition
             # -> Der Schläger den Ball getroffen hat
-            if self.infinite or self.bathit[0]:
+            if self.infinite or self._bathit[0]:
                 self.posVec[0] = self.posVec[0] * -1.0
                 self.dirVec[0] = self.dirVec[0] * -1.0
 
@@ -182,14 +186,14 @@ class court:
             # Wenn der Ball über der unteren Kante und unter der oberen Kante des Schlägers
             # auftrifft, so würde der Schläger den Ball treffen
             if poi[0] > self.bat[1] - self.batsize and poi[0] < self.bat[1] + self.batsize:
-                self.bathit[1] = True
+                self._bathit[1] = True
             else:
                 self.Points[0] +=1 # Punkte von Spieler 0 (links) erhöhen
 
             # Ball abprallen lassen, falls:
             # -> Das infinite true ist, also das Spiel endlos dauern soll ohne Zurücksetzen der Ballposition
             # -> Der Schläger den Ball getroffen hat
-            if self.infinite or self.bathit[1]:
+            if self.infinite or self._bathit[1]:
                 # 2 Spielfeldlängen - aktuellem X-Betrag ergibt neue X-Position
                 self.posVec[0] = 2 * self.x_max - self.posVec[0]
                 self.dirVec[0] = self.dirVec[0] * -1.0
