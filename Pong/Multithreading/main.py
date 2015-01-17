@@ -189,6 +189,7 @@ if __name__ == '__main__':
         prednextreqPlayer0.add('mypos',court.sensor_bat(0))
         connPlayer0.send(prednextreqPlayer0)
         print('send data to player 0: ' + str(prednextreqPlayer0))
+        print('Player0 Bat: ' + str(court.sensor_bat(0)))
 
         prednextreqPlayer1 = DataFrame('predictNext')
         prednextreqPlayer1.add('xpos',court.sensor_X())
@@ -196,6 +197,7 @@ if __name__ == '__main__':
         prednextreqPlayer1.add('mypos',court.sensor_bat(1))
         connPlayer1.send(prednextreqPlayer1)
         print('send data to player 1: ' + str(prednextreqPlayer1))
+        print('Player1 Bat: ' + str(court.sensor_bat(1)))
 
 
         #while True:

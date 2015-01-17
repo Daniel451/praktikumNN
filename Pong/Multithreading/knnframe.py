@@ -1,7 +1,7 @@
 import logging
 from NeuralNetwork import NeuralNetwork
 import numpy
-import bcolors
+from bcolors import bcolors
 
 class knnframe:
     def __init__(self, loadConfig, name):
@@ -26,14 +26,16 @@ class knnframe:
 
         pred = self.knn.predict([[xpos,ypos]])
 
-        print( bcolors.WARNING + pred[0][0] + bcolors.ENDC)
+        print( bcolors.WARNING + 'Player ' + self.name + ' predicted: ' + str(pred[0][0]) + bcolors.ENDC)
 
         diff = pred[0][0] + self.fakediff - mypos
 
-        if diff > 0.1:
+        print( bcolors.HEADER + 'Player ' + self.name + ' diff: ' + str(diff) + bcolors.ENDC)
+
+        if diff > 0.03:
             print('Player ' + self.name +': up!')
             return 'u'
-        elif diff < -0.1:
+        elif diff < -0.03:
             print('Player ' + self.name +': down!')
             return 'd'
         print('hold position!')
