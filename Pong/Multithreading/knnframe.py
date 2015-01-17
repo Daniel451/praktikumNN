@@ -2,7 +2,7 @@ import logging
 from NeuralNetwork import NeuralNetwork
 import numpy
 
-class mlp:
+class knnframe:
     def __init__(self, loadConfig, name):
         logging.basicConfig(filename='log/player_' + str(name) + '.log', level=logging.DEBUG)
 
@@ -25,7 +25,8 @@ class mlp:
 
         pred = self.knn.predict([[xpos,ypos]])
 
-        diff = pred[0] + self.fakediff - mypos
+
+        diff = pred[0][0] + self.fakediff - mypos
 
         if diff > 0.1:
             print('Player ' + self.name +': up!')
@@ -37,19 +38,24 @@ class mlp:
         return 'n'
 
     def reward_pos(self):
-        #was good, but show error to center of bat!
-        self.knn.reward(self.fakediff)
 
+        #self.knn.reward(self.fakediff)
+
+        # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio += 1.0/self.timesteps
         if self.hitratio > 1.0:
             self.hitratio = 0.0
+
         print('Player ' + self.name + ': got positive reward! Hitratio is now: ' + str(self.hitratio))
         self.newfakediff()
 
     def reward_neg(self):
+
+        # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio -= 1.0/self.timesteps
         if self.hitratio < 0.0:
             self.hitratio = 0.0
+
         print('Player ' + self.name + ': got negative reward! Hitratio is now: ' + str(self.hitratio))
         self.newfakediff()
 

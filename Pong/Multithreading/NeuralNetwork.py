@@ -123,7 +123,7 @@ class NeuralNetwork:
 
         self.RD.insert(0, self.RDtemp)
         del self.RD[-1]  # letzen Datensatz löschen, da dann self.tmax+1 lang
-
+        return a
 
     def reward(self, diff, epsilon = 0.2):
 
@@ -134,21 +134,21 @@ class NeuralNetwork:
         # Das NN ist im untrainierten Zustand (Zufallszahlen in den Gewichten) sehr warscheinlich falsch, es gibt einen Error-Wert: delta:
         delta = n.atleast_2d(diff)  #Erzeugt delta zum ersten Mal: SollAusgabe - IstAusgabe mittels der Trainingsdaten.
 
-        # TODO Gleich ist mein Akku leer... hier weitermachen!
-        # Neue Daten anfügen!
 
         for l in range(len(self.W) - 1, -1, -1):  #für alle Layer, diesmal jedoch von hinten nach von!
             if l > 0:  #solange wir uns über dem Input-Layer befinden, berechnen wir schon mal den delta-Wert für die nächste Iteration, den Delta-Wert dieses Layers wird jedoch noch für das Anpassen der Gewichte benötigt
-                # TODO was muss hier hin? Activation oder Output? -> müsste Activation sein....
+                # DontCareTODO was muss hier hin? Activation oder Output? -> müsste Activation sein....
                 delta_next = _tanh_deriv(self.Activation[l]) * (self.W[l] * n.transpose(delta)).sum(axis=0)
 
-            # TODO Evtl. könnte aus der _tanh_deriv Funktion die tanh(x) Funktion entfernt werden, wenn ich unten nun statt Output[] Activation[] nutzen würde. Richtig? Falsch?!
+            # DontCareTODO Evtl. könnte aus der _tanh_deriv Funktion die tanh(x) Funktion entfernt werden, wenn ich unten nun statt Output[] Activation[] nutzen würde. Richtig? Falsch?!
 
-            # TODO was muss hier hin? Activation oder Output? -> müsste Output sein....
+            # DontCareTODO was muss hier hin? Activation oder Output? -> müsste Output sein....
+
+
             self.W[l] += epsilon * delta.T * self.Output[l]  #Anpassen der Gewichte
             self.B[l] += epsilon * delta.T  # Anpassen des Bias
 
-            for r in range(0, self.tmax):
+            for r in range(0, self.tmax): # Anpassen der rekurenten Gewichte
                 self.RWI[r][l] += epsilon * delta * self.RD[r][l] * 0.001
 
             delta = delta_next
@@ -156,18 +156,17 @@ class NeuralNetwork:
             # wie oben schon kurz angesprochen, hier wird nun delta_next zu delta, damit der passende Wert für das nächste Layer zur Verfügung steht.
             # Da delta von der Gewichtsanpassung und die Gewichte für das delta_next gebraucht wird, muss es so auseinander gezogen werden.
 
-
-
-
     def save(self, file):  #untested: sichere Gewichte und Bias
-        n.savez(file + '.npz', W=self.W, B=self.B)
+        n.savez(file + '.npz', W=self.W, B=self.B, R=self.RWI)
 
     def load(self, file):  #untested: lade Gewichte und Bias
+        #TODO Schön waere eine Ueberpruefung ob konsistent zu config!
         data = n.load(file + '.npz')
         self.W = data['W']
         self.B = data['B']
+        self.RWI = data['R']
 
-    def debug(self):  #untested: lade Gewichte und Bias
+    def debug(self):
         print('Gewichte:')
         print(self.W)
         print('=======================================')

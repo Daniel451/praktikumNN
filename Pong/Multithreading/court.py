@@ -11,7 +11,7 @@ class court:
         self.initspeed = 0.2
         self.speedstep = 0.05
         self.outputNoiseMax = 0.0
-        self.infinite = False
+        self.infinite = True
         self.batsize = 1.0 # half of length!
         self.batstep = 0.2 
         
