@@ -2,7 +2,7 @@ from tkinter import *
 from multiprocessing import Process, Pipe
 import socket
 import json
-from DataFrame import DataFrame
+from data_frame import DataFrame
 import time
 
 def netw_communication(conn):

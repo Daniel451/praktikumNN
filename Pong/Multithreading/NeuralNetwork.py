@@ -53,9 +53,8 @@ class NeuralNetwork:
         self.Output = []
         self.RDtemp = []
 
-        #TODO:
-        #self.RWE.append(n.random.random((layer[-1],layer[1]))-0.5) #Erstelle die Rückkoplung von den Daten vom Ausgang zum Eingang. Sie sind dann Paralell zu den Eingangsneuronen
-
+        self.hitratio = 0.5
+        self.impact = 100.0 # impact of moving average
 
 
 

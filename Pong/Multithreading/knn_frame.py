@@ -1,16 +1,19 @@
 import logging
 from NeuralNetwork import NeuralNetwork
-import random
+import numpy
 
 class mlp:
     def __init__(self, loadConfig, name):
         logging.basicConfig(filename='log/player_' + str(name) + '.log', level=logging.DEBUG)
+
+        self.name = str(name)
         self.timesteps = 100.0
-        self.averageval = 0.0
+        self.hitratio = 0.5
         self.fakediff = 0.0
+        self.newfakediff()
         self.knn = NeuralNetwork([2,4,1],2)
 
-    def SaveConfig(self,filename):
+    def saveconfig(self,filename):
         #no Return
         self.knn.save(filename)
         print('Configuration saved: ' + filename)
@@ -20,38 +23,34 @@ class mlp:
                       #  down:    d
                       #  nothing: n
 
-
-        print([xpos,ypos])
-
         pred = self.knn.predict([[xpos,ypos]])
 
         diff = pred[0] + self.fakediff - mypos
 
         if diff > 0.1:
+            print('Player ' + self.name +': up!')
             return 'u'
-            print('Up!')
         elif diff < -0.1:
+            print('Player ' + self.name +': down!')
             return 'd'
-            print('Down!')
-        print('Hold position!')
+        print('hold position!')
         return 'n'
 
     def reward_pos(self,error):
         #was good, but show error to center of bat!
-        self.knn.reward_pos(self.fakediff)
-        self.average('up')
-        print('Got positive reward!')
+        self.knn.reward(self.fakediff)
+        if self.hitratio < 1.0:
+            self.hitratio += 1.0/self.timesteps
+        print('Player ' + self.name + ': got positive reward! Hitratio is now: ' + str(self.hitratio))
 
     def reward_neg(self):
-        self.average('down')
-        print('Got negative reward!')
+        if self.hitratio > 1.0:
+            self.hitratio -= 1.0/self.timesteps
+        print('Player ' + self.name + ': got negative reward! Hitratio is now: ' + str(self.hitratio))
 
     def newfakediff(self):
-        self.fakediff = (random.random() - 0.5)  * self.averageval
+        self.fakediff = numpy.random.normal(0.0,1.0/3.0)*(1.0-self.hitratio)
+        # Gauss Normalverteilung von etwa -1 - +1 bei  self.hitratio = 0
 
 
-    def average(self,direction):
-        if direction == 'more':
-            self.averageval += 1.0/self.timesteps
-        else:
-            self.averageval -= 1.0/self.timesteps
+

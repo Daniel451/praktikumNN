@@ -1,5 +1,5 @@
 from multiprocessing import Process, Pipe
-from rec_mlp import mlp
+from knn_frame import mlp
 from court import court
 import logging
 
@@ -9,11 +9,12 @@ import threading
 import json
 import socketserver
 import time
+import numpy
 
 from pprint import pprint
 
 
-from DataFrame import DataFrame 
+from data_frame import DataFrame
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
@@ -80,10 +81,10 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
 
 
 
-def startPlayer(conn,playername, loadConfig = None):
-    player = mlp(loadConfig,playername) #Erstelle ein Neuronal Netzwerk als Spieler evtl lade eine Konfigration... Wenn nicht, erstelle eine Neue
+def startplayer(conn,playername, loadconfig = None):
+    player = mlp(loadconfig,playername) #Erstelle ein Neuronal Netzwerk als Spieler evtl lade eine Konfigration... Wenn nicht, erstelle eine Neue
     # init ist hier nun passier!
-    
+
     
     while True:
         print('Player ' + str(playername) + ' waiting for new instruction...' )
@@ -95,35 +96,22 @@ def startPlayer(conn,playername, loadConfig = None):
                 break
             elif frame.instruction == 'predictNext': #
                 print('Player ' + str(playername) + ' Call: ' + frame.instruction )
-                conn.send(predictNext(player,frame))
+                conn.send(predictnext(player,frame))
             elif frame.instruction == 'reward_pos': #
                 print('Player ' + str(playername) + ' Call: ' + frame.instruction )
                 reward(player,frame)
             elif frame.instruction == 'saveConfig': #
                 path = 'save/config_' + str(playername) + '_' + time.strftime("%Y-%m-%d_%H:%M:%S", time.time()) + '.pcf'
                 print('Player ' + str(playername) + ' Call: '+ frame.instruction + ' in ' + path )
-                player.SaveConfig(path)
+                player.saveconfig(path)
             else:
-                print('unknown instruction: ' + frame.instruction)
+                print('Player ' + str(playername) + ' unknown instruction: ' + frame.instruction)
     conn.close()
 
-def saveConfig(player,frame):
-    player.SaveConfig(frame.getdata('filename'))
+def saveconfig(player,frame):
+    player.saveconfig(frame.getdata('filename'))
     
-def predictNext(player,frame):
-
-
-    print('frame: ' + frame.getdata('xpos'))
-
-    xpos = float(frame.getdata('xpos'))
-    ypos = float(frame.getdata('ypos'))
-    mypos = float(frame.getdata('mypos'))
-
-
-
-    print ('xpos: ' + str(xpos))
-    print ('ypos: ' + str(ypos))
-    print ('mypos: ' + str(mypos))
+def predictnext(player,frame):
 
 
     #action = player.predict(frame.getdata('xpos'), frame.getdata('ypos'), frame.getdata('mypos'))
@@ -135,8 +123,13 @@ def predictNext(player,frame):
     return returnframe
     
 def reward(player,frame):
-    player.reward_pos(frame.getdata('error'))
-    
+    if frame.getdata('') == 'positiv':
+        player.reward_pos(frame.getdata('error'))
+    else:
+        player.reward_neg(frame.getdata('error'))
+
+
+
 
 if __name__ == '__main__':
     
@@ -147,8 +140,8 @@ if __name__ == '__main__':
     
     sendPlayerA, connPlayer0 = Pipe()
     sendPlayerB, connPlayer1 = Pipe()
-    p1 = Process(target=startPlayer, args=(sendPlayerA,0))
-    p2 = Process(target=startPlayer, args=(sendPlayerB,1))
+    p1 = Process(target=startplayer, args=(sendPlayerA,0))
+    p2 = Process(target=startplayer, args=(sendPlayerB,1))
     p1.start()
     p2.start()
     
@@ -182,15 +175,15 @@ if __name__ == '__main__':
 
         print('send data to player 0!')
         frame = DataFrame('predictNext')
-        frame.add('xpos',court.sensor_X)
-        frame.add('ypos',court.sensor_Y)
+        frame.add('xpos',court.sensor_X())
+        frame.add('ypos',court.sensor_Y())
         frame.add('mypos',court.sensor_bat(0))
         connPlayer0.send(frame)
 
         print('send data to player 1!')
         frame = DataFrame('predictNext')
-        frame.add('xpos',court.sensor_X)
-        frame.add('ypos',court.sensor_Y)
+        frame.add('xpos',court.sensor_X())
+        frame.add('ypos',court.sensor_Y())
         frame.add('mypos',court.sensor_bat(1))
         connPlayer1.send(frame)
 

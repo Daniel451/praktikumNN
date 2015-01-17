@@ -8,3 +8,5 @@ class DataFrame:
         return self.data[identifier] 
     def instruction(self):
         return self.instruction
+    def debug(self):
+        print (self.data)
