@@ -1,5 +1,5 @@
 from multiprocessing import Process, Pipe
-from knn_frame import mlp
+from knnframe import knnframe
 from court import court
 import logging
 
@@ -80,7 +80,7 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
 
 
 def startplayer(conn,playername, loadconfig = None):
-    player = mlp(loadconfig,playername) #Erstelle ein Neuronal Netzwerk als Spieler evtl lade eine Konfigration... Wenn nicht, erstelle eine Neue
+    player = knnframe(loadconfig,playername) #Erstelle ein Neuronal Netzwerk als Spieler evtl lade eine Konfigration... Wenn nicht, erstelle eine Neue
     # init ist hier nun passier!
 
     
@@ -92,16 +92,24 @@ def startplayer(conn,playername, loadconfig = None):
             if frame.instruction == 'EXIT': # Beenden.
                 print('Player ' + str(playername) + ' Call: ' +  frame.instruction )
                 break
+
             elif frame.instruction == 'predictNext': #
                 print('Player ' + str(playername) + ' Call: ' + frame.instruction )
                 conn.send(predictnext(player,frame))
+
             elif frame.instruction == 'reward_pos': #
                 print('Player ' + str(playername) + ' Call: ' + frame.instruction )
-                reward(player,frame)
+                player.reward_pos()
+
+            elif frame.instruction == 'reward_neg': #
+                print('Player ' + str(playername) + ' Call: ' + frame.instruction )
+                player.reward_neg()
+
             elif frame.instruction == 'saveConfig': #
                 path = 'save/config_' + str(playername) + '_' + time.strftime("%Y-%m-%d_%H:%M:%S", time.time()) + '.pcf'
                 print('Player ' + str(playername) + ' Call: '+ frame.instruction + ' in ' + path )
                 player.saveconfig(path)
+
             else:
                 print('Player ' + str(playername) + ' unknown instruction: ' + frame.instruction)
     conn.close()
@@ -112,19 +120,16 @@ def saveconfig(player,frame):
 def predictnext(player,frame):
 
 
-    #action = player.predict(frame.getdata('xpos'), frame.getdata('ypos'), frame.getdata('mypos'))
+    #actiontest = player.predict(frame.getdata('xpos'), frame.getdata('ypos'), frame.getdata('mypos'))
+    actiontest = player.predict(0.1, 0.2, 0.3)
+    print(actiontest)
 
-
-    action = 'u'
+    action = 'u' #todo!!
     returnframe = DataFrame('Return')
     returnframe.add('move',action)
+
     return returnframe
-    
-def reward(player,frame):
-    if frame.getdata('') == 'positiv':
-        player.reward_pos(frame.getdata('error'))
-    else:
-        player.reward_neg(frame.getdata('error'))
+
 
 
 
@@ -164,34 +169,41 @@ if __name__ == '__main__':
     server_thread.daemon = True
     server_thread.start()
     print ("Server loop running in thread: ", server_thread.name)
-    
-    print('Press a Key to exit')
+
     while True:
 
         print('new tick!')
         court.tick()
+        rewardframepos = DataFrame('reward_pos')
+        rewardframeneg = DataFrame('reward_neg')
         if court.hitbat(0):
-            frame = DataFrame('reward_pos')
-            frame.add('error',0)
-            connPlayer0.send(frame)
+            connPlayer0.send(rewardframepos)
         if court.hitbat(1):
-            frame = DataFrame('reward_pos')
-            frame.add('error',1)
-            connPlayer1.send(frame)
+            connPlayer1.send(rewardframepos)
 
-        print('send data to player 0!')
-        frame = DataFrame('predictNext')
-        frame.add('xpos',court.sensor_X())
-        frame.add('ypos',court.sensor_Y())
-        frame.add('mypos',court.sensor_bat(0))
-        connPlayer0.send(frame)
 
-        print('send data to player 1!')
-        frame = DataFrame('predictNext')
-        frame.add('xpos',court.sensor_X())
-        frame.add('ypos',court.sensor_Y())
-        frame.add('mypos',court.sensor_bat(1))
-        connPlayer1.send(frame)
+        #TODO enable this:
+        #if court.out(0):
+        #    connPlayer0.send(rewardframeneg)
+        #if court.out(1):
+        #    connPlayer1.send(rewardframeneg)
+
+        #todo send negativ reward
+
+
+        prednextreqPlayer0 = DataFrame('predictNext')
+        prednextreqPlayer0.add('xpos',court.sensor_X())
+        prednextreqPlayer0.add('ypos',court.sensor_Y())
+        prednextreqPlayer0.add('mypos',court.sensor_bat(0))
+        connPlayer0.send(prednextreqPlayer0)
+        print('send data to player 0: ' + str(prednextreqPlayer0))
+
+        prednextreqPlayer1 = DataFrame('predictNext')
+        prednextreqPlayer1.add('xpos',court.sensor_X())
+        prednextreqPlayer1.add('ypos',court.sensor_Y())
+        prednextreqPlayer1.add('mypos',court.sensor_bat(1))
+        connPlayer1.send(prednextreqPlayer1)
+        print('send data to player 1: ' + str(prednextreqPlayer1))
 
 
         #while True:
