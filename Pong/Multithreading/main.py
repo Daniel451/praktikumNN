@@ -62,16 +62,14 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
                                                             'dirvec':court.v_getDirVec().tolist(), # Richtungsvector
                                                             'bat':court.v_getbat(),
                                                             'points':court.v_getPoint(),
-                                                            'sensorP1_bat':court.sensor_bat(0),   # position wie sie das NN sieht!
-                                                            'sensorP2_bat':court.sensor_bat(1),
-                                                            'sensor_posX':court.sensor_X(),   # position wie sie das NN sieht!
-                                                            'sensor_posY':court.sensor_Y(),
+                                                            'sensorP1_bat':court.scaled_sensor_bat(0),   # position wie sie das NN sieht!
+                                                            'sensorP2_bat':court.scaled_sensor_bat(1),
+                                                            'sensor_posX':court.scaled_sensor_x(),   # position wie sie das NN sieht!
+                                                            'sensor_posY':court.scaled_sensor_y(),
                                                         }), 'UTF-8'))
                 
                 else:
                     self.request.sendall(bytes(json.dumps({'return':'not ok'}), 'UTF-8'))
-                    #print('send information: ' + 'NOT OK!')
-                #print('send information: ' + instruction)
             except Exception as e:
                 print("No instruction available: ", e)
                 return
@@ -205,7 +203,7 @@ if __name__ == '__main__':
         #while True:
 
         #print('wait for player answers!')
-        time.sleep(0.3) # muss warten!!
+        #time.sleep(0.3) # muss warten!!
             #if not (connPlayer0.empty() or connPlayer1.empty()):
         if connPlayer0.poll(None): # Daten sind da...
             frame = connPlayer0.recv()

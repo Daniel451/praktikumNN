@@ -6,8 +6,15 @@ from data_frame import DataFrame
 import time
 
 def netw_communication(conn):
-    nc = NetwCon() 
-    nc.connect()
+    nc = NetwCon()
+    connected = False
+    while not connected:
+        print('Try to connect...')
+        connected = nc.connect()
+        if not connected:
+            time.sleep(1)
+    print('connected, lets go...')
+
     
     
     
@@ -38,10 +45,13 @@ class NetwCon:
 
     def connect(self, host='localhost', port=6769):
         try:
-            self.sock.connect((host, port)) 
+            self.sock.connect((host, port))
+            return True
         except socket.error as e:
             print('something\'s wrong with %s:%d. Exception type is %s' % (host, port, e))
-            sys.exit(1)
+            print('retrying in 1s')
+            #sys.exit(1)
+        return False
             
         
     def send(self, data):

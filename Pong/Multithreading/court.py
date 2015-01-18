@@ -25,17 +25,17 @@ class court:
         self.outputNoiseMax = 0.0
 
         # Soll der Ball aus dem Spielfeld fliegen können oder ewig hin und her springen?
-        self.infinite = True
+        self.infinite = False
 
 
         self.batsize = 1 # half of length! gesehen auf die y_max!
-        self.batstep = 0.2 
+        self.batstep = 0.3
         
         #### ^^^ Parameter zum ändern ^^^ ####
         
         self.posVec = None
         self.dirVec = None
-        self._initVectors()
+        self.__initvectors()
         self.speed = self.initspeed
         self._bathit = [False, False]
         self._out = [False, False]
@@ -43,7 +43,7 @@ class court:
         self.bat = [self.y_max/2.0 , self.y_max/2.0]
         
         
-    def _initVectors(self):
+    def __initvectors(self):
         rad =  (np.pi - 2.0 * self.alpha_min) * 2 * random.random() - ( (np.pi / 2.0 ) - self.alpha_min)
         self.dirVec = np.array([ np.cos(rad) , np.sin(rad) ])
         if random.random() > 0.5:
@@ -60,28 +60,28 @@ class court:
         self.Points[player] += 1
 
 
-    def sensor_X(self): #TODO: Anpassen, input value ist ja nicht 0..16!!!
+    def __sensor_x(self):
         return self.posVec[0] + (random.random() - 0.5 ) * self.outputNoiseMax
 
 
-    def sensor_Y(self): #TODO: Anpassen, input value ist ja nicht 0..16!!!
+    def __sensor_y(self):
         return self.posVec[1] + (random.random() - 0.5 ) * self.outputNoiseMax
 
 
-    def sensor_bat(self, player): #TODO: Anpassen, input value ist ja nicht 0..16!!!
+    def __sensor_bat(self, player):
         return self.bat[player] + (random.random() - 0.5 ) * self.outputNoiseMax
         
         
     def scaled_sensor_x(self):
-        return self.sensor_X() / (self.x_max/2.0) - 1.0
+        return self.__sensor_x() / (self.x_max/2.0) - 1.0
 
 
     def scaled_sensor_y(self):
-        return self.sensor_Y() / (self.y_max/2.0) - 1.0 
+        return self.__sensor_y() / (self.y_max/2.0) - 1.0
 
 
     def scaled_sensor_bat(self, player): 
-        return self.sensor_bat(player) / (self.y_max/2.0) - 1.0 
+        return self.__sensor_bat(player) / (self.y_max/2.0) - 1.0
 
 
     def hitbat(self, player):
@@ -169,6 +169,10 @@ class court:
             if self.infinite or self._bathit[0]:
                 self.posVec[0] = self.posVec[0] * -1.0
                 self.dirVec[0] = self.dirVec[0] * -1.0
+            else:
+                self.__initvectors()
+
+
 
 
     def __tickBounceRight(self):
@@ -203,7 +207,8 @@ class court:
                 # 2 Spielfeldlängen - aktuellem X-Betrag ergibt neue X-Position
                 self.posVec[0] = 2 * self.x_max - self.posVec[0]
                 self.dirVec[0] = self.dirVec[0] * -1.0
-
+            else:
+                self.__initvectors()
 
     def move(self, player, action):
         """

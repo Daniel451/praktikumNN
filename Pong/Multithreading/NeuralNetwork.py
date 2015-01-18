@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as n
-
+import time
 
 def _tanh(x):  # diese Funktion stellt die Übertragungsfunktion der Neuronen dar. Forwardpropagation
     return n.tanh(x)
@@ -30,23 +30,25 @@ class NeuralNetwork:
         self.W = []  # Erstelle das Array der Gewichte zwischen den Neuronen.
         self.B = []  # Erstelle das Array der Biase für alle Neuronen.
         self.RWI = []  # Erstelle das Array der Gewichte zu den Recurrenten Daten intern, dh. zu sich selbst.
-        self.RWE = []  # Erstelle das Array der Gewichte zu den Recurrenten Daten extern, dh. von output nach Input.
         self.RD = []  # Daten halten für Recurrente Daten.
         for i in range(1, len(layer)):
-            self.W.append(n.random.random((layer[i], layer[
-                i - 1])) - 0.5)  # erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron zufällig im Bereich von -0.5 bis 0.5.
+            self.W.append(n.random.random((layer[i], layer[i - 1])) - 0.5)  # erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron zufällig im Bereich von -0.5 bis 0.5.
             # self.RWI.append(n.random.random((layer[i],layer[i]))-0.5)
             self.B.append(
                 n.random.random((layer[i], 1)) - 0.5)  # ebenso zufällige Werte für Bias. Bereich: -0.5 bis 0.5.
 
-        for t in range(0, self.tmax):  # für t Zeitschritte...
+        for t in range(0, self.tmax*2):  # für t Zeitschritte und 2x um genügend Daten für das Lernen zu haben
             RD = []
+            for i in range(0, len(layer)):
+                RD.append(n.zeros((1, layer[i])))
+            self.RD.append(RD)
+
+        for t in range(0, self.tmax):  # für t Zeitschritte und 2x um genügend Daten für das Lernen zu haben
             RWI = []
             for i in range(1, len(layer)):
-                RD.append(n.zeros((1, layer[i])))
-                # RWI.append(n.random.random((1,layer[i]))-0.5)
-                RWI.append(n.zeros((1, layer[i])))
-            self.RD.append(RD)
+                RWI.append(n.random.random((1,layer[i]))-0.5)
+                #xTODO Zufällige Daten müssen hier rein, nicht NULLEN!
+                #RWI.append(n.zeros((1, layer[i])))
             self.RWI.append(RWI)
 
         self.Activation = []
@@ -56,11 +58,6 @@ class NeuralNetwork:
         self.hitratio = 0.5
         self.impact = 100.0 # impact of moving average
 
-
-
-        print('')
-        print('============================================================================')
-        print('')
 
     def predict(self, s_in):
         """Learning function for the MLP.
@@ -92,6 +89,7 @@ class NeuralNetwork:
         self.Output.append(a)  # Die Inputlayer haben keine Übertragungsfunktion sie sind nur "dumme Werteträger", Input Neuronen eben!
 
         self.RDtemp = []
+        self.RDtemp.append(a)
 
         # +====================================+
         # +********* Feedforward-Algo *********+
@@ -99,17 +97,13 @@ class NeuralNetwork:
         for l in range(0, len(self.W)):  #für alle Layer...
             #Wie in guess(self, s_in), werden auch hier identisch (!!) die Activation und Output Daten mittels Feedforward-Algo berechnet. Der Unterschied ist jedoch, dass wir uns hier nun die Daten für den folgenden Backpropagation-Algo merken müssen!
 
-            #todo Normieren der acticvation
 
-
-
-            recurrentData = n.atleast_2d(n.zeros(len(self.B[l])))
+            localrec = n.atleast_2d(n.zeros(len(self.B[l])))
 
             for r in range(0, self.tmax):
-                #print(r, self.RD[r][l] , self.RWI[r][l], recurrentData)
-                recurrentData += self.RD[r][l] * self.RWI[r][l]  # multipliziere die Recurenten Daten mit den entsprechenden Gewichten und addiere sie dann miteinander...
+                localrec += self.RD[r][l+1] * self.RWI[r][l] / len(self.B[l])  # multipliziere die Recurenten Daten mit den entsprechenden Gewichten und addiere sie dann miteinander...
 
-            int_a = (n.atleast_2d(a.dot(self.W[l].T)) + self.B[l].T + recurrentData) / len(self.B[l])
+            int_a = (n.atleast_2d(a.dot(self.W[l].T)) + self.B[l].T + localrec) / len(self.B[l])
 
             self.Activation.append(int_a)  #merken des Activation-Wertes!
 
@@ -122,39 +116,50 @@ class NeuralNetwork:
             self.RDtemp.append(a)
 
         self.RD.insert(0, self.RDtemp)
-        del self.RD[-1]  # letzen Datensatz löschen, da dann self.tmax+1 lang
+        del self.RD[-1]  # letzen Datensatz löschen, da dann 2*self.tmax+1 lang
         return a
 
-    def reward(self, diff, epsilon = 0.2):
+    def reward(self, diff, epsilon = 0.1):
 
         # +========================================+
         # +********* Backpropagation-Algo *********+
         # +========================================+
-        print('Angeblich lerne ich nun...')
-        # Das NN ist im untrainierten Zustand (Zufallszahlen in den Gewichten) sehr warscheinlich falsch, es gibt einen Error-Wert: delta:
-        delta = n.atleast_2d(diff)  #Erzeugt delta zum ersten Mal: SollAusgabe - IstAusgabe mittels der Trainingsdaten.
+        print('learning...')
+        starttime = time.time()
+        for i in range(0, self.tmax):
 
 
-        for l in range(len(self.W) - 1, -1, -1):  #für alle Layer, diesmal jedoch von hinten nach von!
-            if l > 0:  #solange wir uns über dem Input-Layer befinden, berechnen wir schon mal den delta-Wert für die nächste Iteration, den Delta-Wert dieses Layers wird jedoch noch für das Anpassen der Gewichte benötigt
-                # DontCareTODO was muss hier hin? Activation oder Output? -> müsste Activation sein....
-                delta_next = _tanh_deriv(self.Activation[l]) * (self.W[l] * n.transpose(delta)).sum(axis=0)
+            # Das NN ist im untrainierten Zustand (Zufallszahlen in den Gewichten) sehr warscheinlich falsch, es gibt einen Error-Wert: delta:
+            delta = n.atleast_2d(diff)  #Erzeugt delta zum ersten Mal: SollAusgabe - IstAusgabe mittels der Trainingsdaten.
 
-            # DontCareTODO Evtl. könnte aus der _tanh_deriv Funktion die tanh(x) Funktion entfernt werden, wenn ich unten nun statt Output[] Activation[] nutzen würde. Richtig? Falsch?!
+            for l in range(len(self.W) - 1, -1, -1):  #für alle Layer, diesmal jedoch von hinten nach von!
+                if l > 0:  #solange wir uns über dem Input-Layer befinden, berechnen wir schon mal den delta-Wert für die nächste Iteration, den Delta-Wert dieses Layers wird jedoch noch für das Anpassen der Gewichte benötigt
+                    # DontCareTODO was muss hier hin? Activation oder Output? -> müsste Activation sein....
+                    delta_next = _tanh_deriv(self.Activation[l]) * (self.W[l] * n.transpose(delta)).sum(axis=0)
 
-            # DontCareTODO was muss hier hin? Activation oder Output? -> müsste Output sein....
+                # DontCareTODO Evtl. könnte aus der _tanh_deriv Funktion die tanh(x) Funktion entfernt werden, wenn ich unten nun statt Output[] Activation[] nutzen würde. Richtig? Falsch?!
+
+                # DontCareTODO was muss hier hin? Activation oder Output? -> müsste Output sein....
+
+                if i == 0:
+                    self.W[l] += epsilon * delta.T * self.Output[l]  #Anpassen der Gewichte
+                else:
+                    self.W[l] += epsilon * delta.T * self.RD[i-1][l]  #Anpassen der Gewichte
 
 
-            self.W[l] += epsilon * delta.T * self.Output[l]  #Anpassen der Gewichte
-            self.B[l] += epsilon * delta.T  # Anpassen des Bias
+                self.B[l] += epsilon * delta.T  # Anpassen des Bias # wird dies nun viel zu häufig angepasst?
 
-            for r in range(0, self.tmax): # Anpassen der rekurenten Gewichte
-                self.RWI[r][l] += epsilon * delta * self.RD[r][l] * 0.001
+                for r in range(0, self.tmax): # Anpassen der rekurenten Gewichte
+                    self.RWI[r][l] += epsilon * delta * self.RD[r+i][l+1]
 
-            delta = delta_next
+                delta = delta_next
 
-            # wie oben schon kurz angesprochen, hier wird nun delta_next zu delta, damit der passende Wert für das nächste Layer zur Verfügung steht.
-            # Da delta von der Gewichtsanpassung und die Gewichte für das delta_next gebraucht wird, muss es so auseinander gezogen werden.
+                # wie oben schon kurz angesprochen, hier wird nun delta_next zu delta, damit der passende Wert für das nächste Layer zur Verfügung steht.
+                # Da delta von der Gewichtsanpassung und die Gewichte für das delta_next gebraucht wird, muss es so auseinander gezogen werden.
+        # erster Datensatz gelernt, nun um einen Zeitschritt in die Vergangenheit gehen: t = t_(x-i)
+        print('...done in ' + str(time.time()-starttime) + 'sec')
+
+
 
     def save(self, file):  #untested: sichere Gewichte und Bias
         n.savez(file + '.npz', W=self.W, B=self.B, R=self.RWI)
