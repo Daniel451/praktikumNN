@@ -25,7 +25,7 @@ class NeuralNetwork:
         Should be at least two values  
         """
 
-        self.tmax = tmax + 5  #del lst[-1]
+        self.tmax = tmax  #del lst[-1]
 
         self.W = []  # Erstelle das Array der Gewichte zwischen den Neuronen.
         self.B = []  # Erstelle das Array der Biase für alle Neuronen.
@@ -43,12 +43,10 @@ class NeuralNetwork:
                 RD.append(n.zeros((1, layer[i])))
             self.RD.append(RD)
 
-        for t in range(0, self.tmax):  # für t Zeitschritte und 2x um genügend Daten für das Lernen zu haben
+        for t in range(0, self.tmax):  # für t Zeitschritte
             RWI = []
             for i in range(1, len(layer)):
-                RWI.append(n.random.random((1,layer[i]))-0.5)
-                #xTODO Zufällige Daten müssen hier rein, nicht NULLEN!
-                #RWI.append(n.zeros((1, layer[i])))
+                RWI.append(n.zeros((1, layer[i])))
             self.RWI.append(RWI)
 
         self.Activation = []
@@ -56,7 +54,6 @@ class NeuralNetwork:
         self.RDtemp = []
 
         self.hitratio = 0.5
-        self.impact = 100.0 # impact of moving average
 
 
     def predict(self, s_in):
@@ -97,9 +94,9 @@ class NeuralNetwork:
         for l in range(0, len(self.W)):  #für alle Layer...
             #Wie in guess(self, s_in), werden auch hier identisch (!!) die Activation und Output Daten mittels Feedforward-Algo berechnet. Der Unterschied ist jedoch, dass wir uns hier nun die Daten für den folgenden Backpropagation-Algo merken müssen!
 
-
             localrec = n.atleast_2d(n.zeros(len(self.B[l])))
 
+            #TODO: Könnte man sicher auch irgendwie direkt in numpy berechnen, ohne Schleife -> schneller?
             for r in range(0, self.tmax):
                 localrec += self.RD[r][l+1] * self.RWI[r][l] / len(self.B[l])  # multipliziere die Recurenten Daten mit den entsprechenden Gewichten und addiere sie dann miteinander...
 
@@ -107,24 +104,24 @@ class NeuralNetwork:
 
             self.Activation.append(int_a)  #merken des Activation-Wertes!
 
-            if len(self.W) - 1 == l:  # siehe oben...
-                a = int_a
-            else:
-                a = _tanh(int_a)
+            #if len(self.W) - 1 == l:  # siehe oben...
+            #    a = int_a
+            #else:
+            a = _tanh(int_a)
 
             self.Output.append(a)  #merken des Output-Wertes!
-            self.RDtemp.append(a)
+            self.RDtemp.append(a.clip(-10.0,10.0)) # bin mir nicht sicher, ob das gut ist, sollte aber theoretisch eh nie auftreten...
 
         self.RD.insert(0, self.RDtemp)
         del self.RD[-1]  # letzen Datensatz löschen, da dann 2*self.tmax+1 lang
         return a
 
-    def reward(self, diff, epsilon = 0.1):
+    def reward(self, diff, epsilon = 0.02):
 
         # +========================================+
         # +********* Backpropagation-Algo *********+
         # +========================================+
-        print('learning...')
+        print('learning with last '+ str(self.tmax) +'data ...')
         starttime = time.time()
         for i in range(0, self.tmax):
 

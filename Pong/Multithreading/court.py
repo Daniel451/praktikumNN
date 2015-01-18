@@ -40,6 +40,7 @@ class court:
         self._bathit = [False, False]
         self._out = [False, False]
         self.Points = [0, 0]
+        self.poi = [None, None]
         self.bat = [self.y_max/2.0 , self.y_max/2.0]
         
         
@@ -71,7 +72,7 @@ class court:
     def __sensor_bat(self, player):
         return self.bat[player] + (random.random() - 0.5 ) * self.outputNoiseMax
         
-        
+
     def scaled_sensor_x(self):
         return self.__sensor_x() / (self.x_max/2.0) - 1.0
 
@@ -82,6 +83,9 @@ class court:
 
     def scaled_sensor_bat(self, player): 
         return self.__sensor_bat(player) / (self.y_max/2.0) - 1.0
+
+    def scaled_sensor_err(self, player):
+        return -1.0 * (self.poi[player] - self.__sensor_x() ) / self.y_max
 
 
     def hitbat(self, player):
@@ -153,8 +157,8 @@ class court:
             # point of impact
             poi = self.posVec + (factor * self.dirVec)
 
-            print('Left: POI: ' + str(poi))
-
+            self.poi[0] = poi[1]
+            print (str(self.poi))
             # Wenn der Ball über der unteren Kante und unter der oberen Kante des Schlägers
             # auftrifft, so würde der Schläger den Ball treffen
             if (poi[1] > self.bat[0] - self.batsize) and (poi[1] < self.bat[0] + self.batsize):
@@ -174,7 +178,6 @@ class court:
 
 
 
-
     def __tickBounceRight(self):
         """
         Checken, ob der Ball rechts aus dem Spielfeld fliegt oder vom Schläger getroffen wird
@@ -190,7 +193,8 @@ class court:
             # point of impact
             poi = self.posVec + (factor * self.dirVec)
 
-            print('Right: POI: ' + str(poi))
+            self.poi[1] = poi[1]
+
 
             # Wenn der Ball über der unteren Kante und unter der oberen Kante des Schlägers
             # auftrifft, so würde der Schläger den Ball treffen
@@ -210,6 +214,7 @@ class court:
             else:
                 self.__initvectors()
 
+
     def move(self, player, action):
         """
         Bewegt den Schläger eines Spielers
@@ -220,13 +225,13 @@ class court:
         """
 
         # Schläger nach oben bewegen
-        if action == 'd' :
+        if action == 'u' :
             self.bat[player] += self.batstep
             if self.bat[player] > self.y_max: # Korrektur, falls oberer Spielfeldrand erreicht wurde
                 self.bat[player] = self.y_max
 
         # Schläger nach unten bewegen
-        if action == 'u':
+        if action == 'd':
             self.bat[player] -= self.batstep
             if self.bat[player] < 0.0: # Korrektur, falls unterer Spielfeldrand erreicht wurde
                 self.bat[player] = 0.0

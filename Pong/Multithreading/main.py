@@ -103,7 +103,8 @@ def startplayer(conn,playername, loadconfig = None):
 
             elif frame.instruction == 'reward_neg': #
                 #print('Player ' + str(playername) + ' Call: ' + frame.instruction )
-                player.reward_neg()
+                err = float(frame.getdata('err'))
+                player.reward_neg(err)
 
             elif frame.instruction == 'saveConfig': #
                 path = 'save/config_' + str(playername) + '_' + time.strftime("%Y-%m-%d_%H:%M:%S", time.time()) + '.pcf'
@@ -168,7 +169,7 @@ if __name__ == '__main__':
         #print('new tick!')
         court.tick()
         rewardframepos = DataFrame('reward_pos')
-        rewardframeneg = DataFrame('reward_neg')
+
         if court.hitbat(0):
             connPlayer0.send(rewardframepos)
         if court.hitbat(1):
@@ -176,8 +177,12 @@ if __name__ == '__main__':
 
 
         if court.out(0):
+            rewardframeneg = DataFrame('reward_neg')
+            rewardframeneg.add('err', court.scaled_sensor_err(0) )
             connPlayer0.send(rewardframeneg)
         if court.out(1):
+            rewardframeneg = DataFrame('reward_neg')
+            rewardframeneg.add('err', court.scaled_sensor_err(1) )
             connPlayer1.send(rewardframeneg)
 
 
@@ -203,7 +208,7 @@ if __name__ == '__main__':
         #while True:
 
         #print('wait for player answers!')
-        #time.sleep(0.3) # muss warten!!
+        time.sleep(0.1) # muss warten!!
             #if not (connPlayer0.empty() or connPlayer1.empty()):
         if connPlayer0.poll(None): # Daten sind da...
             frame = connPlayer0.recv()

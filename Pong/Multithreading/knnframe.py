@@ -44,7 +44,9 @@ class knnframe:
 
         print( bcolors.WARNING + 'Player ' + self.name + ' predicted: ' + str(pred[0][0]) + bcolors.ENDC)
 
-        diff = pred[0][0] + self.fakediff - mypos
+        self.fakediff = 0.0 #TODO seems not to work like this... damn!
+        diff = mypos - pred[0][0]
+
 
         #print( bcolors.HEADER + 'Player ' + self.name + ' diff: ' + str(diff) + bcolors.ENDC)
 
@@ -59,7 +61,7 @@ class knnframe:
 
     def reward_pos(self):
 
-        self.knn.reward(self.fakediff)
+        #self.knn.reward(self.fakediff)
 
         # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio += 1.0/self.timesteps
@@ -69,8 +71,9 @@ class knnframe:
         print( bcolors.OKGREEN + 'Player ' + self.name + ': got positive reward! Hitratio is now: ' + str(self.hitratio) + bcolors.ENDC )
         self.newfakediff()
 
-    def reward_neg(self):
-
+    def reward_neg(self,err):
+        print('error is: ' + str(err))
+        self.knn.reward(err)
         # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio -= 1.0/self.timesteps
         if self.hitratio < 0.0:
