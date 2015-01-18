@@ -46,27 +46,27 @@ class knnframe:
 
         diff = pred[0][0] + self.fakediff - mypos
 
-        print( bcolors.HEADER + 'Player ' + self.name + ' diff: ' + str(diff) + bcolors.ENDC)
+        #print( bcolors.HEADER + 'Player ' + self.name + ' diff: ' + str(diff) + bcolors.ENDC)
 
         if diff > 0.1:
-            print('Player ' + self.name +': up!')
+            #print('Player ' + self.name +': up!')
             return 'd'
         elif diff < -0.1:
-            print('Player ' + self.name +': down!')
+            #print('Player ' + self.name +': down!')
             return 'u'
-        print('hold position!')
+        #print('hold position!')
         return 'n'
 
     def reward_pos(self):
 
-        #self.knn.reward(self.fakediff)
+        self.knn.reward(self.fakediff)
 
         # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio += 1.0/self.timesteps
         if self.hitratio > 1.0:
             self.hitratio = 0.0
 
-        print('Player ' + self.name + ': got positive reward! Hitratio is now: ' + str(self.hitratio))
+        print( bcolors.OKGREEN + 'Player ' + self.name + ': got positive reward! Hitratio is now: ' + str(self.hitratio) + bcolors.ENDC )
         self.newfakediff()
 
     def reward_neg(self):
@@ -76,7 +76,7 @@ class knnframe:
         if self.hitratio < 0.0:
             self.hitratio = 0.0
 
-        print('Player ' + self.name + ': got negative reward! Hitratio is now: ' + str(self.hitratio))
+        print( bcolors.OKBLUE + 'Player ' + self.name + ': got negative reward! Hitratio is now: ' + str(self.hitratio) + bcolors.ENDC)
         self.newfakediff()
 
     def newfakediff(self):

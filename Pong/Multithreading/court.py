@@ -28,7 +28,7 @@ class court:
         self.infinite = True
 
 
-        self.batsize = 1.0 # half of length!
+        self.batsize = 1 # half of length! gesehen auf die y_max!
         self.batstep = 0.2 
         
         #### ^^^ Parameter zum ändern ^^^ ####
@@ -151,11 +151,13 @@ class court:
             factor = (0 - self.posVec[0]) / self.dirVec[0]
 
             # point of impact
-            poi = self.posVec - (factor * self.dirVec)
+            poi = self.posVec + (factor * self.dirVec)
+
+            print('Left: POI: ' + str(poi))
 
             # Wenn der Ball über der unteren Kante und unter der oberen Kante des Schlägers
             # auftrifft, so würde der Schläger den Ball treffen
-            if (poi[0] > self.bat[0] - self.batsize) and (poi[0] < self.bat[0] + self.batsize):
+            if (poi[1] > self.bat[0] - self.batsize) and (poi[1] < self.bat[0] + self.batsize):
                 self._bathit[0] = True # Schläger hat getroffen
             else:
                 self.Points[1] +=1 # Punkte von Spieler 1 (rechts) erhöhen
@@ -182,11 +184,13 @@ class court:
             factor = (self.x_max - self.posVec[0]) / self.dirVec[0]
 
             # point of impact
-            poi = self.posVec - (factor * self.dirVec)
+            poi = self.posVec + (factor * self.dirVec)
+
+            print('Right: POI: ' + str(poi))
 
             # Wenn der Ball über der unteren Kante und unter der oberen Kante des Schlägers
             # auftrifft, so würde der Schläger den Ball treffen
-            if poi[0] > self.bat[1] - self.batsize and poi[0] < self.bat[1] + self.batsize:
+            if poi[1] > self.bat[1] - self.batsize and poi[1] < self.bat[1] + self.batsize:
                 self._bathit[1] = True
             else:
                 self.Points[0] +=1 # Punkte von Spieler 0 (links) erhöhen

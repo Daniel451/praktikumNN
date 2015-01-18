@@ -130,7 +130,7 @@ class NeuralNetwork:
         # +========================================+
         # +********* Backpropagation-Algo *********+
         # +========================================+
-
+        print('Angeblich lerne ich nun...')
         # Das NN ist im untrainierten Zustand (Zufallszahlen in den Gewichten) sehr warscheinlich falsch, es gibt einen Error-Wert: delta:
         delta = n.atleast_2d(diff)  #Erzeugt delta zum ersten Mal: SollAusgabe - IstAusgabe mittels der Trainingsdaten.
 

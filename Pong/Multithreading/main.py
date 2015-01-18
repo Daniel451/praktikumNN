@@ -71,7 +71,7 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
                 else:
                     self.request.sendall(bytes(json.dumps({'return':'not ok'}), 'UTF-8'))
                     #print('send information: ' + 'NOT OK!')
-                print('send information: ' + instruction)
+                #print('send information: ' + instruction)
             except Exception as e:
                 print("No instruction available: ", e)
                 return
@@ -86,7 +86,7 @@ def startplayer(conn,playername, loadconfig = None):
 
     
     while True:
-        print('Player ' + str(playername) + ' waiting for new instruction...' )
+        #print('Player ' + str(playername) + ' waiting for new instruction...' )
         if conn.poll(None):  # warte auf neue Daten...
             frame = conn.recv() # Daten sind da...
             
@@ -96,15 +96,15 @@ def startplayer(conn,playername, loadconfig = None):
                 break
 
             elif frame.instruction == 'predictNext': #
-                print('Player ' + str(playername) + ' Call: ' + frame.instruction )
+                #print('Player ' + str(playername) + ' Call: ' + frame.instruction )
                 conn.send(predictnext(player,frame))
 
             elif frame.instruction == 'reward_pos': #
-                print('Player ' + str(playername) + ' Call: ' + frame.instruction )
+                #print('Player ' + str(playername) + ' Call: ' + frame.instruction )
                 player.reward_pos()
 
             elif frame.instruction == 'reward_neg': #
-                print('Player ' + str(playername) + ' Call: ' + frame.instruction )
+                #print('Player ' + str(playername) + ' Call: ' + frame.instruction )
                 player.reward_neg()
 
             elif frame.instruction == 'saveConfig': #
@@ -121,18 +121,12 @@ def saveconfig(player,frame):
     
 def predictnext(player,frame):
 
-
     action = player.predict(frame.getdata('xpos'), frame.getdata('ypos'), frame.getdata('mypos'))
-    #action = player.predict(0.1, 0.2, 0.3)
-    print(action)
 
     returnframe = DataFrame('Return')
     returnframe.add('move',action)
 
     return returnframe
-
-
-
 
 
 if __name__ == '__main__':
@@ -173,7 +167,7 @@ if __name__ == '__main__':
 
     while True:
 
-        print('new tick!')
+        #print('new tick!')
         court.tick()
         rewardframepos = DataFrame('reward_pos')
         rewardframeneg = DataFrame('reward_neg')
@@ -194,23 +188,23 @@ if __name__ == '__main__':
         prednextreqPlayer0.add('ypos',court.scaled_sensor_y())
         prednextreqPlayer0.add('mypos',court.scaled_sensor_bat(0))
         connPlayer0.send(prednextreqPlayer0)
-        print('send data to player 0: ' + str(prednextreqPlayer0))
-        print('Player0 Bat: ' + str(court.scaled_sensor_bat(0)))
-        print('Player0 X: ' + str(court.scaled_sensor_x()))
-        print('Player0 Y: ' + str(court.scaled_sensor_y()))
+        #print('send data to player 0: ' + str(prednextreqPlayer0))
+        #print('Player0 Bat: ' + str(court.scaled_sensor_bat(0)))
+        #print('Player0 X: ' + str(court.scaled_sensor_x()))
+        #print('Player0 Y: ' + str(court.scaled_sensor_y()))
 
         prednextreqPlayer1 = DataFrame('predictNext')
         prednextreqPlayer1.add('xpos',court.scaled_sensor_x())
         prednextreqPlayer1.add('ypos',court.scaled_sensor_y())
         prednextreqPlayer1.add('mypos',court.scaled_sensor_bat(1))
         connPlayer1.send(prednextreqPlayer1)
-        print('send data to player 1: ' + str(prednextreqPlayer1))
-        print('Player1 Bat: ' + str(court.scaled_sensor_bat(1)))
+        #print('send data to player 1: ' + str(prednextreqPlayer1))
+        #print('Player1 Bat: ' + str(court.scaled_sensor_bat(1)))
 
 
         #while True:
 
-        print('wait for player answers!')
+        #print('wait for player answers!')
         time.sleep(0.3) # muss warten!!
             #if not (connPlayer0.empty() or connPlayer1.empty()):
         if connPlayer0.poll(None): # Daten sind da...
