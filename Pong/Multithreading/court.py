@@ -88,7 +88,6 @@ class court:
         return self._bathit[player]
 
     def out(self, player):
-        return True #Funktion soll information geben über keinen Treffer, dh. Ball ist über der eigenen Linie
         return self._out[player]
 
     def getpoints(self, player):
@@ -116,7 +115,7 @@ class court:
         # bathit[0] -> linker Schläger
         # bathit[1] -> rechter Schläger
         self._bathit = [False, False]
-
+        self._out = [False, False]
         ###################
         ### Anweisungen ###
         ###################
@@ -142,6 +141,7 @@ class court:
         """
         Checken, ob der Ball links aus dem Spielfeld fliegt oder vom Schläger getroffen wird
 
+        :type self
         :return: void
         """
 
@@ -159,6 +159,7 @@ class court:
                 self._bathit[0] = True # Schläger hat getroffen
             else:
                 self.Points[1] +=1 # Punkte von Spieler 1 (rechts) erhöhen
+                self._out[0] = True #Ball ist außerhalb des Spielfelds (gewesen)
 
             # Ball abprallen lassen, falls:
             # -> Das infinite true ist, also das Spiel endlos dauern soll ohne Zurücksetzen der Ballposition
@@ -189,6 +190,7 @@ class court:
                 self._bathit[1] = True
             else:
                 self.Points[0] +=1 # Punkte von Spieler 0 (links) erhöhen
+                self._out[1] = True #Ball ist außerhalb des Spielfelds (gewesen)
 
             # Ball abprallen lassen, falls:
             # -> Das infinite true ist, also das Spiel endlos dauern soll ohne Zurücksetzen der Ballposition

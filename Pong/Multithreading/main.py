@@ -183,13 +183,10 @@ if __name__ == '__main__':
             connPlayer1.send(rewardframepos)
 
 
-        #TODO enable this:
-        #if court.out(0):
-        #    connPlayer0.send(rewardframeneg)
-        #if court.out(1):
-        #    connPlayer1.send(rewardframeneg)
-
-        #todo send negativ reward
+        if court.out(0):
+            connPlayer0.send(rewardframeneg)
+        if court.out(1):
+            connPlayer1.send(rewardframeneg)
 
 
         prednextreqPlayer0 = DataFrame('predictNext')
