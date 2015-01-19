@@ -28,7 +28,7 @@ class knnframe:
         self.hitratio = 0.5
         self.fakediff = 0.0
         self.newfakediff()
-        self.knn = NeuralNetwork([2,10,10,1],10)
+        self.knn = NeuralNetwork([2,10,1],2)
 
     def saveconfig(self,filename):
         #no Return
@@ -44,8 +44,11 @@ class knnframe:
 
         print( bcolors.WARNING + 'Player ' + self.name + ' predicted: ' + str(pred[0][0]) + bcolors.ENDC)
 
+        return float(pred[0][0])
+
         self.fakediff = 0.0 #TODO seems not to work like this... damn!
         diff = mypos - pred[0][0]
+
 
 
         #print( bcolors.HEADER + 'Player ' + self.name + ' diff: ' + str(diff) + bcolors.ENDC)

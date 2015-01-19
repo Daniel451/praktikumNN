@@ -45,7 +45,6 @@ class court:
         
         
     def __initvectors(self):
-
         xcomp = np.random.uniform(0.01, 1)
         ycomp = np.random.uniform(0.01, xcomp)
 
@@ -92,7 +91,7 @@ class court:
         return self.__sensor_bat(player) / (self.y_max/2.0) - 1.0
 
     def scaled_sensor_err(self, player):
-        return -1.0 * (self.poi[player] - self.__sensor_x() ) / self.y_max
+        return (self.poi[player] - self.__sensor_bat(player) ) / self.y_max
 
 
     def hitbat(self, player):
@@ -230,18 +229,25 @@ class court:
         :param action: "d" oder "u" (Schläger hoch oder runter bewegen)
         :return: void
         """
+        if type(action) == str:
+            # Schläger nach oben bewegen
+            if action == 'u' :
+                self.bat[player] += self.batstep
+                if self.bat[player] > self.y_max: # Korrektur, falls oberer Spielfeldrand erreicht wurde
+                    self.bat[player] = self.y_max
 
-        # Schläger nach oben bewegen
-        if action == 'u' :
-            self.bat[player] += self.batstep
+            # Schläger nach unten bewegen
+            if action == 'd':
+                self.bat[player] -= self.batstep
+                if self.bat[player] < 0.0: # Korrektur, falls unterer Spielfeldrand erreicht wurde
+                    self.bat[player] = 0.0
+        elif type(action) == float:
+            self.bat[player] = action
+            if self.bat[player] < 0.0: # Korrektur, falls unterer Spielfeldrand erreicht wurde
+                self.bat[player] = 0.0
             if self.bat[player] > self.y_max: # Korrektur, falls oberer Spielfeldrand erreicht wurde
                 self.bat[player] = self.y_max
 
-        # Schläger nach unten bewegen
-        if action == 'd':
-            self.bat[player] -= self.batstep
-            if self.bat[player] < 0.0: # Korrektur, falls unterer Spielfeldrand erreicht wurde
-                self.bat[player] = 0.0
 
 
     def v_getSize(self):

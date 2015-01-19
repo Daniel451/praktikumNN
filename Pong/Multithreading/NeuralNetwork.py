@@ -110,18 +110,18 @@ class NeuralNetwork:
             a = _tanh(int_a)
 
             self.Output.append(a)  #merken des Output-Wertes!
-            self.RDtemp.append(a.clip(-10.0,10.0)) # bin mir nicht sicher, ob das gut ist, sollte aber theoretisch eh nie auftreten...
+            self.RDtemp.append(a.clip(-30.0,30.0)) # bin mir nicht sicher, ob das gut ist, sollte aber theoretisch eh nie auftreten...
 
         self.RD.insert(0, self.RDtemp)
         del self.RD[-1]  # letzen Datensatz löschen, da dann 2*self.tmax+1 lang
         return a
 
-    def reward(self, diff, epsilon = 0.02):
+    def reward(self, diff, epsilon = 0.1):
 
         # +========================================+
         # +********* Backpropagation-Algo *********+
         # +========================================+
-        print('learning with last '+ str(self.tmax) +'data ...')
+        print('learning with last '+ str(self.tmax) +' Datasets ...')
         starttime = time.time()
         for i in range(0, self.tmax):
 
