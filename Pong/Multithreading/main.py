@@ -1,7 +1,6 @@
 from multiprocessing import Process, Pipe
 from knnframe import knnframe
 from court import court
-from bcolors import bcolors
 import logging
 
 import sys
@@ -207,9 +206,8 @@ if __name__ == '__main__':
 
         #while True:
 
-        #print('wait for player answers!')
-        time.sleep(0.1) # muss warten!!
-            #if not (connPlayer0.empty() or connPlayer1.empty()):
+        time.sleep(0.2) # muss warten!!
+
         if connPlayer0.poll(None): # Daten sind da...
             frame = connPlayer0.recv()
             if frame.instruction == 'Return':
