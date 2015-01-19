@@ -45,12 +45,19 @@ class court:
         
         
     def __initvectors(self):
-        rad =  (np.pi - 2.0 * self.alpha_min) * 2 * random.random() - ( (np.pi / 2.0 ) - self.alpha_min)
-        self.dirVec = np.array([ np.cos(rad) , np.sin(rad) ])
-        if random.random() > 0.5:
-            self.dirVec[0]= self.dirVec[0] * -1.0
+
+        xcomp = np.random.uniform(0.01, 1)
+        ycomp = np.random.uniform(0.01, xcomp)
+
+        #self.dirVec = np.array([ np.cos(xcomp) , np.sin(ycomp) ])
+        self.dirVec = np.array([1, 0.5])
+
+        #rad =  (np.pi - 2.0 * self.alpha_min) * 2 * random.random() - ( (np.pi / 2.0 ) - self.alpha_min)
+        #self.dirVec = np.array([ np.cos(rad) , np.sin(rad) ])
+        #if random.random() > 0.5:
+        #    self.dirVec[0]= self.dirVec[0] * -1.0
         
-        self.posVec = np.array([self.x_max/2.0,self.y_max * random.random()])
+        self.posVec = np.array([self.x_max/2.0, self.y_max/2.0])
 
 
     def _incrSpeed(self):
