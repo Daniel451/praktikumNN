@@ -28,7 +28,7 @@ class knnframe:
         self.hitratio = 0.5
         self.fakediff = 0.0
         self.newfakediff()
-        self.knn = NeuralNetwork([2,10,1],2)
+        self.knn = NeuralNetwork([2,3,1],2)
 
     def saveconfig(self,filename):
         #no Return
@@ -41,8 +41,10 @@ class knnframe:
                       #  nothing: n
 
         pred = self.knn.predict([[xpos,ypos]])
+        print( bcolors.FAIL + 'Player ' + self.name + ' predicted: ' + str(pred[0][0]) + ' with sourcedata: ' + str([xpos,ypos]) + bcolors.ENDC)
+        logging.debug('predicting...')
+        logging.debug(self.knn.debug())
 
-        print( bcolors.WARNING + 'Player ' + self.name + ' predicted: ' + str(pred[0][0]) + bcolors.ENDC)
 
         return float(pred[0][0])
 
@@ -75,7 +77,7 @@ class knnframe:
         self.newfakediff()
 
     def reward_neg(self,err):
-        print('error is: ' + str(err))
+        print('Player ' + self.name + ': error is: ' + str(err))
         self.knn.reward(err)
         # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio -= 1.0/self.timesteps
