@@ -80,7 +80,18 @@ class Application(Frame):
         self.conn.send(DataFrame('EXIT'))
 
 
+    def save(self):
+        print("Send Save Signal to Server...")
+        self.conn.send(DataFrame('saveConfig'))
+
+
     def createWidgets(self):
+
+        self.bSAVE = Button(self)
+        self.bSAVE["text"] = "Save Config"
+        self.bSAVE["command"] =  self.save
+        self.bSAVE.pack({"side": "left"})
+
         self.bQUIT = Button(self)
         self.bQUIT["text"] = "QUIT client only"
         self.bQUIT["command"] =  self.quit

@@ -14,6 +14,9 @@ import time
 
 from data_frame import DataFrame
 
+
+
+
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
@@ -65,7 +68,11 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
                                                             'sensor_posX':court.scaled_sensor_x(),   # position wie sie das NN sieht!
                                                             'sensor_posY':court.scaled_sensor_y(),
                                                         }), 'UTF-8'))
-                
+                elif instruction == 'saveConfig':
+                    saveconfig = True
+
+
+
                 else:
                     self.request.sendall(bytes(json.dumps({'return':'not ok'}), 'UTF-8'))
             except Exception as e:
@@ -97,7 +104,8 @@ def startplayer(conn,playername, loadconfig = None):
 
             elif frame.instruction == 'reward_pos': #
                 #print('Player ' + str(playername) + ' Call: ' + frame.instruction )
-                player.reward_pos()
+                err = float(frame.getdata('err'))
+                player.reward_pos(err)
 
             elif frame.instruction == 'reward_neg': #
                 #print('Player ' + str(playername) + ' Call: ' + frame.instruction )
@@ -138,7 +146,7 @@ if __name__ == '__main__':
 
     logging.basicConfig(filename=path, level=logging.DEBUG)
     logging.info('Started')
-    
+    saveconfig = False
     court = court()
     
     sendPlayerA, connPlayer0 = Pipe()
@@ -169,8 +177,10 @@ if __name__ == '__main__':
         rewardframepos = DataFrame('reward_pos')
 
         if court.hitbat(0):
+            rewardframepos.add('err', court.scaled_sensor_err(0) )
             connPlayer0.send(rewardframepos)
         if court.hitbat(1):
+            rewardframepos.add('err', court.scaled_sensor_err(1) )
             connPlayer1.send(rewardframepos)
 
 
@@ -218,6 +228,14 @@ if __name__ == '__main__':
             frame = connPlayer1.recv()
             if frame.instruction == 'Return':
                 court.move(1,frame.getdata('move'))
+
+
+        if saveconfig:
+            x = DataFrame('saveConfig')
+            connPlayer0.send(x)
+            connPlayer1.send(x)
+
+
 
             
         

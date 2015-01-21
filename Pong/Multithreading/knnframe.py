@@ -41,7 +41,7 @@ class knnframe:
                       #  nothing: n
 
         pred = self.knn.predict([[xpos,ypos]])
-        print( bcolors.FAIL + 'Player ' + self.name + ' predicted: ' + str(pred[0][0]) + ' with sourcedata: ' + str([xpos,ypos]) + bcolors.ENDC)
+        #print( bcolors.FAIL + 'Player ' + self.name + ' predicted: ' + str(pred[0][0]) + ' with sourcedata: ' + str([xpos,ypos]) + bcolors.ENDC)
         logging.debug('predicting...')
         logging.debug(self.knn.debug())
 
@@ -64,10 +64,10 @@ class knnframe:
         #print('hold position!')
         return 'n'
 
-    def reward_pos(self):
-
+    def reward_pos(self,err):
+        self.knn.reward(err)
         #self.knn.reward(self.fakediff)
-
+        print('\a')
         # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio += 1.0/self.timesteps
         if self.hitratio > 1.0:
