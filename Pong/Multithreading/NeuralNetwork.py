@@ -47,7 +47,6 @@ class NeuralNetwork:
         self.Activation = [] #wird zu h
         self.Output = [] # wird zu s
 
-        self.hitratio = 0.5
 
 
     def predict(self, s_in):
@@ -112,6 +111,7 @@ class NeuralNetwork:
                 #pprint.pprint(self.RS[0][l+1].dot(self.RW[l]))
 
                 h = s.dot(self.W[l]) + self.RS[0][l+1].dot(self.RW[l]) + self.B[l]
+                #h = s.dot(self.W[l])  + self.B[l]
             else:
 
                 h = s.dot(self.W[l]) + self.B[l]
@@ -161,7 +161,6 @@ class NeuralNetwork:
                 #Wenn ich es richtig sehe, sind, für den delta_next die gewichte uninterressant!
 
                 delta_next = _tanh_deriv(self.Activation[l]) * delta.dot(self.W[l].T)
-
 
 
                 #print('<delta>')

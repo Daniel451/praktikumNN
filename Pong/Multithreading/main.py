@@ -205,7 +205,7 @@ if __name__ == '__main__':
 
         #while True:
 
-        #time.sleep(0.1) # muss warten!!
+        time.sleep(0.1) # muss warten!!
 
         if connPlayer0.poll(None): # Daten sind da...
             frame = connPlayer0.recv()

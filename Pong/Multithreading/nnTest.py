@@ -16,7 +16,7 @@ s_teach = numpy.array([[0], [1], [1], [0]])          #Trainingsdaten Output
 
 a = [0,0,0,0]
 
-for i in range(0, 20000):
+for i in range(0, 599999):
     print(i)
     x = numpy.random.randint(0,4)
 
@@ -26,7 +26,7 @@ for i in range(0, 20000):
     if answ > 10.0 or answ < -10.0:
         break
 
-    knn.reward(err,0.1)
+    knn.reward(err,0.01)
 
     a[x] += 1
 
