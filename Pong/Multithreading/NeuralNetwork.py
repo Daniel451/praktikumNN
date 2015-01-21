@@ -30,8 +30,8 @@ class NeuralNetwork:
         self.RW = []  # Erstelle das Array der Gewichte zu den Recurrenten Daten intern, dh. zu sich selbst.
         self.RS = []  # Daten halten für Recurrente Daten.
         for i in range(1, len(layer)):
-            self.W.append((n.random.random((layer[i-1], layer[i])) - 0.5)*0.1)  # erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron zufällig im Bereich von -0.5 bis 0.5.
-            self.B.append((n.random.random((1,layer[i])) - 0.5)*0.1)  # ebenso zufällige Werte für Bias. Bereich: -0.5 bis 0.5.
+            self.W.append((n.random.random((layer[i-1], layer[i])) - 0.5))  # erzeuge layer[i - 1] Gewichte für jedes layer für jedes Neuron zufällig im Bereich von -0.5 bis 0.5.
+            self.B.append((n.random.random((1,layer[i])) - 0.5))  # ebenso zufällige Werte für Bias. Bereich: -0.5 bis 0.5.
 
         for i in range(1, len(layer)-1):
             #Erzeuge für jedes Layer eine Matrix mit n mal n Gewichten. Gewichte für die Rekurenz!
@@ -87,29 +87,29 @@ class NeuralNetwork:
 
         for l in range(0, len(self.W)):  #für alle hidden Layer...
 
-            print('Trying to Calculate Layer: ' + str(l))
-            print('s:')
-            pprint.pprint(s)
+            #print('Trying to Calculate Layer: ' + str(l))
+            #print('s:')
+            #pprint.pprint(s)
 
-            print('self.W[l]:')
-            pprint.pprint(self.W[l])
+            #print('self.W[l]:')
+            #pprint.pprint(self.W[l])
 
-            print('s.dot(self.W[l]):')
-            pprint.pprint(s.dot(self.W[l]))
+            #print('s.dot(self.W[l]):')
+            #pprint.pprint(s.dot(self.W[l]))
 
-            print('self.B[l]:')
-            pprint.pprint(self.B[l])
+            #print('self.B[l]:')
+            #pprint.pprint(self.B[l])
 
 
             if l < len(self.W)-1 : #es ist nicht das input noch das output layer!
-                print('self.RS[0][l+1]:')
-                pprint.pprint(self.RS[0][l+1])
+                #print('self.RS[0][l+1]:')
+                #pprint.pprint(self.RS[0][l+1])
 
-                print('self.RW[l]:')
-                pprint.pprint(self.RW[l])
+                #print('self.RW[l]:')
+                #pprint.pprint(self.RW[l])
 
-                print('self.RS[0][l+1].dot(self.RW[l]:')
-                pprint.pprint(self.RS[0][l+1].dot(self.RW[l]))
+                #print('self.RS[0][l+1].dot(self.RW[l]:')
+                #pprint.pprint(self.RS[0][l+1].dot(self.RW[l]))
 
                 h = s.dot(self.W[l]) + self.RS[0][l+1].dot(self.RW[l]) + self.B[l]
             else:
@@ -137,7 +137,7 @@ class NeuralNetwork:
 
 
 
-    def reward(self, diff, epsilon = 0.002):
+    def reward(self, diff, epsilon = 0.2):
 
 
         # +========================================+
@@ -156,60 +156,36 @@ class NeuralNetwork:
 
             for l in range(len(self.W) -1, -1, -1):  #für alle Layer, diesmal jedoch von hinten nach von!
 
-                print('Layer: ' + str(l) )
-                print('delta: ' + str(delta) )
+                #print('Layer: ' + str(l) )
 
-                print('self.W[l]:')
-                pprint.pprint(self.W[l])
-
-                if l > 0:  #solange wir uns über dem Input-Layer befinden, berechnen wir schon mal den delta-Wert für die nächste Iteration, den Delta-Wert dieses Layers wird jedoch noch für das Anpassen der Gewichte benötigt
-                    # DontCareTODO was muss hier hin? Activation oder Output? -> müsste Activation sein....
-                    print('<Delta next>')
-                    print('A: ',self.Activation[l])
-                    print('W: ',self.W[l])
-                    print('D: ',delta) #OK
-                    print('l: ',l) #OK
-                    print('</Delta next>')
-
-
-                if l < len(self.W) - 1 : #es ist nicht das input noch das output layer!
-                    delta_next = _tanh_deriv(self.Activation[l]) * delta.dot(self.W[l].T)
-                    #TODO: Ist falsch, sollte aber so ähnlich laufen! Reicht evtl. einfaches addieren? ist dann jedoch nciht so schnell!
-                    #delta_next = _tanh_deriv(self.Activation[l]) * delta.dot(n.concatenate((self.W[l],self.RW[l] ), axis=0).T)
-                else:
-                    delta_next = _tanh_deriv(self.Activation[l]) * delta.dot(self.W[l].T)
-
-                    #TODO: Hier nun weiter machen, ich geh nun schlafen!
-                    # Next Task: Anpassen der Gewichte zu den Rekurenten Daten!
-                    # Wenn es läuft, PDF Präsentation machen!!
-
+                #Wenn ich es richtig sehe, sind, für den delta_next die gewichte uninterressant!
 
                 delta_next = _tanh_deriv(self.Activation[l]) * delta.dot(self.W[l].T)
 
-                # DontCareTODO Evtl. könnte aus der _tanh_deriv Funktion die tanh(x) Funktion entfernt werden, wenn ich unten nun statt Output[] Activation[] nutzen würde. Richtig? Falsch?!
-
-                # DontCareTODO was muss hier hin? Activation oder Output? -> müsste Output sein....
-
-                if i == 0:
-                    print('W old: ' + str(self.W[l]))
-                    print('delta: ', delta)
-                    print('output[l]: ',self.Output[l+1])
-                    self.W[l] += epsilon * delta * self.Output[l+1]  #Anpassen der Gewichte
-                    print('W new: ' + str(self.W[l]))
-                else:
-                    print(' NEVER!! ')
-                    self.W[l] += epsilon * delta * self.RS[0][l]  #Anpassen der Gewichte
 
 
-                self.B[l] += epsilon * delta  # Anpassen des Bias # wird dies nun viel zu häufig angepasst?
+                #print('<delta>')
+                #pprint.pprint(delta)
+                #print('</delta>')
 
-                if l > 0 and l < len(self.W): #erstes (input) und letztes (output) Layer haben keine Rekursion!
-                    # daher muessen auch keine gewichte angepasst werden!
-                    print('Rekurente Gewichte anpassen:')
+                #print('<Output>')
+                #pprint.pprint(self.Output[l])
+                #print('</Output>')
 
+                #print('<self.W[l]>')
+                #pprint.pprint(self.W[l])
+                #print('</self.W[l]>')
+
+                self.B[l] += epsilon * delta
+                self.W[l] += epsilon * delta * self.Output[l].T
+
+
+                if l < len(self.W)-1: #erstes (input) und letztes (output) Layer haben keine Rekursion!
+                    # daher muessen auch keine Gewichte angepasst werden!
+                    self.RW[l] += epsilon * delta * self.RS[0][l+1].T
 
                 delta = delta_next
-                print('---------------------------------------')
+                #print('---------------------------------------')
                 # wie oben schon kurz angesprochen, hier wird nun delta_next zu delta, damit der passende Wert für das nächste Layer zur Verfügung steht.
                 # Da delta von der Gewichtsanpassung und die Gewichte für das delta_next gebraucht wird, muss es so auseinander gezogen werden.
         # erster Datensatz gelernt, nun um einen Zeitschritt in die Vergangenheit gehen: t = t_(x-i)

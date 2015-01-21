@@ -4,7 +4,7 @@ from pprint import pprint
 import numpy
 
 
-knn = NeuralNetwork([2,4,3],1)
+knn = NeuralNetwork([2,10,1],1)
 
 print('go..')
 print('Init')
@@ -15,19 +15,8 @@ s_in = numpy.array([[0, 0], [0, 1], [1, 0], [1, 1]]) #Trainingsdaten Input
 s_teach = numpy.array([[0], [1], [1], [0]])          #Trainingsdaten Output
 
 a = [0,0,0,0]
-sin=numpy.array([[ 0.8 , 0.2 ]])
-print(knn.predict(sin))
-print(knn.predict(sin))
-print(knn.predict(sin))
-print(knn.predict(sin))
 
-
-knn.reward([1.0,0.2,0.3])
-print('ende')
-exit()
-
-
-for i in range(0, 2000):
+for i in range(0, 20000):
     print(i)
     x = numpy.random.randint(0,4)
 
