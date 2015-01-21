@@ -25,8 +25,7 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
         while True:
             try:
                 data = json.loads(self.request.recv(8*1024).decode('UTF-8').strip())
-                # process the data, i.e. print it:
-                #print(json.dumps(data, sort_keys=True,indent=4, separators=(',', ': ')))
+
             
             except Exception as e:
                 print("Exception while receiving message: ", e)
@@ -144,10 +143,10 @@ if __name__ == '__main__':
     
     sendPlayerA, connPlayer0 = Pipe()
     sendPlayerB, connPlayer1 = Pipe()
-    p1 = Process(target=startplayer, args=(sendPlayerA,0))
-    p2 = Process(target=startplayer, args=(sendPlayerB,1))
+    p0 = Process(target=startplayer, args=(sendPlayerA,0))
+    p1 = Process(target=startplayer, args=(sendPlayerB,1))
+    p0.start()
     p1.start()
-    p2.start()
     
     
     
@@ -206,7 +205,7 @@ if __name__ == '__main__':
 
         #while True:
 
-        time.sleep(0.2) # muss warten!!
+        #time.sleep(0.1) # muss warten!!
 
         if connPlayer0.poll(None): # Daten sind da...
             frame = connPlayer0.recv()
@@ -223,18 +222,14 @@ if __name__ == '__main__':
             
         
     
-    
-    #while True:
-    #    x = input("Do what?: ")
-    #    if x == 'EXIT'
+
     frame = DataFrame('EXIT')
     connPlayer0.send(frame)
     connPlayer1.send(frame)
-    #        break
                 
                   
+    p0.join()
     p1.join()
-    p2.join()
     server.shutdown()
     logging.info('Finished')
     
