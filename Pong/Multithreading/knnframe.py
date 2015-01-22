@@ -71,7 +71,7 @@ class knnframe:
         # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio += 1.0/self.timesteps
         if self.hitratio > 1.0:
-            self.hitratio = 0.0
+            self.hitratio = 1.0
 
         print( bcolors.OKGREEN + 'Player ' + self.name + ': got positive reward! Hitratio is now: ' + str(self.hitratio) + bcolors.ENDC )
         self.newfakediff()
