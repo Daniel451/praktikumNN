@@ -67,7 +67,7 @@ class knnframe:
     def reward_pos(self,err):
         self.knn.reward(err)
         #self.knn.reward(self.fakediff)
-        print('\a')
+        #print('\a') #Bell
         # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio += 1.0/self.timesteps
         if self.hitratio > 1.0:

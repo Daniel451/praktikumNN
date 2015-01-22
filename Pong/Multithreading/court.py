@@ -50,7 +50,7 @@ class court:
         if random.random() > 0.5:
             self.dirVec[0]= self.dirVec[0] * -1.0
 
-        self.dirVec = np.array([ 0.8 , 0.6 ])
+        #self.dirVec = np.array([ 0.8 , 0.6 ])
 
         self.posVec = np.array([self.x_max/2.0,self.y_max * random.random()])
 

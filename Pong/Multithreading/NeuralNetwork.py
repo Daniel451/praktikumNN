@@ -152,7 +152,7 @@ class NeuralNetwork:
         starttime = time.time()
         #for i in range(0, self.tmax):
         i = 0
-        if True:
+        if True: #TODO: Mehrfaches lernern einbringen!
 
             for l in range(len(self.W) -1, -1, -1):  #für alle Layer, diesmal jedoch von hinten nach von!
 
