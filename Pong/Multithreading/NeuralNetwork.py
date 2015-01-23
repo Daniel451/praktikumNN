@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import pprint
 
+
 import numpy as n
 import time
 
@@ -195,7 +196,10 @@ class NeuralNetwork:
 
 
     def save(self, file):  #untested: sichere Gewichte und Bias
-        n.savez(file + '.npz', W=self.W, B=self.B, R=self.RW)
+        print(file)
+        pprint.pprint(self.B)
+        #n.savez(file, W=self.W) #, B=self.B)    #, R=self.RW)
+        n.savez(file, W=self.W, RW=self.RW,B=[self.B])    #, R=self.RW)
 
     def load(self, file):  #untested: lade Gewichte und Bias
         #TODO Schön waere eine Ueberpruefung ob konsistent zu config!

@@ -10,6 +10,7 @@ import os.path
 import json
 import socketserver
 import time
+import datetime
 
 
 from data_frame import DataFrame
@@ -69,7 +70,9 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
                                                             'sensor_posY':court.scaled_sensor_y(),
                                                         }), 'UTF-8'))
                 elif instruction == 'saveConfig':
-                    saveconfig = True
+                    x = DataFrame('saveConfig')
+                    connPlayer0.send(x)
+                    connPlayer1.send(x)
 
 
 
@@ -113,7 +116,8 @@ def startplayer(conn,playername, loadconfig = None):
                 player.reward_neg(err)
 
             elif frame.instruction == 'saveConfig': #
-                path = 'save/config_' + str(playername) + '_' + time.strftime("%Y-%m-%d_%H:%M:%S", time.time()) + '.pcf'
+
+                path = 'save/config_' + str(playername) + '_' + datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S') + '.pcf'
                 print('Player ' + str(playername) + ' Call: '+ frame.instruction + ' in ' + path )
                 player.saveconfig(path)
 
@@ -169,6 +173,10 @@ if __name__ == '__main__':
     server_thread.daemon = True
     server_thread.start()
     print ("Server loop running in thread: ", server_thread.name)
+
+    x = DataFrame('saveConfig')
+    connPlayer0.send(x)
+    connPlayer1.send(x)
 
     while True:
 
@@ -230,10 +238,7 @@ if __name__ == '__main__':
                 court.move(1,frame.getdata('move'))
 
 
-        if saveconfig:
-            x = DataFrame('saveConfig')
-            connPlayer0.send(x)
-            connPlayer1.send(x)
+
 
 
 
