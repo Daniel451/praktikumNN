@@ -5,5 +5,5 @@
 !*/
 !*.py
 !.gitignore
-!.pdf
-!.tex
+!*.pdf
+!*.tex
