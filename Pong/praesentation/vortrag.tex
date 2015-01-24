@@ -141,7 +141,7 @@
 \begin{beamercolorbox}[wd=\paperwidth,ht=3.8ex,dp=1.2ex,leftskip=0pt,rightskip=4.0ex]{frametitle}%
 		\usebeamerfont*{frametitle}\centerline{\insertframetitle}
 	\end{beamercolorbox}
-	\vspace{0.0cm}
+	\vspace{-0.5cm}
 }
 
 \setbeamertemplate{footline}
@@ -215,7 +215,7 @@
 %\setcounter{framenumber}{0}
 
 \frame{
-	\frametitle{Inhalt}
+	\frametitle{Agenda}
 	\tableofcontents
 }
 
@@ -267,66 +267,56 @@
 \frame[t]
 {
     \frametitle{Grundlagen}
-    \begin{itemize}
-        \item multithreaded Architektur
-        \item eingeteilt in Ticks
-        \item KNN erh"alt Positionstupel vom Ball
-    \end{itemize}
+    %\begin{itemize}
+    %    \item multithreaded Architektur
+    %    \item eingeteilt in Ticks
+    %    \item KNN erh"alt Positionstupel vom Ball
+    %\end{itemize}
     
-    TODO: Grafik mit Aufbau der SW
+    \begin{beamercolorbox}[center]{}
+        \includegraphics[]{app.pdf}
+    \end{beamercolorbox}%
     
 }
 
 
 
-  
+\section{erkannte Probleme und unsere L"osungen}
 
 
 
-\section{Ballrichtung kalkulieren}
+%\section{Ballrichtung kalkulieren}
 \frame[t]
 {
     \frametitle{Ballrichtung kalkulieren}
     
     \begin{beamercolorbox}[center]{}
-        \includegraphics[width=0.90\paperwidth]{recurent.pdf}
+        \includegraphics[]{recurent.pdf}
     \end{beamercolorbox}%
 }
 
 
 \frame[t]
 {
-    \frametitle{unser rekurentes Netz}
+    \frametitle{rekurentes Netz}
     
     \begin{beamercolorbox}[center]{}
-        %\includegraphics[width=0.90\paperwidth]{recurentNET.pdf}
-    \end{beamercolorbox}%
-    TODO: hier folgt noch eine Grafik mit dem aufbau eines Rekurenten Netzes
-}
-
-
-
-
-\section{zeitverz"ogerte Bewertung} %Fehlerkalkulation
-\frame[t]
-{
-    \frametitle{zeitverz"ogerte Bewertung}
-        \begin{beamercolorbox}[center]{}
-        \includegraphics[width=0.9\paperwidth]{delayed.pdf}
-    \end{beamercolorbox}%
-}
-
-\frame[t]
-{
-    \frametitle{zeitverz"ogerte Bewertung}
-        \begin{beamercolorbox}[center]{}
-        %\includegraphics[width=0.9\paperwidth]{delayedFB.pdf}
+        \includegraphics[]{recurentKNN.pdf}
     \end{beamercolorbox}%
     
-    TODO: Hier folgt noch eine Grafik mit dem rekurenten lernen 
 }
 
 
+
+
+%\section{zeitverz"ogerte Bewertung} %Fehlerkalkulation
+\frame[t]
+{
+    \frametitle{zeitverz"ogerte Bewertung}
+        \begin{beamercolorbox}[center]{}
+        \includegraphics[]{delayed.pdf}
+    \end{beamercolorbox}%
+}
 
 
 
@@ -339,15 +329,16 @@
         \item trainiertes KNN
     \end{itemize}
   
-  TODO: Video oder Live
-
+  TODO: Video
 }
 
 \frame[t]
 {
   \frametitle{KNNs gegen"ubergestellt}
   
-  TODO: Hier folgt noch eine BALKENDIAGRAMM - GRAFIK mit Vergleich von verschiendenen Konfigurationen. Welches KNN lernt am schnellsten / besten?
+    \begin{beamercolorbox}[center]{}
+        \includegraphics[]{diagramm.pdf}
+    \end{beamercolorbox}%
   
   %Config -> 1k Iterationen -> 10k Iterationen -> 100k -> 10 Mio
   %xx -> 0.3
