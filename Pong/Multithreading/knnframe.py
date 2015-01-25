@@ -28,8 +28,9 @@ class knnframe:
         self.hitratio = 0.5
         self.fakediff = 0.0
         self.newfakediff()
-        self.knn = NeuralNetwork([2,5,1],8)
+        self.knn = NeuralNetwork([2,10,1],25)
         self.reward_count = 0
+        self.printcount = 10
 
     def saveconfig(self,filename):
         #no Return
@@ -75,30 +76,35 @@ class knnframe:
         if self.hitratio > 1.0:
             self.hitratio = 1.0
 
-        print( bcolors.OKGREEN + 'Player ' + self.name + ': got positive reward! Hitratio is now: ' + str(self.hitratio) + bcolors.ENDC )
+        if self.reward_count % self.printcount == 0:
+            print( bcolors.OKGREEN + 'Player ' + self.name + ': got positive reward! Hitratio is now: ' + str(self.hitratio) + bcolors.ENDC )
         self.newfakediff()
 
     def reward_neg(self,err):
         self.rew_diag()
-        print('Player ' + self.name + ': error is: ' + str(err))
+        if self.reward_count % self.printcount == 0:
+            print('Player ' + self.name + ': error is: ' + str(err))
         self.knn.reward(err)
         # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio -= 1.0/self.timesteps
         if self.hitratio < 0.0:
             self.hitratio = 0.0
 
-        print( bcolors.OKBLUE + 'Player ' + self.name + ': got negative reward! Hitratio is now: ' + str(self.hitratio) + bcolors.ENDC)
+        if self.reward_count % self.printcount == 0:
+            print( bcolors.OKBLUE + 'Player ' + self.name + ': got negative reward! Hitratio is now: ' + str(self.hitratio) + bcolors.ENDC)
         self.newfakediff()
 
     def newfakediff(self):
         self.fakediff = numpy.random.normal(0.0,1.0/3.0)*(1.0-self.hitratio)
         # Gauss Normalverteilung von etwa -1 - +1 bei  self.hitratio = 0
-        print('Player ' + self.name + ': fakediff is now: ' + str(self.fakediff))
+        #print('Player ' + self.name + ': fakediff is now: ' + str(self.fakediff))
 
     def rew_diag(self):
         self.reward_count += 1
-        print('Rewards: ', self.reward_count)
-        print('Hitratio: ', self.hitratio)
+        if self.reward_count % self.printcount == 0:
+            print("") # Leerzeile
+            print('Rewards: ', self.reward_count)
+            print('Hitratio: ', self.hitratio)
         if self.reward_count == 100:
             print('100')
             logging.info('hitratio@1k: ' + str(self.hitratio))

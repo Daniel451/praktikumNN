@@ -144,7 +144,7 @@ class NeuralNetwork:
         # +========================================+
         # +********* Backpropagation-Algo *********+
         # +========================================+
-        print('learning with last '+ str(self.tmax) +' Datasets ...')
+        #print('learning with last '+ str(self.tmax) +' Datasets ...')
 
         # Das NN ist im untrainierten Zustand (Zufallszahlen in den Gewichten) sehr warscheinlich falsch, es gibt einen Error-Wert: delta:
         delta = n.atleast_2d(diff)  #Erzeugt delta zum ersten Mal: SollAusgabe - IstAusgabe mittels der Trainingsdaten.
@@ -224,8 +224,8 @@ class NeuralNetwork:
                 delta = delta_next
 
 
-        print('==============================================')
-        print('...done in ' + str(time.time()-starttime) + 'sec')
+        #print('==============================================')
+        #print('...done in ' + str(time.time()-starttime) + 'sec')
 
 
 
