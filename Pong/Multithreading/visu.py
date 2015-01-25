@@ -186,12 +186,12 @@ class Application(Frame):
     def drawCurt(self):
         
         # court
-        self.court.create_rectangle(10,0, self.factor * self.size[0]+10,self.factor * self.size[1],fill="blue")
+        self.court.create_rectangle(10,0, self.factor * self.size[0]+10,self.factor * self.size[1],fill="black")
         
         #create_line(x1, y1, x2, y2, width=1, fill="black")
         
         # vertical middle line
-        self.court.create_line(self.factor * self.size[0]/2+10, 0, self.factor * self.size[0]/2+10, self.factor * self.size[1], fill="black", dash=(4, 4))
+        self.court.create_line(self.factor * self.size[0]/2+10, 0, self.factor * self.size[0]/2+10, self.factor * self.size[1], fill="white", dash=(4, 4))
         
         #Player1 - Bat
         self.c_bat1 = self.court.create_line(
@@ -199,20 +199,20 @@ class Application(Frame):
             50,
             10,
             70,  
-            fill="black",width=4)
+            fill="white",width=8)
         #Player2 - Bat
         self.c_bat2 = self.court.create_line(
             self.factor * self.size[0]+10,
             70,
             self.factor * self.size[0]+10,
             90,  
-            fill="black",width=4)
+            fill="white",width=10)
         
         r = 5
-        self.c_ball = self.court.create_oval(100-r + 10, 100-r, 100+r+ 10, 100+r,fill="red")
+        self.c_ball = self.court.create_oval(100-r + 10, 100-r, 100+r+ 10, 100+r,fill="white")
         
         self.c_direction = self.court.create_line( 100, 100, 
-                                110, 110, fill="black",arrowshape=(8,10,3),arrow="last")
+                                110, 110, fill="white",arrowshape=(8,10,3),arrow="last")
 
         self.p1points = self.court.create_text(self.factor * self.size[0] / 2  + 10 + 150 ,20,text = str(self.points[1]),fill='white',font = ('ARIAL',30))
         self.p0points = self.court.create_text(self.factor * self.size[0] / 2  - 10 - 150 ,20,text = str(self.points[0]),fill='white',font = ('ARIAL',30))
