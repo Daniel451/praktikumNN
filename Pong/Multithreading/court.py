@@ -42,6 +42,8 @@ class court:
         self.Points = [0, 0]
         self.poi = [None, None]
         self.bat = [self.y_max/2.0 , self.y_max/2.0]
+
+        self.bouncecount = 0
         
         
     def __initvectors(self):
@@ -53,6 +55,7 @@ class court:
         #self.dirVec = np.array([ 0.8 , 0.6 ])
 
         self.posVec = np.array([self.x_max/2.0,self.y_max * random.random()])
+        self.bouncecount = 0
 
 
 
@@ -127,6 +130,10 @@ class court:
         ### Anweisungen ###
         ###################
 
+        if self.bouncecount > 10:  #and self.posVec[0] < self.x_max/2 - self.initspeed and self.posVec[0] > self.x_max/2 + self.initspeed:
+            print('Reinit because of too many bounces!')
+            self.__initvectors()
+
         # bounce bottom:
         if self.posVec[1] < 0:
             self.posVec[1] = self.posVec[1] * -1.0
@@ -176,8 +183,10 @@ class court:
             if self.infinite or self._bathit[0]:
                 self.posVec[0] = self.posVec[0] * -1.0
                 self.dirVec[0] = self.dirVec[0] * -1.0
+                self.bouncecount += 1
             else:
                 self.__initvectors()
+                self.bouncecount = 0
 
 
 
@@ -214,8 +223,10 @@ class court:
                 # 2 Spielfeldlängen - aktuellem X-Betrag ergibt neue X-Position
                 self.posVec[0] = 2 * self.x_max - self.posVec[0]
                 self.dirVec[0] = self.dirVec[0] * -1.0
+                self.bouncecount += 1
             else:
                 self.__initvectors()
+                self.bouncecount = 0
 
 
     def move(self, player, action):

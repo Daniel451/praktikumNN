@@ -21,7 +21,7 @@ class knnframe:
             file.close()
 
         # logging stuff
-        logging.basicConfig(filename=path, level=logging.DEBUG)
+        logging.basicConfig(filename=path, level=logging.INFO)
 
         self.name = str(name)
         self.timesteps = 1000.0
@@ -33,7 +33,7 @@ class knnframe:
 
     def saveconfig(self,filename):
         #no Return
-        self.knn.save(filename)
+        #self.knn.save(filename) #TODO correct this!
         print('Configuration saved: ' + filename)
         
     def predict(self,xpos,ypos,mypos):
@@ -97,6 +97,8 @@ class knnframe:
 
     def rew_diag(self):
         self.reward_count += 1
+        print('Rewards: ', self.reward_count)
+        print('Hitratio: ', self.hitratio)
         if self.reward_count == 1000:
             print('1k')
             logging.info('hitratio@1k: ' + str(self.hitratio))
