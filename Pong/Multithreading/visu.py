@@ -116,7 +116,7 @@ class Application(Frame):
 
 
         
-        self.court = Canvas(self.master, width=1000, height=600)
+        self.court = Canvas(self.master, width=900, height=500)
         self.court.pack({"side": "left"})
         
         
@@ -163,7 +163,7 @@ class Application(Frame):
             
         self.lastrefresh = self.timestamp
         self.timestamp = time.time()
-        self.after(300, self.update)
+        self.after(150, self.update)
             
     def updateCurt(self):
         r = 5
@@ -186,7 +186,8 @@ class Application(Frame):
     def drawCurt(self):
         
         # court
-        self.court.create_rectangle(10,0, self.factor * self.size[0]+10,self.factor * self.size[1],fill="black")
+
+        self.court.create_rectangle(5,0, self.factor * self.size[0]+15,self.factor * self.size[1],fill="black")
         
         #create_line(x1, y1, x2, y2, width=1, fill="black")
         
@@ -206,7 +207,7 @@ class Application(Frame):
             70,
             self.factor * self.size[0]+10,
             90,  
-            fill="white",width=10)
+            fill="white",width=8)
         
         r = 5
         self.c_ball = self.court.create_oval(100-r + 10, 100-r, 100+r+ 10, 100+r,fill="white")

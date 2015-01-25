@@ -196,6 +196,7 @@ if __name__ == '__main__':
     x = DataFrame('saveConfig')
     connPlayer0.send(x)
     connPlayer1.send(x)
+    x = input('sdf')
 
     while True:
 
