@@ -99,17 +99,17 @@ class knnframe:
         self.reward_count += 1
         print('Rewards: ', self.reward_count)
         print('Hitratio: ', self.hitratio)
-        if self.reward_count == 1000:
-            print('1k')
+        if self.reward_count == 100:
+            print('100')
             logging.info('hitratio@1k: ' + str(self.hitratio))
-        elif self.reward_count == 10000:
-            print('10k')
+        elif self.reward_count == 200:
+            print('200')
             logging.info('hitratio@10k: ' + str(self.hitratio))
-        elif self.reward_count == 100000:
-            print('100k')
+        elif self.reward_count == 500:
+            print('500')
             logging.info('hitratio@100k: ' + str(self.hitratio))
-        elif self.reward_count == 10000000:
-            print('10mio')
+        elif self.reward_count == 1000:
+            print('1000')
             logging.info('hitratio@10mio: ' + str(self.hitratio))
 
 
