@@ -24,10 +24,11 @@ def netw_communication(conn):
             frame = conn.recv() # Daten sind da...
             print(frame.instruction)
             nc.send({'instruction' : frame.instruction})
-            
+
+            #if  frame.instruction == 'INIT' or frame.instruction == 'REFRESH':
             retval = nc.receive()
             print(retval)
-            
+
             conn.send(retval)
             
             if frame.instruction == 'EXIT':
@@ -77,12 +78,18 @@ class Application(Frame):
     
     def QGoS(self):
         print("Send EXIT Signal to Server...")
-        self.conn.send(DataFrame('EXIT'))
+        conn.send(DataFrame('EXIT'))
 
 
     def save(self):
         print("Send Save Signal to Server...")
-        self.conn.send(DataFrame('saveConfig'))
+        conn.send(DataFrame('saveConfig'))
+
+    def Togglespeed(self):
+        print('send Speed Toggle')
+        conn.send(DataFrame('CHSPEED'))
+        if conn.poll(None):  # warte auf neue Daten...
+            print(conn.recv()) # Daten sind da...
 
 
     def createWidgets(self):
@@ -101,6 +108,13 @@ class Application(Frame):
         self.bQGoS["text"] = "QUIT game on server",
         self.bQGoS["command"] = self.QGoS
         self.bQGoS.pack({"side": "left"})
+
+        self.togglespeed = Button(self)
+        self.togglespeed["text"] = "Toggle Speed",
+        self.togglespeed["command"] = self.Togglespeed
+        self.togglespeed.pack({"side": "left"})
+
+
         
         self.court = Canvas(self.master, width=1000, height=600)
         self.court.pack({"side": "left"})
@@ -114,7 +128,7 @@ class Application(Frame):
         self.conn = conn
         self.createWidgets()
         self.factor = 50.0
-        
+        self.points = [0,0]
         self.update()
         
     def update(self):
@@ -161,7 +175,11 @@ class Application(Frame):
                                         
                                         
         self.court.coords(self.c_direction, self.posvec[0]*self.factor+ 10, self.posvec[1]*self.factor, self.posvec[0]*self.factor + self.dirvec[0] * self.factor + 10, self.posvec[1]*self.factor + self.dirvec[1] * self.factor)
-        
+
+        self.court.itemconfig(self.p0points,text=str(self.points[0]))
+        self.court.itemconfig(self.p1points,text=str(self.points[1]))
+
+
         self.court.update()
         
         
@@ -195,6 +213,10 @@ class Application(Frame):
         
         self.c_direction = self.court.create_line( 100, 100, 
                                 110, 110, fill="black",arrowshape=(8,10,3),arrow="last")
+
+        self.p1points = self.court.create_text(self.factor * self.size[0] / 2  + 10 + 150 ,20,text = str(self.points[1]),fill='white',font = ('ARIAL',30))
+        self.p0points = self.court.create_text(self.factor * self.size[0] / 2  - 10 - 150 ,20,text = str(self.points[0]),fill='white',font = ('ARIAL',30))
+
         root.after(1000,self.updateCurt)
         
 

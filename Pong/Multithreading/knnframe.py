@@ -28,7 +28,7 @@ class knnframe:
         self.hitratio = 0.5
         self.fakediff = 0.0
         self.newfakediff()
-        self.knn = NeuralNetwork([2,3,1],2)
+        self.knn = NeuralNetwork([2,5,1],8)
         self.reward_count = 0
 
     def saveconfig(self,filename):

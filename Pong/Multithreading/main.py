@@ -75,6 +75,14 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
                     connPlayer1.send(x)
 
 
+                elif instruction == 'CHSPEED':
+                    self.request.sendall(bytes(json.dumps({'return':'ok'}), 'UTF-8'))
+                    print ('change speed to...')
+                    changespeed()
+
+
+
+
 
                 else:
                     self.request.sendall(bytes(json.dumps({'return':'not ok'}), 'UTF-8'))
@@ -138,10 +146,21 @@ def predictnext(player,frame):
     return returnframe
 
 
+def changespeed():
+    global speed
+    if speed > 0.0:
+        speed = 0.0
+    else:
+        speed = 0.3
+
+
+
 if __name__ == '__main__':
 
     # logging path
     path = "log_pong.log"
+    global speed
+    speed = 0.0
 
     # check if logfile exists
     if not os.path.exists(path):
@@ -222,8 +241,8 @@ if __name__ == '__main__':
 
 
         #while True:
-
-        #time.sleep(0.1) # muss warten!!
+        if speed > 0:
+            time.sleep(speed)
 
         if connPlayer0.poll(None): # Daten sind da...
             frame = connPlayer0.recv()

@@ -41,7 +41,7 @@ class NeuralNetwork:
         __temp_RD = []
         for i in range(0, len(layer)):
             __temp_RD.append(n.zeros((1, layer[i])))
-        for t in range(0, self.tmax):  # für t Zeitschritte leere "templates" zum Speichern der Daten
+        for t in range(0, self.tmax+1):  # für t Zeitschritte leere "templates" zum Speichern der Daten
             self.RS.append(__temp_RD)
 
 
@@ -151,17 +151,54 @@ class NeuralNetwork:
 
 
         starttime = time.time()
-        #for i in range(0, self.tmax):
-        i = 0
-        if True: #TODO: Mehrfaches lernern einbringen!
 
+        for l in range(len(self.W) -1, -1, -1):  #für alle Layer, diesmal jedoch von hinten nach von!
+            #print('Layer: ' + str(l) )
+            #Wenn ich es richtig sehe, sind, für den delta_next die gewichte uninterressant!
+
+            delta_next = _tanh_deriv(self.Activation[l]) * delta.dot(self.W[l].T)
+
+
+            #print('<delta>')
+            #pprint.pprint(delta)
+            #print('</delta>')
+
+            #print('<Output>')
+            #pprint.pprint(self.Output[l])
+            #print('</Output>')
+
+            #print('<self.W[l]>')
+            #pprint.pprint(self.W[l])
+            #print('</self.W[l]>')
+
+            self.B[l] += epsilon * delta
+            self.W[l] += epsilon * delta * self.Output[l].T
+
+
+            if l < len(self.W)-1: #erstes (input) und letztes (output) Layer haben keine Rekursion!
+            # daher muessen auch keine Gewichte angepasst werden!
+               self.RW[l] += epsilon * delta * self.RS[0][l+1].T
+
+            delta = delta_next
+                #print('---------------------------------------')
+                # wie oben schon kurz angesprochen, hier wird nun delta_next zu delta, damit der passende Wert für das nächste Layer zur Verfügung steht.
+                # Da delta von der Gewichtsanpassung und die Gewichte für das delta_next gebraucht wird, muss es so auseinander gezogen werden.
+        # erster Datensatz gelernt, nun um einen Zeitschritt in die Vergangenheit gehen: t = t_(x-i)
+
+        epsilon = 0.02
+
+
+        for i in range(1, self.tmax):
+            #delta = n.atleast_2d(poi-self.RS[i][-1])
+            delta = n.atleast_2d(diff) # todo: vieleicht wäre eine ordentlich angepasster diff besser!
+
+            ## RS[i] = [array([[-0.91446288, -0.47661583]]), array([[ 0.24259971,  0.16527083,  0.17044024]]), array([[-0.27864748]])]
+            ###  [[-0.27864748]]
             for l in range(len(self.W) -1, -1, -1):  #für alle Layer, diesmal jedoch von hinten nach von!
-
                 #print('Layer: ' + str(l) )
-
                 #Wenn ich es richtig sehe, sind, für den delta_next die gewichte uninterressant!
 
-                delta_next = _tanh_deriv(self.Activation[l]) * delta.dot(self.W[l].T)
+                delta_next = _tanh_deriv(self.RS[i][l]) * delta.dot(self.W[l].T)
 
 
                 #print('<delta>')
@@ -177,18 +214,16 @@ class NeuralNetwork:
                 #print('</self.W[l]>')
 
                 self.B[l] += epsilon * delta
-                self.W[l] += epsilon * delta * self.Output[l].T
+                self.W[l] += epsilon * delta * self.RS[i][l].T
 
 
                 if l < len(self.W)-1: #erstes (input) und letztes (output) Layer haben keine Rekursion!
-                    # daher muessen auch keine Gewichte angepasst werden!
-                    self.RW[l] += epsilon * delta * self.RS[0][l+1].T
+                # daher muessen auch keine Gewichte angepasst werden!
+                   self.RW[l] += epsilon * delta * self.RS[i+1][l+1].T
 
                 delta = delta_next
-                #print('---------------------------------------')
-                # wie oben schon kurz angesprochen, hier wird nun delta_next zu delta, damit der passende Wert für das nächste Layer zur Verfügung steht.
-                # Da delta von der Gewichtsanpassung und die Gewichte für das delta_next gebraucht wird, muss es so auseinander gezogen werden.
-        # erster Datensatz gelernt, nun um einen Zeitschritt in die Vergangenheit gehen: t = t_(x-i)
+
+
         print('==============================================')
         print('...done in ' + str(time.time()-starttime) + 'sec')
 

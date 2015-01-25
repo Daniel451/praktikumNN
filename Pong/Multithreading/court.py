@@ -46,7 +46,7 @@ class court:
         self.bouncecount = 0
         
         
-    def __initvectors(self):
+    def __initvectors_old(self):
         rad =  (np.pi - 2.0 * self.alpha_min) * 2 * random.random() - ( (np.pi / 2.0 ) - self.alpha_min)
         self.dirVec = np.array([ np.cos(rad) , np.sin(rad) ])
         if random.random() > 0.5:
@@ -56,6 +56,29 @@ class court:
 
         self.posVec = np.array([self.x_max/2.0,self.y_max * random.random()])
         self.bouncecount = 0
+
+    def __initvectors(self):
+
+
+        rotationAngle = np.random.uniform(-np.pi/4, np.pi/4 )
+
+        rotMatrix = np.array([
+                [np.cos(rotationAngle), -np.sin(rotationAngle)],
+                [np.sin(rotationAngle), np.cos(rotationAngle)]
+            ])
+
+        self.dirVec = np.dot(rotMatrix, np.array([1, 0]))
+
+        if random.random() > 0.5:
+            self.dirVec[0]= self.dirVec[0] * -1.0
+
+        #self.posVec = np.array([self.x_max/2.0, self.y_max/2.0])
+        self.posVec = np.array([self.x_max/2.0,self.y_max * random.random()])
+        self.bouncecount = 0
+
+
+
+
 
 
 
@@ -91,6 +114,7 @@ class court:
         return self.__sensor_bat(player) / (self.y_max/2.0) - 1.0
 
     def scaled_sensor_err(self, player):
+        print((self.poi[player]  ) / self.y_max)
         return (self.poi[player] - self.__sensor_bat(player) ) / self.y_max
 
 
