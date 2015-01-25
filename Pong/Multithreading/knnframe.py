@@ -24,11 +24,12 @@ class knnframe:
         logging.basicConfig(filename=path, level=logging.DEBUG)
 
         self.name = str(name)
-        self.timesteps = 100.0
+        self.timesteps = 1000.0
         self.hitratio = 0.5
         self.fakediff = 0.0
         self.newfakediff()
         self.knn = NeuralNetwork([2,3,1],2)
+        self.reward_count = 0
 
     def saveconfig(self,filename):
         #no Return
@@ -65,6 +66,7 @@ class knnframe:
         return 'n'
 
     def reward_pos(self,err):
+        self.rew_diag()
         self.knn.reward(err)
         #self.knn.reward(self.fakediff)
         #print('\a') #Bell
@@ -77,6 +79,7 @@ class knnframe:
         self.newfakediff()
 
     def reward_neg(self,err):
+        self.rew_diag()
         print('Player ' + self.name + ': error is: ' + str(err))
         self.knn.reward(err)
         # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
@@ -92,5 +95,19 @@ class knnframe:
         # Gauss Normalverteilung von etwa -1 - +1 bei  self.hitratio = 0
         print('Player ' + self.name + ': fakediff is now: ' + str(self.fakediff))
 
+    def rew_diag(self):
+        self.reward_count += 1
+        if self.reward_count == 1000:
+            print('1k')
+            logging.info('hitratio@1k: ' + str(self.hitratio))
+        elif self.reward_count == 10000:
+            print('10k')
+            logging.info('hitratio@10k: ' + str(self.hitratio))
+        elif self.reward_count == 100000:
+            print('100k')
+            logging.info('hitratio@100k: ' + str(self.hitratio))
+        elif self.reward_count == 10000000:
+            print('10mio')
+            logging.info('hitratio@10mio: ' + str(self.hitratio))
 
 
