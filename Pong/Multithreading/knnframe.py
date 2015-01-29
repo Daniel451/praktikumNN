@@ -16,15 +16,15 @@ class knnframe:
         path = 'log_player_' + str(name) + '.log' # logging file path
 
         # check if logfile exists
-        if not os.path.exists(path):
-            file = open(path, "w+")
-            file.close()
+
+        self.file = open(path, "w+")
+
 
         # logging stuff
-        logging.basicConfig(filename=path, level=logging.INFO)
+        #logging.basicConfig(filename=path, level=logging.debug)
 
         self.name = str(name)
-        self.timesteps = 1000.0
+        self.timesteps = 20.0
         self.hitratio = 0.5
         self.fakediff = 0.0
         self.newfakediff()
@@ -43,8 +43,8 @@ class knnframe:
 
         pred = self.knn.predict([[xpos,ypos]])
         #print( bcolors.FAIL + 'Player ' + self.name + ' predicted: ' + str(pred[0][0]) + ' with sourcedata: ' + str([xpos,ypos]) + bcolors.ENDC)
-        logging.debug('predicting...')
-        logging.debug(self.knn.debug())
+        #logging.debug('predicting...')
+        #logging.debug(self.knn.debug())
 
 
         return float(pred[0][0])
@@ -99,17 +99,20 @@ class knnframe:
         self.reward_count += 1
         print('Rewards: ', self.reward_count)
         print('Hitratio: ', self.hitratio)
-        if self.reward_count == 100:
-            print('100')
-            logging.info('hitratio@1k: ' + str(self.hitratio))
-        elif self.reward_count == 200:
-            print('200')
-            logging.info('hitratio@10k: ' + str(self.hitratio))
-        elif self.reward_count == 500:
-            print('500')
-            logging.info('hitratio@100k: ' + str(self.hitratio))
-        elif self.reward_count == 1000:
-            print('1000')
-            logging.info('hitratio@10mio: ' + str(self.hitratio))
+        if self.reward_count == 20:
+            #print('20')
+            self.file.write('hitratio@20: ' + str(self.hitratio) + '\n')
+        elif self.reward_count == 50:
+            #print('50')
+            self.file.write('hitratio@50: ' + str(self.hitratio)+ '\n')
+        elif self.reward_count == 75:
+            #print('75')
+            self.file.write('hitratio@75: ' + str(self.hitratio)+ '\n')
+        elif self.reward_count == 100:
+            #print('150')
+            self.file.write('hitratio@100: ' + str(self.hitratio)+ '\n')
+        elif self.reward_count == 150:
+            #print('150')
+            self.file.write('hitratio@150: ' + str(self.hitratio)+ '\n')
 
 
