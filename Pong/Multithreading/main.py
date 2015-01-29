@@ -1,6 +1,18 @@
+#!/usr/bin/env python3.4
+# -*- coding: utf-8 -*-
+""" bla bla bla"""   #TODO: Write summary about this file!
+
+__author__ = "Daniel Speck, Florian Kock"
+__copyright__ = "Copyright 2014, Praktikum Neuronale Netze"
+__license__ = "GPLv3"
+__version__ = "1.0.0"
+__maintainer__ = "Daniel Speck, Florian Kock"
+__email__ = "2speck@informatik.uni-hamburg.de, 2kock@informatik.uni-hamburg.de"
+__status__ = "Development"
+
 from multiprocessing import Process, Pipe
 from knnframe import knnframe
-from court import court
+from court import Court
 import logging
 
 import sys
@@ -51,23 +63,23 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
                 elif instruction == 'INIT':
                     self.request.sendall(bytes(json.dumps({
                                                             'return':'ok',
-                                                            'size':court.v_getSize(),
-                                                            'batsize':court.v_getBatSize(),
+                                                            'size':Court.v_getSize(),
+                                                            'batsize':Court.v_getBatSize(),
                                                             'p1name':'John A. Nunez',
                                                             'p2name':'Cynthia J. Wilson',
                                                         }), 'UTF-8'))
                 elif instruction == 'REFRESH':
                     self.request.sendall(bytes(json.dumps({
                                                             'return':'ok',
-                                                            'speed':court.v_getSpeed(),
-                                                            'posvec':court.v_getPosVec().tolist(), #echte position
-                                                            'dirvec':court.v_getDirVec().tolist(), # Richtungsvector
-                                                            'bat':court.v_getbat(),
-                                                            'points':court.v_getPoint(),
-                                                            'sensorP1_bat':court.scaled_sensor_bat(0),   # position wie sie das NN sieht!
-                                                            'sensorP2_bat':court.scaled_sensor_bat(1),
-                                                            'sensor_posX':court.scaled_sensor_x(),   # position wie sie das NN sieht!
-                                                            'sensor_posY':court.scaled_sensor_y(),
+                                                            'speed':Court.v_getSpeed(),
+                                                            'posvec':Court.v_getPosVec().tolist(), #echte position
+                                                            'dirvec':Court.v_getDirVec().tolist(), # Richtungsvector
+                                                            'bat':Court.v_getbat(),
+                                                            'points':Court.v_getPoint(),
+                                                            'sensorP1_bat':Court.scaled_sensor_bat(0),   # position wie sie das NN sieht!
+                                                            'sensorP2_bat':Court.scaled_sensor_bat(1),
+                                                            'sensor_posX':Court.scaled_sensor_x(),   # position wie sie das NN sieht!
+                                                            'sensor_posY':Court.scaled_sensor_y(),
                                                         }), 'UTF-8'))
                 elif instruction == 'saveConfig':
                     x = DataFrame('saveConfig')
@@ -170,7 +182,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename=path, level=logging.DEBUG)
     logging.info('Started')
     saveconfig = False
-    court = court()
+    court = Court()
     
     sendPlayerA, connPlayer0 = Pipe()
     sendPlayerB, connPlayer1 = Pipe()
@@ -201,31 +213,31 @@ if __name__ == '__main__':
     while True:
 
         #print('new tick!')
-        court.tick()
+        Court.tick()
         rewardframepos = DataFrame('reward_pos')
 
-        if court.hitbat(0):
-            rewardframepos.add('err', court.scaled_sensor_err(0) )
+        if Court.hitbat(0):
+            rewardframepos.add('err', Court.scaled_sensor_err(0) )
             connPlayer0.send(rewardframepos)
-        if court.hitbat(1):
-            rewardframepos.add('err', court.scaled_sensor_err(1) )
+        if Court.hitbat(1):
+            rewardframepos.add('err', Court.scaled_sensor_err(1) )
             connPlayer1.send(rewardframepos)
 
 
-        if court.out(0):
+        if Court.out(0):
             rewardframeneg = DataFrame('reward_neg')
-            rewardframeneg.add('err', court.scaled_sensor_err(0) )
+            rewardframeneg.add('err', Court.scaled_sensor_err(0) )
             connPlayer0.send(rewardframeneg)
-        if court.out(1):
+        if Court.out(1):
             rewardframeneg = DataFrame('reward_neg')
-            rewardframeneg.add('err', court.scaled_sensor_err(1) )
+            rewardframeneg.add('err', Court.scaled_sensor_err(1) )
             connPlayer1.send(rewardframeneg)
 
 
         prednextreqPlayer0 = DataFrame('predictNext')
-        prednextreqPlayer0.add('xpos',court.scaled_sensor_x())
-        prednextreqPlayer0.add('ypos',court.scaled_sensor_y())
-        prednextreqPlayer0.add('mypos',court.scaled_sensor_bat(0))
+        prednextreqPlayer0.add('xpos',Court.scaled_sensor_x())
+        prednextreqPlayer0.add('ypos',Court.scaled_sensor_y())
+        prednextreqPlayer0.add('mypos',Court.scaled_sensor_bat(0))
         connPlayer0.send(prednextreqPlayer0)
         #print('send data to player 0: ' + str(prednextreqPlayer0))
         #print('Player0 Bat: ' + str(court.scaled_sensor_bat(0)))
@@ -233,9 +245,9 @@ if __name__ == '__main__':
         #print('Player0 Y: ' + str(court.scaled_sensor_y()))
 
         prednextreqPlayer1 = DataFrame('predictNext')
-        prednextreqPlayer1.add('xpos',court.scaled_sensor_x())
-        prednextreqPlayer1.add('ypos',court.scaled_sensor_y())
-        prednextreqPlayer1.add('mypos',court.scaled_sensor_bat(1))
+        prednextreqPlayer1.add('xpos',Court.scaled_sensor_x())
+        prednextreqPlayer1.add('ypos',Court.scaled_sensor_y())
+        prednextreqPlayer1.add('mypos',Court.scaled_sensor_bat(1))
         connPlayer1.send(prednextreqPlayer1)
         #print('send data to player 1: ' + str(prednextreqPlayer1))
         #print('Player1 Bat: ' + str(court.scaled_sensor_bat(1)))
@@ -248,14 +260,14 @@ if __name__ == '__main__':
         if connPlayer0.poll(None): # Daten sind da...
             frame = connPlayer0.recv()
             if frame.instruction == 'Return':
-                court.move(0,frame.getdata('move'))
+                Court.move(0,frame.getdata('move'))
 
 
 
         if connPlayer1.poll(None): # Daten sind da...
             frame = connPlayer1.recv()
             if frame.instruction == 'Return':
-                court.move(1,frame.getdata('move'))
+                Court.move(1,frame.getdata('move'))
 
 
 
