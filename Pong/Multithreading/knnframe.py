@@ -16,9 +16,9 @@ class knnframe:
         path = 'log_player_' + str(name) + '.log' # logging file path
 
         # check if logfile exists
-        if not os.path.exists(path):
-            file = open(path, "w+")
-            file.close()
+
+        self.file = open(path, "w+")
+
 
         # logging stuff
         #logging.basicConfig(filename=path, level=logging.debug)
