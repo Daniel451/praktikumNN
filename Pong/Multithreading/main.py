@@ -105,7 +105,7 @@ def startplayer(conn,playername, loadconfig = None):
             frame = conn.recv() # Daten sind da...
             
             if frame.instruction == 'EXIT': # Beenden.
-                print('Player ' + str(playername) + ' Call: ' +  frame.instruction )
+                #print('Player ' + str(playername) + ' Call: ' +  frame.instruction )
                 exit()
                 break
 
@@ -126,7 +126,7 @@ def startplayer(conn,playername, loadconfig = None):
             elif frame.instruction == 'saveConfig': #
 
                 path = 'save/config_' + str(playername) + '_' + datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S') + '.pcf'
-                print('Player ' + str(playername) + ' Call: '+ frame.instruction + ' in ' + path )
+                #print('Player ' + str(playername) + ' Call: '+ frame.instruction + ' in ' + path )
                 player.saveconfig(path)
 
             else:

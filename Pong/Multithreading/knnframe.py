@@ -16,9 +16,9 @@ class knnframe:
         path = 'log_player_' + str(name) + '.log' # logging file path
 
         # check if logfile exists
-
-        self.file = open(path, "w+")
-
+        if not os.path.exists(path):
+            file = open(path, "w+")
+            file.close()
 
         # logging stuff
         #logging.basicConfig(filename=path, level=logging.debug)
@@ -30,6 +30,7 @@ class knnframe:
         self.newfakediff()
         self.knn = NeuralNetwork([2,5,1],8)
         self.reward_count = 0
+        self.printcount = 10
 
     def saveconfig(self,filename):
         #no Return
@@ -75,25 +76,28 @@ class knnframe:
         if self.hitratio > 1.0:
             self.hitratio = 1.0
 
-        print( bcolors.OKGREEN + 'Player ' + self.name + ': got positive reward! Hitratio is now: ' + str(self.hitratio) + bcolors.ENDC )
+        if self.reward_count % self.printcount == 0:
+            print( bcolors.OKGREEN + 'Player ' + self.name + ': got positive reward! Hitratio is now: ' + str(self.hitratio) + bcolors.ENDC )
         self.newfakediff()
 
     def reward_neg(self,err):
         self.rew_diag()
-        print('Player ' + self.name + ': error is: ' + str(err))
+        if self.reward_count % self.printcount == 0:
+            print('Player ' + self.name + ': error is: ' + str(err))
         self.knn.reward(err)
         # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio -= 1.0/self.timesteps
         if self.hitratio < 0.0:
             self.hitratio = 0.0
 
-        print( bcolors.OKBLUE + 'Player ' + self.name + ': got negative reward! Hitratio is now: ' + str(self.hitratio) + bcolors.ENDC)
+        if self.reward_count % self.printcount == 0:
+            print( bcolors.OKBLUE + 'Player ' + self.name + ': got negative reward! Hitratio is now: ' + str(self.hitratio) + bcolors.ENDC)
         self.newfakediff()
 
     def newfakediff(self):
         self.fakediff = numpy.random.normal(0.0,1.0/3.0)*(1.0-self.hitratio)
         # Gauss Normalverteilung von etwa -1 - +1 bei  self.hitratio = 0
-        print('Player ' + self.name + ': fakediff is now: ' + str(self.fakediff))
+        #print('Player ' + self.name + ': fakediff is now: ' + str(self.fakediff))
 
     def rew_diag(self):
         self.reward_count += 1

@@ -22,12 +22,12 @@ def netw_communication(conn):
         if conn.poll(None):  # warte auf neue Daten...
             
             frame = conn.recv() # Daten sind da...
-            print(frame.instruction)
+            #print(frame.instruction)
             nc.send({'instruction' : frame.instruction})
 
             #if  frame.instruction == 'INIT' or frame.instruction == 'REFRESH':
             retval = nc.receive()
-            print(retval)
+            #print(retval)
 
             conn.send(retval)
             
@@ -163,7 +163,7 @@ class Application(Frame):
             
         self.lastrefresh = self.timestamp
         self.timestamp = time.time()
-        self.after(150, self.update)
+        self.after(50, self.update)
             
     def updateCurt(self):
         r = 5

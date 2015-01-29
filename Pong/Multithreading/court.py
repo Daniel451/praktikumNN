@@ -16,7 +16,7 @@ class court:
         self.alpha_min = 0.5
 
         # Ballgeschwindigkeit
-        self.initspeed = 0.2
+        self.initspeed = 1.0
 
         # Inkrement zur Geschwindigkeitserhöhung (von initspeed)
         self.speedstep = 0.05
@@ -114,7 +114,7 @@ class court:
         return self.__sensor_bat(player) / (self.y_max/2.0) - 1.0
 
     def scaled_sensor_err(self, player):
-        print((self.poi[player]  ) / self.y_max)
+        #print((self.poi[player]  ) / self.y_max)
         return (self.poi[player] - self.__sensor_bat(player) ) / self.y_max
 
 
@@ -143,7 +143,7 @@ class court:
         #########################
 
         # todo: kommentieren
-        self.posVec = self.posVec + self.dirVec
+        self.posVec = self.posVec + self.dirVec * 0.5
 
         # Hat der Schläger den Ball getroffen?
         # bathit[0] -> linker Schläger
@@ -192,7 +192,7 @@ class court:
             poi = self.posVec + (factor * self.dirVec)
 
             self.poi[0] = poi[1]
-            print (str(self.poi))
+            #print (str(self.poi))
             # Wenn der Ball über der unteren Kante und unter der oberen Kante des Schlägers
             # auftrifft, so würde der Schläger den Ball treffen
             if (poi[1] > self.bat[0] - self.batsize) and (poi[1] < self.bat[0] + self.batsize):
