@@ -93,86 +93,76 @@ class Knnframe:
         self.knn.save(filename) #TODO correct this!
         
     def predict(self,xpos,ypos,mypos):
-        #return action  (up:      u
-                      #  down:    d
-                      #  nothing: n
+        """
+        Stellt eine Funktion zur Verfügung, die das KNN Anweist aus gegebenen Werten, hier ein normierter
+        Ortsvektor, eine Ausgabe bzw. Aktion vorherzusagen.
+        :param xpos: normierte x-Komponente des Ortsvektors
+        :type xpos: float
+        :param ypos: normierte y-Komponente des Ortsvektors
+        :type ypos: float
+        :param mypos: Position des eigenen Schlägers, normiert (wird hier nicht weiter genutzt)
+        :type mypos: float
+        :return: Aktion die das KNN vorhersagt (kann float oder str sein)
+        :rtype: float
+        """
 
+        #Rufe die passende Funktion im KNN auf, hierbei ist zu beachten, das es, wie in NeuralNetwork.py beschrieben
+        # praktisch immer ein 2-Dimensionales (Numpy-) Array ist. Daher die [[ ]] doppelte Klammerung: ".shape=1,2"
+        # Ebenfalls muss diese eingabe zur Konfiguration des KNN passen. Hier ist es mit 2 Input-Neuronen erstellt,
+        # somit müssen auch 2 Werte eingegeben werden.
         pred = self.knn.predict([[xpos,ypos]])
-        #print( bcolors.FAIL + 'Player ' + self.playerid + ' predicted: ' + str(pred[0][0]) + ' with sourcedata: ' + str([xpos,ypos]) + bcolors.ENDC)
-        #logging.debug('predicting...')
-        #logging.debug(self.knn.debug())
 
-
+        # Auch das zurückgegebene Ergebnis ist 2-Dimensional, enthält aber nur einen Wert wie
+        #  in der Konfiguration angegeben.
         return float(pred[0][0])
 
-        self.fakediff = 0.0 #TODO seems not to work like this... damn!
-        diff = mypos - pred[0][0]
-
-
-
-        #print( bcolors.HEADER + 'Player ' + self.playerid + ' diff: ' + str(diff) + bcolors.ENDC)
-
-        if diff > 0.1:
-            #print('Player ' + self.playerid +': up!')
-            return 'd'
-        elif diff < -0.1:
-            #print('Player ' + self.playerid +': down!')
-            return 'u'
-        #print('hold position!')
-        return 'n'
 
     def reward_pos(self,err):
-        self.rew_diag()
+        """
+        Stellt eine Funktion zur Verfügung, die aufgerufen werden soll, wenn das KNN eine positive Belohnung
+        erhalten soll. Neben dem Aufrufen des KNNs wird auch dafür gesorgt, dass der gleitende Durchschnitt,
+        siehe __init__() aktualisiert wird.
+        :param err: skalierter Deltawert zwischen Schlägermittelpunkt und Auftreffpunkt des Balles
+        :type err: float
+        :return: none
+        :rtype: void
+        """
+
+        # rufe die Belohnungsfunktion (hier: supervised lernen) vom KNN auf
         self.knn.reward(err)
-        #self.knn.reward(self.fakediff)
-        #print('\a') #Bell
-        # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
+
+        # Aktualisieren vom gleitenden Durchschnitt nach oben hin.
         self.hitratio += 1.0/self.timesteps
-        if self.hitratio > 1.0:
+        if self.hitratio > 1.0: # Bergenzen auf 1.0
             self.hitratio = 1.0
 
-        if self.reward_count % self.printcount == 0:
-            print(ConCol.OKGREEN + "Player " + str(self.playerid) + ": got positive reward! Hitratio is now: "
-                  + str(self.hitratio) + ConCol.ENDC)
-        self.newfakediff()
+        # Debug ausgaben in die Konsole, um zu sehen, ob das Spiel im Gange ist und wie der aktuelle Zustand ist.
+        #  Die eigentlichen Informationen sind jedoch in der dedizierten Visualisierung zu sehen.
+        print( ConCol.OKGREEN + 'Player ' + self.playerid + ': got positive reward! Hitratio is now: ' + str(self.hitratio) + ConCol.ENDC )
 
     def reward_neg(self,err):
-        self.rew_diag()
-        if self.reward_count % self.printcount == 0:
-            print('Player ' + str(self.playerid) + ': error is: ' + str(err))
+        """
+        Stellt eine Funktion zur Verfügung, die aufgerufen werden soll, wenn das KNN eine negative Belohnung
+        erhalten soll. Neben dem Aufrufen des KNNs wird auch dafür gesorgt, dass der gleitende Durchschnitt,
+        siehe __init__() aktualisiert wird.
+        :param err: skalierter Deltawert zwischen Schlägermittelpunkt und Auftreffpunkt des Balles
+        :type err: float
+        :return: none
+        :rtype: void
+        """
+        # rufe die Belohnungsfunktion (hier: supervised lernen) vom KNN auf
         self.knn.reward(err)
-        # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
+
+        # Aktualisieren vom gleitenden Durchschnitt nach unten hin.
         self.hitratio -= 1.0/self.timesteps
-        if self.hitratio < 0.0:
+        if self.hitratio < 0.0: # Bergenzen auf 0.0
             self.hitratio = 0.0
 
-        if self.reward_count % self.printcount == 0:
-            print( ConCol.OKBLUE + 'Player ' + str(self.playerid) + ': got negative reward! Hitratio is now: ' + str(self.hitratio) + ConCol.ENDC)
-        self.newfakediff()
+        # Debug ausgaben in die Konsole, um zu sehen, ob das Spiel im Gange ist und wie der aktuelle Zustand ist.
+        #  Die eigentlichen Informationen sind jedoch in der dedizierten Visualisierung zu sehen.
+        print( ConCol.OKBLUE + 'Player ' + self.playerid + ': got negative reward! Hitratio is now: ' + str(self.hitratio) + ConCol.ENDC)
 
-    def newfakediff(self):
-        self.fakediff = numpy.random.normal(0.0,1.0/3.0)*(1.0-self.hitratio)
-        # Gauss Normalverteilung von etwa -1 - +1 bei  self.hitratio = 0
-        #print('Player ' + self.playerid + ': fakediff is now: ' + str(self.fakediff))
 
-    def rew_diag(self):
-        self.reward_count += 1
-        print('Rewards: ', self.reward_count)
-        print('Hitratio: ', self.hitratio)
-        if self.reward_count == 20:
-            #print('20')
-            self.file.write('hitratio@20: ' + str(self.hitratio) + '\n')
-        elif self.reward_count == 50:
-            #print('50')
-            self.file.write('hitratio@50: ' + str(self.hitratio) + '\n')
-        elif self.reward_count == 75:
-            #print('75')
-            self.file.write('hitratio@75: ' + str(self.hitratio) + '\n')
-        elif self.reward_count == 100:
-            #print('150')
-            self.file.write('hitratio@100: ' + str(self.hitratio) + '\n')
-        elif self.reward_count == 150:
-            #print('150')
-            self.file.write('hitratio@150: ' + str(self.hitratio) + '\n')
+
 
 
