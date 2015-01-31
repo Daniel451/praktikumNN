@@ -25,7 +25,7 @@ class knnframe:
         """
 
         # Logging
-        path = 'log_player_' + str(name) + '.log' # logging file path
+        path = 'log_player_' + str(name) + '.log' # logging file file
 
         # check if logfile exists
 
@@ -33,7 +33,7 @@ class knnframe:
 
 
         # logging stuff
-        #logging.basicConfig(filename=path, level=logging.debug)
+        #logging.basicConfig(filename=file, level=logging.debug)
 
         self.name = str(name)
         self.timesteps = 20.0

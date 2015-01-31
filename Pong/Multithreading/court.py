@@ -197,7 +197,7 @@ class Court:
         ### Initialisierungen ###
         #########################
 
-        # Setze den Ball auf eine Position weiter. Die Schrittweite wird durch speed gesetzt.
+        # Setze den Ball auf eine Position weiter. Die Schrittweite wird durch mainloopdelay gesetzt.
         self.posVec += self.dirVec * self.speed
 
         # Hat der Schläger den Ball getroffen?

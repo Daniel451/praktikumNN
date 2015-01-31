@@ -14,7 +14,7 @@ from tkinter import *
 from multiprocessing import Process, Pipe
 import socket
 import json
-from data_frame import DataFrame
+from telegramframe import TelegrammFrame
 import time
 
 def netw_communication(conn):
@@ -90,16 +90,16 @@ class Application(Frame):
     
     def QGoS(self):
         print("Send EXIT Signal to Server...")
-        conn.send(DataFrame('EXIT'))
+        conn.send(TelegrammFrame('EXIT'))
 
 
     def save(self):
         print("Send Save Signal to Server...")
-        conn.send(DataFrame('saveConfig'))
+        conn.send(TelegrammFrame('saveConfig'))
 
     def Togglespeed(self):
         print('send Speed Toggle')
-        conn.send(DataFrame('CHSPEED'))
+        conn.send(TelegrammFrame('CHSPEED'))
         if conn.poll(None):  # warte auf neue Daten...
             print(conn.recv()) # Daten sind da...
 
@@ -117,7 +117,7 @@ class Application(Frame):
         self.bQUIT.pack({"side": "left"})
         
         self.bQGoS = Button(self)
-        self.bQGoS["text"] = "QUIT game on server",
+        self.bQGoS["text"] = "QUIT game on guiserver",
         self.bQGoS["command"] = self.QGoS
         self.bQGoS.pack({"side": "left"})
 
@@ -145,7 +145,7 @@ class Application(Frame):
         
     def update(self):
         if self.init:
-            conn.send(DataFrame('INIT')) #Frage init Daten an...
+            conn.send(TelegrammFrame('INIT')) #Frage init Daten an...
             
             if conn.poll(None):  # warte auf neue Daten...
                 data = conn.recv() # Daten sind da...
@@ -159,11 +159,11 @@ class Application(Frame):
                 self.drawCurt()
                 self.init = False
                 
-        conn.send(DataFrame('REFRESH')) #Frage init Daten an...
+        conn.send(TelegrammFrame('REFRESH')) #Frage init Daten an...
         if conn.poll(None):  # warte auf neue Daten...
             data = conn.recv() # Daten sind da...
             
-            self.speed = data['speed']
+            self.speed = data['mainloopdelay']
             self.posvec = data['posvec']
             self.dirvec = data['dirvec']
             self.posX = data['sensor_posX']

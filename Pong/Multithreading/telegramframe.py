@@ -10,9 +10,9 @@ __maintainer__ = "Daniel Speck, Florian Kock"
 __email__ = "2speck@informatik.uni-hamburg.de, 2kock@informatik.uni-hamburg.de"
 __status__ = "Development"
 
-class DataFrame:
+class TelegrammFrame:
     """
-    DataFrame stellt ein Objekt dar, das dazu genutzt werden kann, Information zu transportieren.
+    TelegrammFrame stellt ein Objekt dar, das dazu genutzt werden kann, Information zu transportieren.
     Es besteht aus einer "Instruction" als String und kann beliebig viele Daten angehangen haben.
     Daten werden mit einem Key identifiziert.
     """
