@@ -1,5 +1,6 @@
 #!/usr/bin/env python3.4
 # -*- coding: utf-8 -*-
+
 """
 Hier ist der Frame für die Anbindung von Spiel (Pong) zu KNN enthalten.
 Hier geht es vor allem um die Anbindung von unserem NeuralNetwork.py.
@@ -13,58 +14,82 @@ __maintainer__ = "Daniel Speck, Florian Kock"
 __email__ = "2speck@informatik.uni-hamburg.de, 2kock@informatik.uni-hamburg.de"
 __status__ = "Development"
 
-import logging
 from NeuralNetwork import NeuralNetwork
-import numpy
-import os.path
 from concol import ConCol
 
+import logging
+import os.path
+
+
 class Knnframe:
+
     def __init__(self, loadconfig, playerid):
         """
-        Init vom KNN Frame
-        Setzen von default Werten bzw. Erstellen des echten KNN.
-        :param loadconfig: Pfad/Konfigurationsdatei eines schon bestehenden KNN (nicht Implementiert!)
+        Initialisierung von Knnframe.
+        Setzen von default-Werten bzw. Erstellen des "echten" KNN.
+
+        :param loadconfig: Pfad/Konfigurationsdatei eines schon bestehenden KNN (noch nicht Implementiert!)
         :type loadconfig: str
-        :param playerid: Spieler Identifikationsnummer (wird hauptsächlich für Dateinamen gebraucht)
+
+        :param playerid: Spieleridentifikationsnummer (wird hauptsächlich für Dateinamen gebraucht)
         :type playerid: int
+
         :return: none
         :rtype: void
         """
 
         # Für effizientes debugging und logging können Werte und Informationen in eine
-        #  Datei geschrieben werden
-        file = 'log_player_' + str(playerid) + '.log'
+        # Datei geschrieben werden
+        file = 'log_player_' + str(playerid) + '.log'  # Dateipfad
         self.createlogfile(file)
         logging.basicConfig(filename=file, level=logging.INFO)
         logging.info('==================')
         logging.info('====  Started  ===')
         logging.info('==================')
 
-        # Spieler Identifikationsnummer (wird hauptsächlich für Dateinamen und Debuggingausgaben gebraucht)
+        # Spieleridentifikationsnummer (wird hauptsächlich für Dateinamen und Debuggingausgaben benötigt)
         self.playerid = playerid
 
-        # Um eine Bewertung des Spieles wärend der Spielzeit durchführen zu können, werden die Treffer zu den
-        #  nicht-Treffern (Outs) gezählt und ins Verhältnis gebracht. Dies geschieht über einen gleitenden Durchschnitt
-        self.timesteps = 20.0 # die letzten X Belohnungen sollen Zählen (Formel hierzu: siehe unten in reward_pos bzw reward_neg)
-        self.hitratio = 0.5 # der initiale Wert der Treffer = 1 zu Outs = 0.
+        # Um eine Bewertung des Spieles während der Spielzeit durchführen zu können, werden die Treffer zu den
+        # Nicht-Treffern (Outs) gezählt und in ein Verhältnis gebracht.
+        # Dies geschieht über einen gleitenden Durchschnitt.
 
-        # um eine sinnvolle Ausgabe zu erzeugen, werden die Belohnungen gezählt.
+        # Anzahl der letzten x Belohnungen, die in die Berechnung der Hitrate eingehen sollen.
+        # (Formel hierzu: siehe unten in reward_pos() bzw. reward_neg())
+        self.timesteps = 20.0
+
+        # Das initiale Verhältnis von Treffern zu Outs (100% Treffer = 1.0, 100% Outs = 0.0).
+        self.hitratio = 0.5
+
+        # Zu Ausgabe-/Debug-/Logzwecken werden die Belohnungen gezählt.
         self.reward_count = 0
 
-        # Debugausgaben nur alle X Belohnungen:
-        self.printcount = 10
-
-        # Erstellen des neuralen Netzwerk Objektes.
-        # Konfiguration ist wie folgt zu verstehen:
-        #  NeuralNetwork(layer, tmax):
-        #  bei NeuralNetwork([2,5,1],8) ist dies also:
-        #   Aufbau:
+        ########################################################
+        # Erstellen des künstlichen neuronalen Netzwerkobjekts #
+        ########################################################
+        #
+        # Die Konfiguration ist wie folgt zu verstehen:
+        #
+        # NeuralNetwork(layer, tmax)
+        #
+        # layer: Liste -> [Input-Neuronen, Hidden-Neuronen*, Output-Neuronen]
+        # *: Es sind beliebig viele Hidden-Layer möglich. Die Konfiguration [2,10,5,1] würde
+        # z.B. ein Netz mit 2 Hidden-Layern erstellen,
+        # das Erste Hidden-Layer mit 10, das Zweite Hidden-Layer mit 5 Neuronen.
+        #
+        # tmax: Integer
+        #
+        # Beispiel:
+        #
+        #   bei NeuralNetwork([2,5,1],8) würde dies folgendem Aufbau entsprechen:
+        #
         #   - 2 input Neuronen
         #   - 5 hidden Neuronen
         #   - 1 output Neuron
+        #
         #   Lernschritte in die Vergangenheit:
-        #   - 8 Speicherstellen für das lernen von Situationen vor einer Bestätigung
+        #
+        #   - 8 Speicherstellen für das zeitverzögerte Lernen von Situationen vor einer Belohnung
         #   (siehe hierzu die NeuralNetwork.py)
         #
         self.knn = NeuralNetwork([2, 5, 1], 8)
@@ -72,9 +97,11 @@ class Knnframe:
     @staticmethod
     def createlogfile(logfilename):
         """
-        Legt ein logfile an, wenn Keines existiert.
+        Legt ein logfile an, wenn keines existiert.
+
         :param logfilename: Dateiname
         :type logfilename: str
+
         :return: none
         :rtype: void
         """
@@ -85,84 +112,105 @@ class Knnframe:
     def saveconfig(self,filename):
         """
         Stellt eine Funktion zur Verfügung, die das KNN Anweist die Konfiguration zu speichern
+
         :param filename: Dateiname
         :type filename: str
+
         :return: none
         :rtype: void
         """
         self.knn.save(filename)
         
-    def predict(self,xpos,ypos,mypos):
+    def predict(self, xpos, ypos, mypos):
         """
         Stellt eine Funktion zur Verfügung, die das KNN Anweist aus gegebenen Werten, hier ein normierter
         Ortsvektor, eine Ausgabe bzw. Aktion vorherzusagen.
-        :param xpos: normierte x-Komponente des Ortsvektors
+
+        :param xpos: Normierte x-Komponente des Ortsvektors
         :type xpos: float
-        :param ypos: normierte y-Komponente des Ortsvektors
+
+        :param ypos: Normierte y-Komponente des Ortsvektors
         :type ypos: float
+
         :param mypos: Position des eigenen Schlägers, normiert (wird hier nicht weiter genutzt)
         :type mypos: float
-        :return: Aktion die das KNN vorhersagt (kann float oder str sein)
+
+        :return: Aktion, die das KNN berechnet (kann float oder str sein)
         :rtype: float
         """
 
-        #Rufe die passende Funktion im KNN auf, hierbei ist zu beachten, das es, wie in NeuralNetwork.py beschrieben
-        # praktisch immer ein 2-Dimensionales (Numpy-) Array ist. Daher die [[ ]] doppelte Klammerung: ".shape=1,2"
-        # Ebenfalls muss diese eingabe zur Konfiguration des KNN passen. Hier ist es mit 2 Input-Neuronen erstellt,
-        # somit müssen auch 2 Werte eingegeben werden.
-        pred = self.knn.predict([[xpos,ypos]])
+        # Rufe die passende Funktion im KNN auf, hierbei ist zu beachten, das es, wie in NeuralNetwork.py beschrieben
+        # praktisch immer ein 2D (Numpy-)Array ist. Daher die doppelte Klammerung [[ ]]: ".shape=1,2"
+        #
+        # Ebenfalls muss diese Eingabe zur Konfiguration des KNN passen. Hier ist es mit 2 Input-Neuronen erstellt,
+        # daher müssen auch 2 Werte eingegeben werden.
+        pred = self.knn.predict([[xpos, ypos]])
 
-        # Auch das zurückgegebene Ergebnis ist 2-Dimensional, enthält aber nur einen Wert wie
-        #  in der Konfiguration angegeben.
+        # Die zurückgegebene Prädiktion ist ebenfalls zweidimensional, enthält aber nur einen Wert wie
+        # in der Konfiguration angegeben.
         return float(pred[0][0])
 
 
-    def reward_pos(self,err):
+    def reward_pos(self, err):
         """
         Stellt eine Funktion zur Verfügung, die aufgerufen werden soll, wenn das KNN eine positive Belohnung
-        erhalten soll. Neben dem Aufrufen des KNNs wird auch dafür gesorgt, dass der gleitende Durchschnitt,
-        siehe __init__() aktualisiert wird.
+        erhält. Außerdem wird der gleitende Durchschnitt (siehe __init__()) aktualisiert.
+
         :param err: skalierter Deltawert zwischen Schlägermittelpunkt und Auftreffpunkt des Balles
         :type err: float
+
         :return: none
         :rtype: void
         """
 
-        # rufe die Belohnungsfunktion (hier: supervised lernen) vom KNN auf
+        # Rufe die Belohnungsfunktion (hier: supervised learning) vom KNN auf
         self.knn.reward(err)
+
+        # Anzahl der bisherigen Rewards erhöhen/aktualisieren
+        self.reward_count += 1
 
         # Aktualisieren vom gleitenden Durchschnitt nach oben hin.
-        self.hitratio += 1.0/self.timesteps
-        if self.hitratio > 1.0: # Bergenzen auf 1.0
+        self.hitratio += 1.0 / self.timesteps
+
+        # Da die hitratio ebenfalls normiert ist (Interval: [0.0, 1.0]),
+        # muss korrigiert werden, falls die obere Schranke überschritten wurde.
+        if self.hitratio > 1.0:
             self.hitratio = 1.0
 
-        # Debug ausgaben in die Konsole, um zu sehen, ob das Spiel im Gange ist und wie der aktuelle Zustand ist.
-        #  Die eigentlichen Informationen sind jedoch in der dedizierten Visualisierung zu sehen.
-        print( ConCol.OKGREEN + 'Player ' + self.playerid + ': got positive reward! Hitratio is now: ' + str(self.hitratio) + ConCol.ENDC )
+        # Debug-Ausgaben in die Konsole schreiben, um zu sehen, ob das Spiel im Gange ist
+        # sowie den aktuellen Zustand beschreiben.
+        # Die eigentlichen Informationen sind jedoch in der dedizierten Visualisierung zu sehen.
+        print(ConCol.OKGREEN + 'Player ' + str(self.playerid) + ': got positive reward! Hitratio is now: '
+               + str(self.hitratio) + " (" + str(self.reward_count) + " rewards total)" + ConCol.ENDC)
 
-    def reward_neg(self,err):
+    def reward_neg(self, err):
         """
         Stellt eine Funktion zur Verfügung, die aufgerufen werden soll, wenn das KNN eine negative Belohnung
-        erhalten soll. Neben dem Aufrufen des KNNs wird auch dafür gesorgt, dass der gleitende Durchschnitt,
-        siehe __init__() aktualisiert wird.
+        erhält. Außerdem wird der gleitende Durchschnitt (siehe __init__()) aktualisiert.
+
         :param err: skalierter Deltawert zwischen Schlägermittelpunkt und Auftreffpunkt des Balles
         :type err: float
+
         :return: none
         :rtype: void
         """
-        # rufe die Belohnungsfunktion (hier: supervised lernen) vom KNN auf
+
+        # Rufe die Belohnungsfunktion (hier: supervised learning) vom KNN auf
         self.knn.reward(err)
+
+        # Anzahl der bisherigen Rewards erhöhen/aktualisieren
+        self.reward_count += 1
 
         # Aktualisieren vom gleitenden Durchschnitt nach unten hin.
         self.hitratio -= 1.0/self.timesteps
-        if self.hitratio < 0.0: # Bergenzen auf 0.0
+
+        # Da die hitratio ebenfalls normiert ist (Interval: [0.0, 1.0]),
+        # muss korrigiert werden, falls die untere Schranke unterschritten wurde.
+        if self.hitratio < 0.0:
             self.hitratio = 0.0
 
-        # Debug ausgaben in die Konsole, um zu sehen, ob das Spiel im Gange ist und wie der aktuelle Zustand ist.
-        #  Die eigentlichen Informationen sind jedoch in der dedizierten Visualisierung zu sehen.
-        print( ConCol.OKBLUE + 'Player ' + self.playerid + ': got negative reward! Hitratio is now: ' + str(self.hitratio) + ConCol.ENDC)
-
-
-
-
-
+        # Debug-Ausgaben in die Konsole schreiben, um zu sehen, ob das Spiel im Gange ist
+        # sowie den aktuellen Zustand beschreiben.
+        # Die eigentlichen Informationen sind jedoch in der dedizierten Visualisierung zu sehen.
+        print(ConCol.OKBLUE + 'Player ' + str(self.playerid) + ': got negative reward! Hitratio is now: '
+              + str(self.hitratio) + " (" + str(self.reward_count) + " rewards total)" + ConCol.ENDC)
