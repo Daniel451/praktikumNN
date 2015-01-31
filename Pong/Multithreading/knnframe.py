@@ -32,7 +32,6 @@ class Knnframe:
         :rtype: void
         """
 
-
         # Für effizientes debugging und logging können Werte und Informationen in eine
         #  Datei geschrieben werden
         file = 'log_player_' + str(playerid) + '.log'
@@ -68,8 +67,7 @@ class Knnframe:
         #   - 8 Speicherstellen für das lernen von Situationen vor einer Bestätigung
         #   (siehe hierzu die NeuralNetwork.py)
         #
-        self.knn = NeuralNetwork([2,5,1],8)
-
+        self.knn = NeuralNetwork([2, 5, 1], 8)
 
     @staticmethod
     def createlogfile(logfilename):

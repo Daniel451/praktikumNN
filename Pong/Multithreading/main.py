@@ -1,11 +1,21 @@
 #!/usr/bin/env python3.4
 # -*- coding: utf-8 -*-
-"""Diese Datei stellt den Eintrittspunkt der Kernapplikation zur Verfügung von hier wird das Programm gestartet.
 
-Nach einigen Importen und Klassendefinitionen startet die Hauptschleife die dafür sorgt, dass die KNNs, welche
-zuvor gestartet wurden ihre Anfragen erhalten und daraufhin ihre Predictions senden können. Weiterhin sorgt diese
-Hauptschleife auch dafür, dass die KNNs ihre Rewards erhalten. Je nach Implementation bedeutet dies, dass das Netzt
-supervised lernt oder auch andere Techniken verwendet um beim nächsten Ballanflug eine bessere Prediction zu liefern."""
+"""
+Diese Datei stellt den Eintrittspunkt der Kernapplikation zur Verfügung.
+Von hier aus wird das Programm gestartet.
+
+Nach einigen imports und Klassendefinitionen startet die Hauptschleife, welche dafür sorgt, dass die KNNs, welche
+zuvor gestartet wurden, ihre Daten (Positionsvektor des Balles) erhalten und daraufhin ihre predictions zurückgeben
+können.
+Weiterhin sorgt diese Hauptschleife ebenfalls dafür, dass die KNNs ihre "Rewards", also den Fehler / das aktuelle
+Delta zum Lernen erhalten.
+
+Je nach Implementation kann dies allerdings auch bedeuten, dass das Netz nicht unseren vorgestellten supervised
+learning Ansatz verfolgt, sondern z.B. unseren anfangs erdachten reinforcement learning Algorithmus verwendet.
+Die Implementation und damit die Strategie des Lernens oder auch andere Techniken können also verwendet werden,
+um beim nächsten Ballanflug eine bessere Prediction zu liefern.
+"""
 
 __author__ = "Daniel Speck, Florian Kock"
 __copyright__ = "Copyright 2014, Praktikum Neuronale Netze"
@@ -17,7 +27,7 @@ __status__ = "Development"
 
 from multiprocessing import Process, Pipe
 from knnframe import Knnframe
-from court import Court
+from court import court
 from telegramframe import TelegrammFrame
 
 import logging
@@ -48,15 +58,13 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
             try:
                 data = json.loads(self.request.recv(8*1024).decode('UTF-8').strip())
 
-            
             except Exception as e:
                 print("Exception while receiving message: ", e)
                 return
             
             try:
                 instruction = data['instruction']
-                #print('got instruction: ' + instruction)
-            
+
                 if instruction == 'EXIT':
                     # send some 'ok' back
                     print('Exiting...')
@@ -69,114 +77,125 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
                 
                 elif instruction == 'INIT':
                     self.request.sendall(bytes(json.dumps({
-                                                            'return':'ok',
-                                                            'size':Court.v_getSize(),
-                                                            'batsize':Court.v_getBatSize(),
-                                                            'p1name':'John A. Nunez',
-                                                            'p2name':'Cynthia J. Wilson',
-                                                        }), 'UTF-8'))
+                                                            'return': 'ok',
+                                                            'size': court.v_getSize(),
+                                                            'batsize': court.v_getBatSize(),
+                                                            'p1name': 'John A. Nunez',
+                                                            'p2name': 'Cynthia J. Wilson',
+                                                            }), 'UTF-8'))
                 elif instruction == 'REFRESH':
                     self.request.sendall(bytes(json.dumps({
-                                                            'return':'ok',
-                                                            'mainloopdelay':Court.v_getSpeed(),
-                                                            'posvec':Court.v_getPosVec().tolist(), #echte position
-                                                            'dirvec':Court.v_getDirVec().tolist(), # Richtungsvector
-                                                            'bat':Court.v_getbat(),
-                                                            'points':Court.v_getPoint(),
-                                                            'sensorP1_bat':Court.scaled_sensor_bat(0),   # position wie sie das NN sieht!
-                                                            'sensorP2_bat':Court.scaled_sensor_bat(1),
-                                                            'sensor_posX':Court.scaled_sensor_x(),   # position wie sie das NN sieht!
-                                                            'sensor_posY':Court.scaled_sensor_y(),
-                                                        }), 'UTF-8'))
+                                                            'return': 'ok',
+                                                            'mainloopdelay': court.v_getSpeed(),
+                                                            # aktueller Positionsvektor
+                                                            'posvec': court.v_getPosVec().tolist(),
+                                                            # aktueller Richtungsvektor
+                                                            'dirvec': court.v_getDirVec().tolist(),
+                                                            # Schlägerposition
+                                                            'bat': court.v_getbat(),
+                                                            # Spielstand
+                                                            'points': court.v_getPoint(),
+                                                            # Skalierte Positionsdaten des Schlägers für KNNs
+                                                            'sensorP1_bat': court.scaled_sensor_bat(0),
+                                                            'sensorP2_bat': court.scaled_sensor_bat(1),
+                                                            # Skalierte Positionsdaten des Balls für KNNs
+                                                            'sensor_posX': court.scaled_sensor_x(),
+                                                            'sensor_posY': court.scaled_sensor_y(),
+                                                            }), 'UTF-8'))
                 elif instruction == 'saveConfig':
                     x = TelegrammFrame('saveConfig')
                     connPlayer0.send(x)
                     connPlayer1.send(x)
 
-
                 elif instruction == 'CHSPEED':
-                    self.request.sendall(bytes(json.dumps({'return':'ok'}), 'UTF-8'))
+                    self.request.sendall(bytes(json.dumps({'return': 'ok'}), 'UTF-8'))
                     print ('change mainloopdelay to...')
                     changespeed()
 
-
-
-
-
                 else:
-                    self.request.sendall(bytes(json.dumps({'return':'not ok'}), 'UTF-8'))
+                    self.request.sendall(bytes(json.dumps({'return': 'not ok'}), 'UTF-8'))
+
             except Exception as e:
                 print("No instruction available: ", e)
                 return
 
 
 
-
-
-def startplayer(conn,playerid, loadconfig = None):
+def startplayer(conn, playerid, loadconfig=None):
     """
     Hauptschleife für die Spieler-Threads.
     Sorgt dafür, dass die Anforderungen von der Hauptschleife korrekt abgearbeitet werden.
+
     :param conn: Kommunikationstunnel zur Hauptschleife.
     :type conn: multiprocessing.Pipe
+
     :param playerid: Spieler Identifikationsnummer (wird hauptsächlich für Dateinamen gebraucht)
     :type playerid: int
+
     :param loadconfig: Dateiname mit Konfiguration vom Spieler, default=Null, d.h. eine neue wird erzeugt.
     :type loadconfig: str
+
     :return: none
     :rtype: void
     """
 
-    # Nutze ein Framework um ein KNN zu erstellen. Dies hat den Vorteil, das evtl. mehrere Implementationen von
-    #  verschiendenen KIs recht einfach angepasst werden können. Das Interface von Knnframe.py muss jedoch immer
-    #  gleich bleiben! ("Inferface-Pattern")
+    # Es wird ein Framework, quasi ein "Wrapper-Objekt", genutzt um ein KNN zu erstellen.
+    # Jenes hat den Vorteil, das beliebige/mehrere Implementationen vonverschiendenen KIs,
+    # relativ einfach integriert werden können in die vorhandene Infrastruktur.
+    #
+    # Das Interface von Knnframe.py muss jedoch immer erhalten bleiben ("Inferface-Pattern").
 
-    player = Knnframe(loadconfig,playerid)
+    player = Knnframe(loadconfig, playerid)
 
     # Hauptschleife für die Spieler
     while True:
-        if conn.poll(None):  # warte auf neue Daten von der Hauptschleife in main
-            # (info: conn.poll(None) unterbricht den Progammfluss und wartet bis wirklich Daten vorhanden sind!
-            #   siehe in Hauptschleife Zeile ca. 290 in dieser Datei)
 
-            telegramm = conn.recv() # Lade das Telegramm und werte es aus:
-            
+        # Warte auf neue Daten von der Hauptschleife in main
+        # if conn.poll(None) unterbricht den Progammfluss und wartet bis wirklich Daten vorhanden sind!
+        if conn.poll(None):
+
+            # Lade das Telegramm und werte es aus
+            telegramm = conn.recv()
+
             if telegramm.instruction == 'EXIT':
-                # Anforderung zum Beenden erhalten, springe aus der Schleife.
+                # Anforderung zum Beenden erhalten, springe aus der Schleife
                 break
 
             elif telegramm.instruction == 'predictNext':
-                # Anforderung eine neue Vorhersage zu treffen erhalten,
-                #  rufe die entsprechende Funktion auf und sende die Antwort zurück an die Hauptschleife
-                conn.send(requestprediction(player,telegramm))
+                # Anforderung eine neue Vorhersage zu treffen erhalten
+                # Rufe die entsprechende Funktion auf und sende die Antwort zurück an die Hauptschleife
+                conn.send(requestprediction(player, telegramm))
 
             elif telegramm.instruction == 'reward_pos':
-                # Positive Belohnung erhalten,
-                #  rufe die entsprechende Funktion im Interface des Frameworks für die das KNN auf.
+                # Positive Belohnung erhalten (Schläger hat Ball getroffen)
+                # Rufe die entsprechende Funktion im Interface des Frameworks für die das KNN auf
                 err = float(telegramm.getdata('err'))
                 player.reward_pos(err)
 
             elif telegramm.instruction == 'reward_neg':
-                # Negative Belohnung erhalten,
-                #  rufe die entsprechende Funktion im Interface des Frameworks für die das KNN auf.
+                # Negative Belohnung erhalten (Ball hat die Linie überschritten, Schläger hat Ball nicht getroffen)
+                # Rufe die entsprechende Funktion im Interface des Frameworks für die das KNN auf
                 err = float(telegramm.getdata('err'))
                 player.reward_neg(err)
 
             elif telegramm.instruction == 'saveConfig':
-                # Anforderung die Konfiguration zu speichern erhalten,
-                #  bilde den Pfad und Dateinamen aus Zeit/Datum und Spieler ID und ...
+                # Anforderung die Konfiguration zu speichern erhalten
+
+                # Bilde den Pfad und Dateinamen aus Zeit/Datum und Spieler ID
                 path = 'save/config_' + str(playerid) + '_' + datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S')
-                #  rufe die entsprechende Funktion im Interface des Frameworks für die das KNN auf.
+
+                # Rufe die entsprechende Funktion im Interface des Frameworks zum Speichern für das KNN auf
                 player.saveconfig(path)
 
             else:
-                # Fehlerhafte, unbekannte Anforderung erhalten.
+                # Fehlerhafte, unbekannte Anforderung erhalten
                 print('Player ' + str(playerid) + ': unknown instruction: ' + telegramm.instruction)
 
-    # Bei einer EXIT - Anforderung wird Kommunikationstunnel geschlossen und der Thread beendet.
+    # Bei einer EXIT - Anforderung wird der Kommunikationstunnel geschlossen und der Thread beendet
     conn.close()
 
-def saveconfig(player,saveconfigtelegramm):
+
+def saveconfig(player, saveconfigtelegramm):
     """
     Weißt Spier an, die Konfiguration zu speichern.
     :param player: der Spielerframe
@@ -187,7 +206,8 @@ def saveconfig(player,saveconfigtelegramm):
     :rtype: void
     """
     player.saveconfig(saveconfigtelegramm.getdata('filename'))
-    
+
+
 def requestprediction(player,requesttelegramm):
     """
     Der Spieler wird aufgefordert eine neue Vorhersage für die aktuelle Situation zu treffen.
@@ -276,7 +296,7 @@ if __name__ == '__main__':
 
 
     # Erstelle das Spielfeld
-    court = Court()
+    court = court()
 
     # Erzeuge jeweils einen Kommunikationstunnel zwischen der main-Schleife und den Spielern (MLPs)
     givePlayer0, connPlayer0 = Pipe() # Tunnel zu Spieler0
@@ -319,40 +339,40 @@ if __name__ == '__main__':
 
         # Das Spiel ist in Spielrunden eingeteilt, in jede Runde beginnt damit, dass das Spielfeld
         #  die neue Ballposition berechnet. Siehe hierzu die Datei: court.py.
-        Court.tick()
+        court.tick()
 
         # Wenn das Speilfeld erkennt, das ein Schläger getroffen wurde, dann...
-        if Court.hitbat(0) or Court.hitbat(1):
+        if court.hitbat(0) or court.hitbat(1):
             rewardframepos = TelegrammFrame('reward_pos')
 
-            if Court.hitbat(0): # ... gib entweder Spieler 0 die positive Belohnung ...
-                rewardframepos.add('err', Court.scaled_sensor_err(0) )
+            if court.hitbat(0): # ... gib entweder Spieler 0 die positive Belohnung ...
+                rewardframepos.add('err', court.scaled_sensor_err(0) )
                 # (um noch besser zu werden, dh. der Schläger wurde nicht ganz mittig getroffen, werden
                 #  jeweils noch das Delta zwischen Auftreffpunkt und Schlägermittelpunkt mitgegeben. )
                 connPlayer0.send(rewardframepos)
-                logging.info("Player 0 got a positive reward! Error: " + str(Court.scaled_sensor_err(0)))
-            if Court.hitbat(1):   # ... oder Spielre 1 die positive Belohnung.
-                rewardframepos.add('err', Court.scaled_sensor_err(1) )
+                logging.info("Player 0 got a positive reward! Error: " + str(court.scaled_sensor_err(0)))
+            if court.hitbat(1):   # ... oder Spielre 1 die positive Belohnung.
+                rewardframepos.add('err', court.scaled_sensor_err(1) )
                 # (um noch besser zu werden, dh. der Schläger wurde nicht ganz mittig getroffen, werden
                 #  jeweils noch das Delta zwischen Auftreffpunkt und Schlägermittelpunkt mitgegeben. )
                 connPlayer1.send(rewardframepos)
-                logging.info("Player 1 got a positive reward!" + str(Court.scaled_sensor_err(1)))
+                logging.info("Player 1 got a positive reward!" + str(court.scaled_sensor_err(1)))
 
 
         # Sollte das Speilfeld erkennen, das der Ball nicht vom Schlager getroffen, sondern über die
         #  Line geflogen ist, dann sende wie bei Schlägertreffer beschriben eine Belohnung, diesmal
         #  jedoch eine Negative.
-        if Court.out(0) or Court.out(1):
+        if court.out(0) or court.out(1):
             rewardframeneg = TelegrammFrame('reward_neg')
 
-            if Court.out(0):
-                rewardframeneg.add('err', Court.scaled_sensor_err(0) )
+            if court.out(0):
+                rewardframeneg.add('err', court.scaled_sensor_err(0) )
                 connPlayer0.send(rewardframeneg)
-                logging.info("Player 0 got a negative reward!" + str(Court.scaled_sensor_err(0)))
-            if Court.out(1):
-                rewardframeneg.add('err', Court.scaled_sensor_err(1) )
+                logging.info("Player 0 got a negative reward!" + str(court.scaled_sensor_err(0)))
+            if court.out(1):
+                rewardframeneg.add('err', court.scaled_sensor_err(1) )
                 connPlayer1.send(rewardframeneg)
-                logging.info("Player 1 got a negative reward!" + str(Court.scaled_sensor_err(1)))
+                logging.info("Player 1 got a negative reward!" + str(court.scaled_sensor_err(1)))
 
         # Zusammengefasst, kann man erkennen, das nur Belohnungen gegeben werden, wenn der Ball über der Linie war
         #  oder den Schläger getroffen hat.
@@ -362,17 +382,17 @@ if __name__ == '__main__':
 
         # Bereite die Prediction-Anforderung für Spieler 0 vor, enthalten sollten sein:
         prednextreqPlayer0 = TelegrammFrame('predictNext')
-        prednextreqPlayer0.add('xpos',Court.scaled_sensor_x())     # die skalierte (-1 bis +1), aktuelle Ballposition
-        prednextreqPlayer0.add('ypos',Court.scaled_sensor_y())     # in X und Y-Richtung,
-        prednextreqPlayer0.add('mypos',Court.scaled_sensor_bat(0)) # und die eigene skalierte (-1 bis +1) Schlägerposition.
+        prednextreqPlayer0.add('xpos',court.scaled_sensor_x())     # die skalierte (-1 bis +1), aktuelle Ballposition
+        prednextreqPlayer0.add('ypos',court.scaled_sensor_y())     # in X und Y-Richtung,
+        prednextreqPlayer0.add('mypos',court.scaled_sensor_bat(0)) # und die eigene skalierte (-1 bis +1) Schlägerposition.
         # sende diese Information dann an den Spieler 0 ab!
         connPlayer0.send(prednextreqPlayer0)
 
         # Bereite die Prediction-Anforderung für Spieler 1 vor, enthalten sollten sein:
         prednextreqPlayer1 = TelegrammFrame('predictNext')
-        prednextreqPlayer1.add('xpos',Court.scaled_sensor_x())     # die skalierte (-1 bis +1), aktuelle Ballposition
-        prednextreqPlayer1.add('ypos',Court.scaled_sensor_y())     # in X und Y-Richtung,
-        prednextreqPlayer1.add('mypos',Court.scaled_sensor_bat(1)) # und die eigene skalierte (-1 bis +1) Schlägerposition.
+        prednextreqPlayer1.add('xpos',court.scaled_sensor_x())     # die skalierte (-1 bis +1), aktuelle Ballposition
+        prednextreqPlayer1.add('ypos',court.scaled_sensor_y())     # in X und Y-Richtung,
+        prednextreqPlayer1.add('mypos',court.scaled_sensor_bat(1)) # und die eigene skalierte (-1 bis +1) Schlägerposition.
         # sende diese Information dann an den Spieler 1 ab!
         connPlayer1.send(prednextreqPlayer1)
 
@@ -391,12 +411,12 @@ if __name__ == '__main__':
         if connPlayer0.poll(None):                     # Warten auf Daten von Spieler0, ...
             frame = connPlayer0.recv()                 # ... wenn vorhanden, dann abfragen und ...
             if frame.instruction == 'Return':
-                Court.move(0,frame.getdata('move'))    # ...anschließend von Speilfeld ausführen lassen.
+                court.move(0,frame.getdata('move'))    # ...anschließend von Speilfeld ausführen lassen.
 
         if connPlayer1.poll(None):                     # Warten auf Daten von Spieler0, ...
             frame = connPlayer1.recv()                 # ... wenn vorhanden, dann abfragen und ...
             if frame.instruction == 'Return':
-                Court.move(1,frame.getdata('move'))    # ...anschließend von Speilfeld ausführen lassen.
+                court.move(1,frame.getdata('move'))    # ...anschließend von Speilfeld ausführen lassen.
 
         # Wiederholen, bis ...
         if exitrequest: # ... die Beendenanforderung erhalten wurde
