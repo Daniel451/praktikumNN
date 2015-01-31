@@ -214,8 +214,3 @@ class Knnframe:
         # Die eigentlichen Informationen sind jedoch in der dedizierten Visualisierung zu sehen.
         print(ConCol.OKBLUE + 'Player ' + str(self.playerid) + ': got negative reward! Hitratio is now: '
               + str(self.hitratio) + " (" + str(self.reward_count) + " rewards total)" + ConCol.ENDC)
-
-
-
-
-
