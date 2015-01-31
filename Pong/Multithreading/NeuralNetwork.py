@@ -140,23 +140,22 @@ class NeuralNetwork:
         # +********* Feedforward-Algo *********+
         # +====================================+
 
-        # Input Daten blabla
+        # Input Daten wandeln zu einem numpy Array, wenn sie es nicht schon sind.
         s = n.atleast_2d(s_in)
 
 
 
-        #ist  H
-        self.h = []  # init des h Zwischenspeichers:
-        self.h.append(s)  # Das erste Layer braucht nicht berechnet zu werden, es sind gleichzeitig die h wie auch Input Daten des NN.
+        # Initialisierung des h Zwischenspeichers
+        self.h = []
+        # Das erste Layer braucht nicht berechnet zu werden, es kann direkt als Activation übernommen werden.
+        self.h.append(s)
 
-        #ist S
-        self.s = []  # init des h Zwischenspeichers: Übertragungsfunktion( h )
-        self.s.append(s)  # Die Inputlayer haben eine lineare Übertragungsfunktion sie sind daher "dumme Werteträger", Input Neuronen eben!
+        # Initialisierung des s Zwischenspeichers
+        self.s = []
+        # Das erste Layer braucht nicht berechnet zu werden, es kann direkt als Output übernommen werden, da die
+        # lineare Funktion genutzt wird.
+        self.s.append(s)
 
-
-        # +====================================+
-        # +********* Feedforward-Algo *********+
-        # +====================================+
 
         for l in range(0, len(self.W)):  #für alle hidden Layer...
 
