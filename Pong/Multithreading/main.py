@@ -16,7 +16,7 @@ __email__ = "2speck@informatik.uni-hamburg.de, 2kock@informatik.uni-hamburg.de"
 __status__ = "Development"
 
 from multiprocessing import Process, Pipe
-from knnframe import knnframe
+from knnframe import Knnframe
 from court import Court
 from telegramframe import TelegrammFrame
 
@@ -128,10 +128,10 @@ def startplayer(conn,playerid, loadconfig = None):
     """
 
     # Nutze ein Framework um ein KNN zu erstellen. Dies hat den Vorteil, das evtl. mehrere Implementationen von
-    #  verschiendenen KIs recht einfach angepasst werden können. Das Interface von knnframe.py muss jedoch immer
+    #  verschiendenen KIs recht einfach angepasst werden können. Das Interface von Knnframe.py muss jedoch immer
     #  gleich bleiben! ("Inferface-Pattern")
 
-    player = knnframe(loadconfig,playerid)
+    player = Knnframe(loadconfig,playerid)
 
     # Hauptschleife für die Spieler
     while True:
@@ -180,7 +180,7 @@ def saveconfig(player,saveconfigtelegramm):
     """
     Weißt Spier an, die Konfiguration zu speichern.
     :param player: der Spielerframe
-    :type player: knnframe
+    :type player: Knnframe
     :param saveconfigtelegramm: Telegramm mit Daten (filename)
     :type saveconfigtelegramm: TelegrammFrame
     :return: none
@@ -192,7 +192,7 @@ def requestprediction(player,requesttelegramm):
     """
     Der Spieler wird aufgefordert eine neue Vorhersage für die aktuelle Situation zu treffen.
     :param player: der Spielerframe
-    :type player: knnframe
+    :type player: Knnframe
     :param requesttelegramm: Telegramm mit den Daten (x,y,mypos)
     :type requesttelegramm: TelegrammFrame
     :return: Antwort mit Action vom Spieler (move, kann str oder float sein)

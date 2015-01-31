@@ -1,6 +1,9 @@
 #!/usr/bin/env python3.4
 # -*- coding: utf-8 -*-
-""" bla bla bla"""   #TODO: Write summary about this file!
+"""
+Hier ist der Frame für die Anbindung von Spiel (Pong) zu KNN enthalten.
+Hier geht es vor allem um die Anbindung von unserem NeuralNetwork.py.
+"""
 
 __author__ = "Daniel Speck, Florian Kock"
 __copyright__ = "Copyright 2014, Praktikum Neuronale Netze"
@@ -16,38 +19,80 @@ import numpy
 import os.path
 from concol import ConCol
 
-class knnframe:
-    def __init__(self, loadConfig, name):
+class Knnframe:
+    def __init__(self, loadconfig, playerid):
         """
-        :param loadConfig:
-        :param name:
-        :return:
+        Init vom KNN Frame
+        Setzen von default Werten bzw. Erstellen des echten KNN.
+        :param loadconfig: Pfad/Konfigurationsdatei eines schon bestehenden KNN (nicht Implementiert!)
+        :type loadconfig: str
+        :param playerid: Spieler Identifikationsnummer (wird hauptsächlich für Dateinamen gebraucht)
+        :type playerid: int
+        :return: none
+        :rtype: void
         """
 
-        # Logging
-        path = 'log_player_' + str(name) + '.log' # logging file file
 
-        # check if logfile exists
+        # Für effizientes debugging und logging können Werte und Informationen in eine
+        #  Datei geschrieben werden
+        file = 'log_player_' + str(playerid) + '.log'
+        self.createlogfile(file)
+        logging.basicConfig(filename=file, level=logging.INFO)
+        logging.info('==================')
+        logging.info('====  Started  ===')
+        logging.info('==================')
 
-        self.file = open(path, "w+")
+        # Spieler Identifikationsnummer (wird hauptsächlich für Dateinamen und Debuggingausgaben gebraucht)
+        self.playerid = playerid
 
+        # Um eine Bewertung des Spieles wärend der Spielzeit durchführen zu können, werden die Treffer zu den
+        #  nicht-Treffern (Outs) gezählt und ins Verhältnis gebracht. Dies geschieht über einen gleitenden Durchschnitt
+        self.timesteps = 20.0 # die letzten X Belohnungen sollen Zählen (Formel hierzu: siehe unten in reward_pos bzw reward_neg)
+        self.hitratio = 0.5 # der initiale Wert der Treffer = 1 zu Outs = 0.
 
-        # logging stuff
-        #logging.basicConfig(filename=file, level=logging.debug)
-
-        self.name = str(name)
-        self.timesteps = 20.0
-        self.hitratio = 0.5
-        self.fakediff = 0.0
-        self.newfakediff()
-        self.knn = NeuralNetwork([2,5,1],8)
+        # um eine sinnvolle Ausgabe zu erzeugen, werden die Belohnungen gezählt.
         self.reward_count = 0
+
+        # Debugausgaben nur alle X Belohnungen:
         self.printcount = 10
 
+        # Erstellen des neuralen Netzwerk Objektes.
+        # Konfiguration ist wie folgt zu verstehen:
+        #  NeuralNetwork(layer, tmax):
+        #  bei NeuralNetwork([2,5,1],8) ist dies also:
+        #   Aufbau:
+        #   - 2 input Neuronen
+        #   - 5 hidden Neuronen
+        #   - 1 output Neuron
+        #   Lernschritte in die Vergangenheit:
+        #   - 8 Speicherstellen für das lernen von Situationen vor einer Bestätigung
+        #   (siehe hierzu die NeuralNetwork.py)
+        #
+        self.knn = NeuralNetwork([2,5,1],8)
+
+
+    @staticmethod
+    def createlogfile(logfilename):
+        """
+        Legt ein logfile an, wenn Keines existiert.
+        :param logfilename: Dateiname
+        :type logfilename: str
+        :return: none
+        :rtype: void
+        """
+        if not os.path.exists(logfilename):
+            file = open(logfilename, "w+")
+            file.close()
+
     def saveconfig(self,filename):
-        #no Return
-        #self.knn.save(filename) #TODO correct this!
-        print('Configuration saved: ' + filename)
+        """
+        Stellt eine Funktion zur Verfügung, die das KNN Anweist die Konfiguration zu speichern
+        :param filename: Dateiname
+        :type filename: str
+        :return: none
+        :rtype: void
+        """
+        self.knn.save(filename) #TODO correct this!
         
     def predict(self,xpos,ypos,mypos):
         #return action  (up:      u
@@ -55,7 +100,7 @@ class knnframe:
                       #  nothing: n
 
         pred = self.knn.predict([[xpos,ypos]])
-        #print( bcolors.FAIL + 'Player ' + self.name + ' predicted: ' + str(pred[0][0]) + ' with sourcedata: ' + str([xpos,ypos]) + bcolors.ENDC)
+        #print( bcolors.FAIL + 'Player ' + self.playerid + ' predicted: ' + str(pred[0][0]) + ' with sourcedata: ' + str([xpos,ypos]) + bcolors.ENDC)
         #logging.debug('predicting...')
         #logging.debug(self.knn.debug())
 
@@ -67,13 +112,13 @@ class knnframe:
 
 
 
-        #print( bcolors.HEADER + 'Player ' + self.name + ' diff: ' + str(diff) + bcolors.ENDC)
+        #print( bcolors.HEADER + 'Player ' + self.playerid + ' diff: ' + str(diff) + bcolors.ENDC)
 
         if diff > 0.1:
-            #print('Player ' + self.name +': up!')
+            #print('Player ' + self.playerid +': up!')
             return 'd'
         elif diff < -0.1:
-            #print('Player ' + self.name +': down!')
+            #print('Player ' + self.playerid +': down!')
             return 'u'
         #print('hold position!')
         return 'n'
@@ -89,13 +134,13 @@ class knnframe:
             self.hitratio = 1.0
 
         if self.reward_count % self.printcount == 0:
-            print( ConCol.OKGREEN + 'Player ' + self.name + ': got positive reward! Hitratio is now: ' + str(self.hitratio) + ConCol.ENDC )
+            print( ConCol.OKGREEN + 'Player ' + self.playerid + ': got positive reward! Hitratio is now: ' + str(self.hitratio) + ConCol.ENDC )
         self.newfakediff()
 
     def reward_neg(self,err):
         self.rew_diag()
         if self.reward_count % self.printcount == 0:
-            print('Player ' + self.name + ': error is: ' + str(err))
+            print('Player ' + self.playerid + ': error is: ' + str(err))
         self.knn.reward(err)
         # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio -= 1.0/self.timesteps
@@ -103,13 +148,13 @@ class knnframe:
             self.hitratio = 0.0
 
         if self.reward_count % self.printcount == 0:
-            print( ConCol.OKBLUE + 'Player ' + self.name + ': got negative reward! Hitratio is now: ' + str(self.hitratio) + ConCol.ENDC)
+            print( ConCol.OKBLUE + 'Player ' + self.playerid + ': got negative reward! Hitratio is now: ' + str(self.hitratio) + ConCol.ENDC)
         self.newfakediff()
 
     def newfakediff(self):
         self.fakediff = numpy.random.normal(0.0,1.0/3.0)*(1.0-self.hitratio)
         # Gauss Normalverteilung von etwa -1 - +1 bei  self.hitratio = 0
-        #print('Player ' + self.name + ': fakediff is now: ' + str(self.fakediff))
+        #print('Player ' + self.playerid + ': fakediff is now: ' + str(self.fakediff))
 
     def rew_diag(self):
         self.reward_count += 1
