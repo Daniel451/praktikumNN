@@ -182,7 +182,8 @@ def startplayer(conn, playerid, loadconfig=None):
                 # Anforderung die Konfiguration zu speichern erhalten
 
                 # Bilde den Pfad und Dateinamen aus Zeit/Datum und Spieler ID
-                path = 'save/config_' + str(playerid) + '_' + datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S')
+                path = 'save/config_' + str(playerid) + '_'\
+                       + datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S')
 
                 # Rufe die entsprechende Funktion im Interface des Frameworks zum Speichern für das KNN auf
                 player.saveconfig(path)
@@ -197,51 +198,65 @@ def startplayer(conn, playerid, loadconfig=None):
 
 def saveconfig(player, saveconfigtelegramm):
     """
-    Weißt Spier an, die Konfiguration zu speichern.
-    :param player: der Spielerframe
+    Weißt Spieler an, die Konfiguration zu speichern.
+
+    :param player: das Frame/Wrapperobjekt des Spielers
     :type player: Knnframe
+
     :param saveconfigtelegramm: Telegramm mit Daten (filename)
     :type saveconfigtelegramm: TelegrammFrame
+
     :return: none
     :rtype: void
     """
-    player.saveconfig(saveconfigtelegramm.getdata('filename'))
+    player.saveconfig(str(saveconfigtelegramm.getdata('filename')))
 
 
-def requestprediction(player,requesttelegramm):
+def requestprediction(player, requesttelegramm):
     """
     Der Spieler wird aufgefordert eine neue Vorhersage für die aktuelle Situation zu treffen.
-    :param player: der Spielerframe
+
+    :param player: das Frame/Wrapperobjekt des Spielers
     :type player: Knnframe
+
     :param requesttelegramm: Telegramm mit den Daten (x,y,mypos)
     :type requesttelegramm: TelegrammFrame
-    :return: Antwort mit Action vom Spieler (move, kann str oder float sein)
+
+    :return: Antwort mit Aktion vom Spieler (move, kann str (up, down, ... -> diskrete Werte) oder
+     float (normiert von -1 .. +1) sein, je nach Implementation
     :rtype: TelegrammFrame
     """
 
     # Gebe Anforderung weiter und erwarte eine Aktion vom Spieler
     action = player.predict(requesttelegramm.getdata('xpos'), requesttelegramm.getdata('ypos'), requesttelegramm.getdata('mypos'))
 
-    # Baue Aktion zu einem Telegramm zusammen und ...
+    # Baue Aktion zu einem Telegramm zusammen
     returnframe = TelegrammFrame('Return')
     returnframe.add('move',action)
 
-    return returnframe # ... gib es zurück.
+    # Telegramm zurückgeben
+    return returnframe
 
 
 def exitapp():
     """
     Setzt die Beendenanforderung für die Hauptschleife.
+
     :return: none
     :rtype: void
     """
+
+    # Globale Variable exitrequest benutzen
     global exitrequest
     exitrequest = True
+
 
 def changespeed():
     """
     Verändert die Geschwindigkeit des Spiels, dies hat keinen Einfluss auf die Spieler an sich,
-    sondern hilft nur dem Betrachter des Spieles in der Visualisierung einen überblick zu behalten.
+    sondern hilft nur dem Betrachter des Spieles in der Visualisierung einen Überblick zu behalten.
+    Es wird also nicht die Ausführungsgeschwindigkeit der Agenten geändert, sondern nur die Tickrate.
+
     :return: none
     :rtype: void
     """
@@ -254,9 +269,11 @@ def changespeed():
 
 def createlogfile(logfilename):
     """
-    Legt ein logfile an, wenn Keines existiert.
+    Legt ein logfile an, wenn keines existiert.
+
     :param logfilename: Dateiname
     :type logfilename: str
+
     :return: none
     :rtype: void
     """
@@ -264,18 +281,15 @@ def createlogfile(logfilename):
         file = open(logfilename, "w+")
         file.close()
 
+
 # +================================+
 # +*********  main start  *********+
 # +================================+
 
-
-
-
-
 if __name__ == '__main__':
 
     # Für effizientes debugging und logging können Werte und Informationen in eine
-    #  Datei geschrieben werden.
+    # Datei geschrieben werden.
     file = "log_pong.log"
     createlogfile(file)
     logging.basicConfig(filename=file, level=logging.INFO)
@@ -283,85 +297,96 @@ if __name__ == '__main__':
     logging.info('====  Started  ===')
     logging.info('==================')
 
+    # Die maximale Geschwindigkeit wirkt sich positiv auf die Lerngeschwindigkeit aus,
+    # jedoch negativ für die Beobachtung/Visualisierung.
+    #
+    # Die Main-Schleife kann künstlich verzögert werden, damit das Spiel für einen Beobachter erkennbar bleibt.
+    # Dieser Wert wird normalerweise über die Funktion changespeed() von der Visualisierung verändert.
+    #
+    # Die maximale Lerngeschwindigkeit wird mit 0.0 erreicht.
+    # Zum Beobachten / für die Visualisierung eignen sich i.d.R. Werte größer als 0.3.
+    # Die Variable mainloopdelay muss ein float größergleich 0.0 sein.
+    # Die Einheit der Variable sind Sekunden.
 
-    # Die maximale Geschwindigkeit ist gut zum lernen, jedoch schlecht zum beobachten.
-    #  Die Main-Schleife kann künstlich verzögert werden, damit das Spiel für einen Betrachter erkennbar bleibt.
-    #  Dieser Wert wird normalerweise über die Funktion changespeed() von der Visualisierung verändert.
-    #  Gute Werte sind 0.0s für die Maximale Geschwindigkeit und 0.3s für eine gute Visualisierung.
     global mainloopdelay
     mainloopdelay = 0.0
 
     global exitrequest
     exitrequest = False
 
-
     # Erstelle das Spielfeld
     court = court()
 
     # Erzeuge jeweils einen Kommunikationstunnel zwischen der main-Schleife und den Spielern (MLPs)
-    givePlayer0, connPlayer0 = Pipe() # Tunnel zu Spieler0
-    givePlayer1, connPlayer1 = Pipe() # Tunnel zu Spieler1
+    givePlayer0, connPlayer0 = Pipe()  # Tunnel zu Spieler0
+    givePlayer1, connPlayer1 = Pipe()  # Tunnel zu Spieler1
 
-
-    # Bereite die Threads für Spieler 0 und 1 vor, und ...
-    #  (Beim starten wird die Funktion startplayer(conn,playername, loadconfig = None) aufgerufen.
-    #   Sie beinhaltet eine eigene Endlosschleife und wartet auf Befehle die durch den Kommunikationstunnel kommen)
+    # Bereite die Threads für Spieler 0 und 1 vor.
+    # Beim Starten wird die Funktion startplayer(conn,playername, loadconfig = None) aufgerufen.
+    # Sie beinhaltet eine eigene Endlosschleife und wartet auf Befehle die durch den Kommunikationstunnel kommen.
     p0 = Process(target=startplayer, args=(givePlayer0,0))
     p1 = Process(target=startplayer, args=(givePlayer1,1))
 
-    # ... starte sie.
+    # Starte die Threads
     p0.start()
     p1.start()
-    
 
-    # Die Visualierung kommuniziert über TCP/IP mit dem Server. Die API wird dafür nachfolgend geöffnet:
-    
-    bindaddress = "localhost" # Server soll nur für dem localhost erreichbar sein.
-    bindport = 6769        # Port für die Verbindung (Darf nicht von einem anderen Programm gebunden sein!)
 
-    #Erstelle GUI-Server mit den bekannten Verbindungsdaten und ...
+    # Die Visualierung kommuniziert über TCP/IP mit dem Server.
+    # Die API wird dafür nachfolgend geöffnet:
+
+    # Adresse für den host
+    # Server soll nur für den localhost erreichbar sein
+    bindaddress = "localhost"
+    # Port für die Verbindung (muss frei sein, darf also nicht durch ein anderes Programm benutzt/gebunden werden)
+    bindport = 6769
+
+
+    # Erstelle GUI-Server mit den bekannten Verbindungsdaten
     guiserver = ThreadedTCPServer((bindaddress, bindport), MyTCPServerHandler)
     ip, port = guiserver.server_address
 
-    # ... bereite einen parallelen Thread für ihn vor. (Blockt dann nicht die Hauptschleife)
+    # Bereite einen parallelen Thread vor (die Hauptschleife wird dann nicht geblockt)
     server_thread = threading.Thread(target=guiserver.serve_forever)
 
-    # Starte GUI-Server, damit er Verbindungen annehmen kann.
+    # Starte GUI-Server, damit er Verbindungen annehmen kann
     server_thread.daemon = True
     server_thread.start()
+
     logging.info("Server loop running in thread: " + str(server_thread.name))
     logging.info("listening on: " + str(ip) + ':' + str(port) )
-
     logging.info("starting main loop... ")
 
-    while True:
-        # Hauptschleife, versorgt Spieler mit daten und koordiniert den Ablauf
 
-        # Das Spiel ist in Spielrunden eingeteilt, in jede Runde beginnt damit, dass das Spielfeld
-        #  die neue Ballposition berechnet. Siehe hierzu die Datei: court.py.
+    # Hauptschleife, versorgt Spieler mit Daten und koordiniert den Ablauf
+    while True:
+
+        # Das Spiel ist in Spielrunden (Ticks) eingeteilt, jede Runde beginnt damit, dass das Spielfeld
+        # die neue Ballposition berechnet.
+        # Siehe hierzu die Datei: court.py
         court.tick()
 
-        # Wenn das Speilfeld erkennt, das ein Schläger getroffen wurde, dann...
+
+        # Wenn das Spielfeld erkennt, das ein Schläger getroffen wurde, dann...
         if court.hitbat(0) or court.hitbat(1):
             rewardframepos = TelegrammFrame('reward_pos')
 
             if court.hitbat(0): # ... gib entweder Spieler 0 die positive Belohnung ...
-                rewardframepos.add('err', court.scaled_sensor_err(0) )
-                # (um noch besser zu werden, dh. der Schläger wurde nicht ganz mittig getroffen, werden
-                #  jeweils noch das Delta zwischen Auftreffpunkt und Schlägermittelpunkt mitgegeben. )
+                rewardframepos.add('err', court.scaled_sensor_err(0))
+                # (Für eine weitere Verbesserung, also wenn der Schläger nicht ganz mittig getroffen wurde,
+                # werden jeweils noch das Delta zwischen Auftreffpunkt und Schlägermittelpunkt mitgegeben)
                 connPlayer0.send(rewardframepos)
                 logging.info("Player 0 got a positive reward! Error: " + str(court.scaled_sensor_err(0)))
-            if court.hitbat(1):   # ... oder Spielre 1 die positive Belohnung.
-                rewardframepos.add('err', court.scaled_sensor_err(1) )
-                # (um noch besser zu werden, dh. der Schläger wurde nicht ganz mittig getroffen, werden
-                #  jeweils noch das Delta zwischen Auftreffpunkt und Schlägermittelpunkt mitgegeben. )
+            if court.hitbat(1):   # ... oder Spieler 1 die positive Belohnung.
+                rewardframepos.add('err', court.scaled_sensor_err(1))
+                # (Für eine weitere Verbesserung, also wenn der Schläger nicht ganz mittig getroffen wurde,
+                # werden jeweils noch das Delta zwischen Auftreffpunkt und Schlägermittelpunkt mitgegeben)
                 connPlayer1.send(rewardframepos)
                 logging.info("Player 1 got a positive reward!" + str(court.scaled_sensor_err(1)))
 
 
-        # Sollte das Speilfeld erkennen, das der Ball nicht vom Schlager getroffen, sondern über die
-        #  Line geflogen ist, dann sende wie bei Schlägertreffer beschriben eine Belohnung, diesmal
-        #  jedoch eine Negative.
+        # Sollte das Spielfeld erkennen, dass der Ball nicht vom Schlager getroffen, sondern über die
+        # (Spielaus)Linie geflogen ist, dann wird eine negative Belohnung gesendet.
         if court.out(0) or court.out(1):
             rewardframeneg = TelegrammFrame('reward_neg')
 
@@ -369,78 +394,86 @@ if __name__ == '__main__':
                 rewardframeneg.add('err', court.scaled_sensor_err(0) )
                 connPlayer0.send(rewardframeneg)
                 logging.info("Player 0 got a negative reward!" + str(court.scaled_sensor_err(0)))
-            if court.out(1):
+
+            elif court.out(1):
                 rewardframeneg.add('err', court.scaled_sensor_err(1) )
                 connPlayer1.send(rewardframeneg)
                 logging.info("Player 1 got a negative reward!" + str(court.scaled_sensor_err(1)))
 
         # Zusammengefasst, kann man erkennen, das nur Belohnungen gegeben werden, wenn der Ball über der Linie war
-        #  oder den Schläger getroffen hat.
-        #  Die Zeit dazwischen, d.h. der Ball fliegt irgendwo auf dem Spielfeld, werden keine (!!) Rückmeldungen
-        #  gegeben. Es ist unbekannt ob die jetzige Situation gut oder Schlecht ist!
+        # oder der Schläger den Ball getroffen hat.
+        #
+        # Die Zeit dazwischen, d.h. wenn sich der Ball irgendwo auf dem Spielfeld bewegt,
+        # werden -keine- Rückmeldungen gesendet (Delayed-Reward-Problem, wie in Präsentation vorgestellt).
+        # Es ist dann also unbekannt, ob die gegenwärtige Situation positiv oder negativ zu bewerten ist.
 
 
-        # Bereite die Prediction-Anforderung für Spieler 0 vor, enthalten sollten sein:
+        # Bereite die Prediction-Anforderung für Spieler 0 und 1 vor, enthalten sollten sein:
         prednextreqPlayer0 = TelegrammFrame('predictNext')
-        prednextreqPlayer0.add('xpos',court.scaled_sensor_x())     # die skalierte (-1 bis +1), aktuelle Ballposition
-        prednextreqPlayer0.add('ypos',court.scaled_sensor_y())     # in X und Y-Richtung,
-        prednextreqPlayer0.add('mypos',court.scaled_sensor_bat(0)) # und die eigene skalierte (-1 bis +1) Schlägerposition.
-        # sende diese Information dann an den Spieler 0 ab!
-        connPlayer0.send(prednextreqPlayer0)
-
-        # Bereite die Prediction-Anforderung für Spieler 1 vor, enthalten sollten sein:
         prednextreqPlayer1 = TelegrammFrame('predictNext')
-        prednextreqPlayer1.add('xpos',court.scaled_sensor_x())     # die skalierte (-1 bis +1), aktuelle Ballposition
-        prednextreqPlayer1.add('ypos',court.scaled_sensor_y())     # in X und Y-Richtung,
-        prednextreqPlayer1.add('mypos',court.scaled_sensor_bat(1)) # und die eigene skalierte (-1 bis +1) Schlägerposition.
-        # sende diese Information dann an den Spieler 1 ab!
+
+        # die aktuelle, skalierte X-Ballposition (-1..+1)
+        prednextreqPlayer0.add('xpos', court.scaled_sensor_x())
+        prednextreqPlayer1.add('xpos', court.scaled_sensor_x())
+
+        # die aktuelle, skalierte Y-Ballposition (-1..+1)
+        prednextreqPlayer0.add('ypos', court.scaled_sensor_y())
+        prednextreqPlayer1.add('ypos', court.scaled_sensor_y())
+
+        # die aktuelle, skalierte Schlägerposition (-1..+1) des eigenen Schlägers
+        prednextreqPlayer0.add('mypos', court.scaled_sensor_bat(0))
+        prednextreqPlayer1.add('mypos', court.scaled_sensor_bat(1))
+
+        # Information an die Agenten/Spieler senden
+        connPlayer0.send(prednextreqPlayer0)
         connPlayer1.send(prednextreqPlayer1)
 
 
-        # Wenn gewünscht ist, das der Spielverlauf sichtbar ist, dann wird jetzt verzögert. Siehe oben!
+        # Hier wird die Verzögerung des Spielverlaufs zwecks besser Visualisation gesetzt:
         if mainloopdelay > 0:
             time.sleep(mainloopdelay)
 
-        #Wir warten nun auf Aktionsdaten von Spieler0 und 1:
+
+        # Wir warten nun auf Aktionsdaten von Spieler 0 und 1:
 
         # Zwischeninformation:
         # Die Funktion x.poll(None) wartet unendlich lange auf Daten, der
-        #  Programmfluss wir hier also verzögert! Alternativ wäre eine Endlosschleife
-        #  möglich, diese würde aber vermutlich mehr Rechenleistung in Anspruch nehmen.
+        # Programmfluss wir hier also verzögert!
+        # Alternativ wäre eine Endlosschleife möglich,
+        # diese würde aber mehr Rechenleistung in Anspruch nehmen.
 
         if connPlayer0.poll(None):                     # Warten auf Daten von Spieler0, ...
             frame = connPlayer0.recv()                 # ... wenn vorhanden, dann abfragen und ...
             if frame.instruction == 'Return':
-                court.move(0,frame.getdata('move'))    # ...anschließend von Speilfeld ausführen lassen.
+                court.move(0, frame.getdata('move'))   # ...anschließend von Spielfeld ausführen lassen.
 
         if connPlayer1.poll(None):                     # Warten auf Daten von Spieler0, ...
             frame = connPlayer1.recv()                 # ... wenn vorhanden, dann abfragen und ...
             if frame.instruction == 'Return':
-                court.move(1,frame.getdata('move'))    # ...anschließend von Speilfeld ausführen lassen.
+                court.move(1, frame.getdata('move'))   # ...anschließend von Spielfeld ausführen lassen.
 
         # Wiederholen, bis ...
-        if exitrequest: # ... die Beendenanforderung erhalten wurde
+        if exitrequest:  # ...die Beendenanforderung erhalten wurde
             break
 
-    
 
-    # Teile den Spielern mit, das das Programm beendet wird und sie
-    #  aufgefordert werden sich ebenfalls zu beenden.
+
+    # Teile den Spielern mit, dass das Programm beendet wird und sie
+    # aufgefordert sind sich ebenfalls zu beenden.
     frame = TelegrammFrame('EXIT')
     logging.info('exit request to Player0')
     connPlayer0.send(frame)
     logging.info('exit request to Player1')
     connPlayer1.send(frame)
-                
+
     # Warte auf die Spielerthreads, wenn sie beendet sind, ...
     p0.join()
     p1.join()
 
-    # ... warten wir noch auf den gui Server, dieser sollte den Port wieder freigeben.
+    # ...warten wir noch auf den GUI-Server, dieser sollte den Port wieder freigeben.
     guiserver.shutdown()
 
     # Das Programm beendet sich nun selbst!
     logging.info('==================')
     logging.info('==  Terminated  ==')
     logging.info('==================')
-    
