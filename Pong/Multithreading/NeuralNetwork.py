@@ -1,6 +1,10 @@
 #!/usr/bin/env python3.4
 # -*- coding: utf-8 -*-
-""" bla bla bla"""   #TODO: Write summary about this file!
+"""In dieser Datei befindet sich das MLP in etwa wie wir es im Praktikum zu Neuralen Netzen kennengelernt haben.
+Es unterscheidet sich dahin, dass wir die Prediction- (Feedforward) und Learn- (Backpropagation) Funktion
+aufgeteilt haben. Dies hat für uns den Vorteil, dass immer alle Werte für eine evtl. Backpropagation zur
+Verfügung stehen. Weiterhin wird für jede Hidden-Schicht eine Rekurenz erstellt. Näheres dazu in der Implementation
+"""
 
 __author__ = "Daniel Speck, Florian Kock"
 __copyright__ = "Copyright 2014, Praktikum Neuronale Netze"
@@ -11,28 +15,50 @@ __email__ = "2speck@informatik.uni-hamburg.de, 2kock@informatik.uni-hamburg.de"
 __status__ = "Development"
 
 import pprint
-
-
 import numpy as n
 import time
 
-
-def _tanh(x):  # diese Funktion stellt die Übertragungsfunktion der Neuronen dar. Forwardpropagation
+def _tanh(x):
+    """
+    Übertragungsfunktion für die Feedforward-Berechnung
+    :param x: Parameter x in f(x) = tanh(x)
+    :type x: numpy
+    :return: Funktionswert f aus f(x) = tanh(x)
+    :rtype: numpy
+    """
     return n.tanh(x)
 
 
-def _tanh_deriv(
-        x):  # diese Funktion stellt die Ableitung der Übertragungsfunktion dar. Sie ist für die Backpropagation nötig.
+def _tanh_deriv(x):
+    """
+    Übertragungsfunktion bei der Backpropagation
+    :param x: Parameter x in f(x) = 1 - tanh(x)^2
+    :type x: numpy
+    :return: Funktionswert f aus f(x) = 1 - tanh(x)^2
+    :rtype: numpy
+    """
     return 1.0 - n.power(n.tanh(x), 2)
 
 
 
 class NeuralNetwork:
     def __init__(self, layer, tmax):
-        """  
-        :param layer: A list containing the number of units in each layer.
-        Should be at least two values  
         """
+        Diese Funktion initialisiert das KNN. Sie setzt Standard- bzw. Zufallswerte und baut die Datenstruktur für die
+        dynamische Berechnung auf.
+        :param layer: Der Aufbau des KNN wird hier übergeben. Diese Struktur ist folgendermaßen zu Verstehen: Das KNN
+        wird vom Input-Layer aus beschrieben mit jeweils einer Zahl größer Null die die Anzahl der Neuronen im
+        entsprechnenden Layer angibt. Hierbei wird das Input- und Output-Layer mit einbezogen. Eine folgende
+        Konfiguration [5,8,10,4] kann also verstanden
+        :type layer:
+        :param tmax:
+        :type tmax:
+        :return:
+        :rtype:
+        """
+
+
+
 
         self.tmax = tmax  #del lst[-1]
 

@@ -90,7 +90,7 @@ class Knnframe:
         :return: none
         :rtype: void
         """
-        self.knn.save(filename) #TODO correct this!
+        self.knn.save(filename)
         
     def predict(self,xpos,ypos,mypos):
         """
