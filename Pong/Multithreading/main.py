@@ -324,8 +324,8 @@ if __name__ == '__main__':
     # Bereite die Threads für Spieler 0 und 1 vor.
     # Beim Starten wird die Funktion startplayer(conn,playername, loadconfig = None) aufgerufen.
     # Sie beinhaltet eine eigene Endlosschleife und wartet auf Befehle die durch den Kommunikationstunnel kommen.
-    p0 = Process(target=startplayer, args=(givePlayer0,0))
-    p1 = Process(target=startplayer, args=(givePlayer1,1))
+    p0 = Process(target=startplayer, args=(givePlayer0, 0))
+    p1 = Process(target=startplayer, args=(givePlayer1, 1))
 
     # Starte die Threads
     p0.start()
@@ -391,12 +391,12 @@ if __name__ == '__main__':
             rewardframeneg = TelegrammFrame('reward_neg')
 
             if court.out(0):
-                rewardframeneg.add('err', court.scaled_sensor_err(0) )
+                rewardframeneg.add('err', court.scaled_sensor_err(0))
                 connPlayer0.send(rewardframeneg)
                 logging.info("Player 0 got a negative reward!" + str(court.scaled_sensor_err(0)))
 
             elif court.out(1):
-                rewardframeneg.add('err', court.scaled_sensor_err(1) )
+                rewardframeneg.add('err', court.scaled_sensor_err(1))
                 connPlayer1.send(rewardframeneg)
                 logging.info("Player 1 got a negative reward!" + str(court.scaled_sensor_err(1)))
 

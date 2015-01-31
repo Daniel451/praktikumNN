@@ -157,6 +157,14 @@ class court:
         """
         return self.__sensor_bat(player) / (self.y_max/2.0) - 1.0
 
+    def hitbat(self, player):
+        """Gibt an, ob der Schläger von Spieler[Player] getroffen wurde oder nicht.
+        :param player: Int vom Spieler (0 oder 1)
+        :return Bool, Treffer (True) oder kein Treffer (False) vom Schlager von Spieler[Player]
+        """
+        return self._bathit[player]
+
+
     def scaled_sensor_err(self, player):
         """Gibt den Error von Spieler[Player] skaliert von -1 bis +1 zurück.
         :pre hitbat(player) or out(player)
@@ -164,14 +172,6 @@ class court:
         :return float, skalierter Error von Spieler[Player]
         """
         return (self.poi[player] - self.__sensor_bat(player) ) / self.y_max
-
-
-    def hitbat(self, player):
-        """Gibt an, ob der Schläger von Spieler[Player] getroffen wurde oder nicht.
-        :param player: Int vom Spieler (0 oder 1)
-        :return Bool, Treffer (True) oder kein Treffer (False) vom Schlager von Spieler[Player]
-        """
-        return self._bathit[player]
 
     def out(self, player):
         """Gibt an, ob der Ball die Linie von Spieler[Player] überschritten hat oder nicht.
