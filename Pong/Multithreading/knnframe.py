@@ -32,7 +32,6 @@ class Knnframe:
         :rtype: void
         """
 
-
         # Für effizientes debugging und logging können Werte und Informationen in eine
         #  Datei geschrieben werden
         file = 'log_player_' + str(playerid) + '.log'
@@ -68,8 +67,7 @@ class Knnframe:
         #   - 8 Speicherstellen für das lernen von Situationen vor einer Bestätigung
         #   (siehe hierzu die NeuralNetwork.py)
         #
-        self.knn = NeuralNetwork([2,5,1],8)
-
+        self.knn = NeuralNetwork([2, 5, 1], 8)
 
     @staticmethod
     def createlogfile(logfilename):
@@ -134,13 +132,14 @@ class Knnframe:
             self.hitratio = 1.0
 
         if self.reward_count % self.printcount == 0:
-            print( ConCol.OKGREEN + 'Player ' + self.playerid + ': got positive reward! Hitratio is now: ' + str(self.hitratio) + ConCol.ENDC )
+            print(ConCol.OKGREEN + "Player " + str(self.playerid) + ": got positive reward! Hitratio is now: "
+                  + str(self.hitratio) + ConCol.ENDC)
         self.newfakediff()
 
     def reward_neg(self,err):
         self.rew_diag()
         if self.reward_count % self.printcount == 0:
-            print('Player ' + self.playerid + ': error is: ' + str(err))
+            print('Player ' + str(self.playerid) + ': error is: ' + str(err))
         self.knn.reward(err)
         # Verhaeltnis von Treffern vom Schläger zu Out's: 0..1
         self.hitratio -= 1.0/self.timesteps
@@ -148,7 +147,7 @@ class Knnframe:
             self.hitratio = 0.0
 
         if self.reward_count % self.printcount == 0:
-            print( ConCol.OKBLUE + 'Player ' + self.playerid + ': got negative reward! Hitratio is now: ' + str(self.hitratio) + ConCol.ENDC)
+            print( ConCol.OKBLUE + 'Player ' + str(self.playerid) + ': got negative reward! Hitratio is now: ' + str(self.hitratio) + ConCol.ENDC)
         self.newfakediff()
 
     def newfakediff(self):
@@ -165,15 +164,15 @@ class Knnframe:
             self.file.write('hitratio@20: ' + str(self.hitratio) + '\n')
         elif self.reward_count == 50:
             #print('50')
-            self.file.write('hitratio@50: ' + str(self.hitratio)+ '\n')
+            self.file.write('hitratio@50: ' + str(self.hitratio) + '\n')
         elif self.reward_count == 75:
             #print('75')
-            self.file.write('hitratio@75: ' + str(self.hitratio)+ '\n')
+            self.file.write('hitratio@75: ' + str(self.hitratio) + '\n')
         elif self.reward_count == 100:
             #print('150')
-            self.file.write('hitratio@100: ' + str(self.hitratio)+ '\n')
+            self.file.write('hitratio@100: ' + str(self.hitratio) + '\n')
         elif self.reward_count == 150:
             #print('150')
-            self.file.write('hitratio@150: ' + str(self.hitratio)+ '\n')
+            self.file.write('hitratio@150: ' + str(self.hitratio) + '\n')
 
 

@@ -18,7 +18,7 @@ __status__ = "Development"
 import numpy as np 
 import random
 
-class Court:
+class court:
     """
     Objekt das das Spielfeld darstellt.
     Enthält Funktionen zur Manipulaton von Schlägern und Inspektoren für die Daten:
