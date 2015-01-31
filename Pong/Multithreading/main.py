@@ -64,8 +64,7 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
             
             try:
                 instruction = data['instruction']
-                #print('got instruction: ' + instruction)
-            
+
                 if instruction == 'EXIT':
                     # send some 'ok' back
                     print('Exiting...')
@@ -88,13 +87,19 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
                     self.request.sendall(bytes(json.dumps({
                                                             'return': 'ok',
                                                             'mainloopdelay': court.v_getSpeed(),
-                                                            'posvec': court.v_getPosVec().tolist(), #echte position
-                                                            'dirvec': court.v_getDirVec().tolist(), # Richtungsvector
+                                                            # aktueller Positionsvektor
+                                                            'posvec': court.v_getPosVec().tolist(),
+                                                            # aktueller Richtungsvektor
+                                                            'dirvec': court.v_getDirVec().tolist(),
+                                                            # Schlägerposition
                                                             'bat': court.v_getbat(),
+                                                            # Spielstand
                                                             'points': court.v_getPoint(),
-                                                            'sensorP1_bat': court.scaled_sensor_bat(0),   # position wie sie das NN sieht!
+                                                            # Skalierte Positionsdaten des Schlägers für KNNs
+                                                            'sensorP1_bat': court.scaled_sensor_bat(0),
                                                             'sensorP2_bat': court.scaled_sensor_bat(1),
-                                                            'sensor_posX': court.scaled_sensor_x(),   # position wie sie das NN sieht!
+                                                            # Skalierte Positionsdaten des Balls für KNNs
+                                                            'sensor_posX': court.scaled_sensor_x(),
                                                             'sensor_posY': court.scaled_sensor_y(),
                                                             }), 'UTF-8'))
                 elif instruction == 'saveConfig':
@@ -102,23 +107,17 @@ class MyTCPServerHandler(socketserver.BaseRequestHandler):
                     connPlayer0.send(x)
                     connPlayer1.send(x)
 
-
                 elif instruction == 'CHSPEED':
-                    self.request.sendall(bytes(json.dumps({'return':'ok'}), 'UTF-8'))
+                    self.request.sendall(bytes(json.dumps({'return': 'ok'}), 'UTF-8'))
                     print ('change mainloopdelay to...')
                     changespeed()
 
-
-
-
-
                 else:
-                    self.request.sendall(bytes(json.dumps({'return':'not ok'}), 'UTF-8'))
+                    self.request.sendall(bytes(json.dumps({'return': 'not ok'}), 'UTF-8'))
+
             except Exception as e:
                 print("No instruction available: ", e)
                 return
-
-
 
 
 
@@ -150,48 +149,53 @@ def startplayer(conn, playerid, loadconfig=None):
 
     # Hauptschleife für die Spieler
     while True:
-        if conn.poll(None):  # warte auf neue Daten von der Hauptschleife in main
-            # (info: conn.poll(None) unterbricht den Progammfluss und wartet bis wirklich Daten vorhanden sind!
-            #   siehe in Hauptschleife Zeile ca. 290 in dieser Datei)
 
-            telegramm = conn.recv() # Lade das Telegramm und werte es aus:
-            
+        # Warte auf neue Daten von der Hauptschleife in main
+        # if conn.poll(None) unterbricht den Progammfluss und wartet bis wirklich Daten vorhanden sind!
+        if conn.poll(None):
+
+            # Lade das Telegramm und werte es aus
+            telegramm = conn.recv()
+
             if telegramm.instruction == 'EXIT':
-                # Anforderung zum Beenden erhalten, springe aus der Schleife.
+                # Anforderung zum Beenden erhalten, springe aus der Schleife
                 break
 
             elif telegramm.instruction == 'predictNext':
-                # Anforderung eine neue Vorhersage zu treffen erhalten,
-                #  rufe die entsprechende Funktion auf und sende die Antwort zurück an die Hauptschleife
-                conn.send(requestprediction(player,telegramm))
+                # Anforderung eine neue Vorhersage zu treffen erhalten
+                # Rufe die entsprechende Funktion auf und sende die Antwort zurück an die Hauptschleife
+                conn.send(requestprediction(player, telegramm))
 
             elif telegramm.instruction == 'reward_pos':
-                # Positive Belohnung erhalten,
-                #  rufe die entsprechende Funktion im Interface des Frameworks für die das KNN auf.
+                # Positive Belohnung erhalten (Schläger hat Ball getroffen)
+                # Rufe die entsprechende Funktion im Interface des Frameworks für die das KNN auf
                 err = float(telegramm.getdata('err'))
                 player.reward_pos(err)
 
             elif telegramm.instruction == 'reward_neg':
-                # Negative Belohnung erhalten,
-                #  rufe die entsprechende Funktion im Interface des Frameworks für die das KNN auf.
+                # Negative Belohnung erhalten (Ball hat die Linie überschritten, Schläger hat Ball nicht getroffen)
+                # Rufe die entsprechende Funktion im Interface des Frameworks für die das KNN auf
                 err = float(telegramm.getdata('err'))
                 player.reward_neg(err)
 
             elif telegramm.instruction == 'saveConfig':
-                # Anforderung die Konfiguration zu speichern erhalten,
-                #  bilde den Pfad und Dateinamen aus Zeit/Datum und Spieler ID und ...
+                # Anforderung die Konfiguration zu speichern erhalten
+
+                # Bilde den Pfad und Dateinamen aus Zeit/Datum und Spieler ID
                 path = 'save/config_' + str(playerid) + '_' + datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S')
-                #  rufe die entsprechende Funktion im Interface des Frameworks für die das KNN auf.
+
+                # Rufe die entsprechende Funktion im Interface des Frameworks zum Speichern für das KNN auf
                 player.saveconfig(path)
 
             else:
-                # Fehlerhafte, unbekannte Anforderung erhalten.
+                # Fehlerhafte, unbekannte Anforderung erhalten
                 print('Player ' + str(playerid) + ': unknown instruction: ' + telegramm.instruction)
 
-    # Bei einer EXIT - Anforderung wird Kommunikationstunnel geschlossen und der Thread beendet.
+    # Bei einer EXIT - Anforderung wird der Kommunikationstunnel geschlossen und der Thread beendet
     conn.close()
 
-def saveconfig(player,saveconfigtelegramm):
+
+def saveconfig(player, saveconfigtelegramm):
     """
     Weißt Spier an, die Konfiguration zu speichern.
     :param player: der Spielerframe
@@ -202,7 +206,8 @@ def saveconfig(player,saveconfigtelegramm):
     :rtype: void
     """
     player.saveconfig(saveconfigtelegramm.getdata('filename'))
-    
+
+
 def requestprediction(player,requesttelegramm):
     """
     Der Spieler wird aufgefordert eine neue Vorhersage für die aktuelle Situation zu treffen.

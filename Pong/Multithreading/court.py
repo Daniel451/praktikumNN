@@ -117,14 +117,14 @@ class court:
         """Gibt die X-Achse mit Rauschen zurück
         :return float, X-Anteil vom Ortsvektor
         """
-        return self.posVec[0] + (random.random() - 0.5 ) * self.outputNoiseMax
+        return self.posVec[0] + (random.random() - 0.5) * self.outputNoiseMax
 
 
     def __sensor_y(self):
         """Gibt die Y-Achse mit Rauschen zurück
         :return float, Y-Anteil vom Ortsvektor
         """
-        return self.posVec[1] + (random.random() - 0.5 ) * self.outputNoiseMax
+        return self.posVec[1] + (random.random() - 0.5) * self.outputNoiseMax
 
 
     def __sensor_bat(self, player):
@@ -132,7 +132,7 @@ class court:
         :param player: Int vom Spieler (0 oder 1)
         :return float, Schlägerposition von Spieler[Player]
         """
-        return self.bat[player] + (random.random() - 0.5 ) * self.outputNoiseMax
+        return self.bat[player] + (random.random() - 0.5) * self.outputNoiseMax
         
 
     def scaled_sensor_x(self):
