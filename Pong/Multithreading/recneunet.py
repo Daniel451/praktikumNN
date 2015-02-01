@@ -166,66 +166,72 @@ class NeuralNetwork:
         # Input Daten wandeln zu einem numpy Array, wenn sie es nicht schon sind.
         s = n.atleast_2d(s_in)
 
-        # Initialisierung des h Zwischenspeichers
+        # Initialisierung des h Zwischenspeichers (Aktivierungen)
         self.h = []
-        # Das erste Layer braucht nicht berechnet zu werden, es kann direkt als Activation übernommen werden.
+        # Das erste Layer braucht nicht berechnet zu werden, es kann direkt als Aktivierung übernommen werden.
         self.h.append(s)
 
-        # Initialisierung des s Zwischenspeichers
+        # Initialisierung des s Zwischenspeichers (Output)
         self.s = []
         # Das erste Layer braucht nicht berechnet zu werden, es kann direkt als Output übernommen werden, da die
         # lineare Funktion im Inputlayer genutzt wird.
         self.s.append(s)
 
-        # Jeder Ebene der Gewichte durchgehen, also über die "Verbindngslayer" iterieren. Das Nullte befindet sich
-        #  zwischen der Input und der ersten Hiddenschicht.
+        # Jede Ebene der Gewichte durchgehen, also über die "Verbindngslayer" iterieren. Das Nullte befindet sich
+        # zwischen der Input- und der ersten Hiddenschicht.
         for l in range(0, len(self.W)):
 
-            # Wenn wir uns unter der Output schicht befinden, dann...
-            if l < len(self.W)-1 :
+            # Wenn wir uns unter der Output schicht befinden
+            if l < len(self.W) - 1:
                 # Für alle Hiddenlayer sollen die rekurrenten Daten berücksichtigt werden...
                 h = s.dot(self.W[l]) / len(self.W[l]) + self.RS[0][l+1].dot(self.RW[l]) / len(self.RW[l]) + self.B[l]
                 # ... um dann mittels der Übertragungsfunktion den Output von den Neuronen zu errechnen.
                 s = _tanh(h)
                 # Mathematik: (Hier möge auf die im Kurs verwendeten Unterlagen verwiesen sein.)
 
-            else: # ... sonst sind wir in der Outputschicht,
-                  #   hier ist die Rekurenz nicht erwünscht, außerdem ...
+            else:   # Hier sind wir in der Outputschicht,
+                    # die Rekurenz ist also nicht erwünscht, außerdem ...
                 h = s.dot(self.W[l]) / len(self.W[l]) + self.B[l]
-                 # ... soll eine lineare Output-Funktion genutzt werden.
+                # ... soll eine lineare Output-Funktion genutzt werden.
                 s = h
 
-            # Nun werden die s und h - Werte für jedes Layer gesichert, und...
+            # Nun werden die s und h - Werte (Output und Aktivierung) für jedes Layer gesichert, und ...
             self.h.append(h)
             self.s.append(s)
 
         # ... für zukünftige Lernschritte als ganzes "Abbild des KNN" im Ringpuffer gesichert.
-        self.RH.insert(0, c.deepcopy(self.h)) # (Eintragen an 0-Stelle, dann...
+        self.RH.insert(0, c.deepcopy(self.h))  # (Eintragen an der 0ten-Stelle, dann...
         del self.RH[-1]  # ... den letzen Datensatz löschen. Der Puffer ist wieder genauso lang, wie zuvor, jedoch
-                         # sind alle Abbilder um eine Stelle nach hinten verschoben worden.
+                         # sind alle Abbilder um eine Stelle nach hinten verschoben worden)
 
 
-        self.RS.insert(0, c.deepcopy(self.s)) # (Eintragen an 0-Stelle, dann...
+        self.RS.insert(0, c.deepcopy(self.s))  # (Eintragen an 0ten-Stelle, dann...
         del self.RS[-1]  # ... den letzen Datensatz löschen. Der Puffer ist wieder genauso lang, wie zuvor, jedoch
-                         # sind alle Abbilder um eine Stelle nach hinten verschoben worden.
+                         # sind alle Abbilder um eine Stelle nach hinten verschoben worden)
 
 
 
-        # Ausgeben der Outputs (s) der letzten Schicht.
+        # Ausgeben der Outputs (s) der letzten Schicht
         return s
 
 
 
     def reward(self, diff, epsilon = 0.2):
         """
-        Die Lernfunktion, hier Reward, da jetzt bekannt ist, ob die Aktion gut oder schlecht war, kann, anhand
-        eines Deltas, die Gewichte zu den Neuronen verbessern. Beim nächsten Aufruf von Predict() sollten dann
-        schon eine bessere, genauere Vorhersage generiert werden können.
+        Die eigentliche Lernfunktion (supervised learning) via Backpropagation mit Eigenlösung (delayed feedback
+        problem). Nun kann hier der "Reward", also das Feedback, ausgewertet werden, da jetzt bekannt ist,
+        ob die einzelnen, vorherigen Aktionen positiv oder negativ waren.
+        Anhand eines Deltas werden die Gewichte zwischen den Neuronen verändert.
+        Beim nächsten Aufruf von Predict() sollte dann schon eine bessere, genauere Vorhersage
+        generiert werden können.
+
         :param diff: Differenz, Delta, zwischen dem Soll und dem Ist-Punkt. Diese müssen zu der Struktur der
         Outputneuronen stimmen. z.B.: [[ 1 , 0.3 ]] bei zwei Outputneuronen.
-        :type diff: numpy
+        :type diff: numpy ndarray
+
         :param epsilon: Lernfaktor
         :type epsilon: float
+
         :return: none
         :rtype: void
         """
@@ -237,13 +243,13 @@ class NeuralNetwork:
         # Delta Daten wandeln zu einem numpy Array, wenn sie es nicht schon sind.
         delta = n.atleast_2d(diff)
 
-        # Jeder Ebene der Gewichte durchgehen, also über die "Verbindngslayer" iterieren. Das Nullte befindet sich
-        #  zwischen der Input und der ersten Hiddenschicht. Hier jedoch vom Output Layer nach vorn zum Input Layer
-        for l in range(len(self.W) -1, -1, -1):
+        # Jede Ebene der Gewichte durchgehen, also über die "Verbindngslayer" iterieren. Das Nullte befindet sich
+        # zwischen der Input- und der ersten Hiddenschicht. Hier jedoch vom Output Layer nach vorn zum Input Layer.
+        for l in range(len(self.W)-1, -1, -1):  # Interval: [OutputLayer, InputLayer), l jeweils um -1 reduzieren
 
             # Da im nächsten Schritt die Gewichte verändert werden, wir jedoch für das Berechnen des nächsten Deltas
-            #  noch die originalen Gewichte benötigen, errechnen wir deshalb schon jetzt das Delta des nächsten
-            #  Layers:
+            # noch die originalen Gewichte benötigen, errechnen wir deshalb schon jetzt das Delta des nächsten
+            # Layers:
             delta_next = _tanh_deriv(self.h[l]) * delta.dot(self.W[l].T)
             # Mathematik: (Hier möge auf die im Kurs verwendeten Unterlagen verwiesen sein.)
 
@@ -257,86 +263,91 @@ class NeuralNetwork:
                 # ... daher müssen auch keine Gewichte angepasst werden!
                 self.RW[l] += epsilon * delta * self.RS[0][l+1].T
 
-            # für das nächste Layer kann nun das Delta für gültig erklärt werden.
+            # Für das nächste Layer kann nun das Delta für gültig erklärt werden.
             delta = delta_next
 
         # Die Lernrate für die zurückligenden Ballpositionen muss recht klein sein, da sonst die Gewichte sich nicht
-        #  auf passende Werte einstellen können.
-        epsilon /= self.tmax # Die Positionierung der aktuellen Situation ist deutlich wichtiger, hängt
-                                    #  aber auch von der Anzahl der zu lernenden Schritte ab.
-        #epsilon = 0.0
+        # auf passende Werte einstellen können.
+        epsilon /= self.tmax    # Die Positionierung der aktuellen Situation ist deutlich wichtiger, hängt
+                                # aber auch von der Anzahl der zu lernenden Schritte ab.
+
         # Errechnen des Referenz-Deltas, das dazu genutzt wird, die vergangenen Situationen zu bewerten.
-        poi = self.RS[0][-1] + n.atleast_2d(diff)
-            #      S_t + delta_t = S_(t+1) + delta_(t+1)
-            # <=>  S_t + delta_t - S_(t+1) = delta_(t+1)
+        poi = self.RS[0][-1] + n.atleast_2d(diff)  # (poi: point of impact, Kollisionspunkt mit dem Schläger/Torlinie)
+
+        #      S_t + delta_t = S_(t+1) + delta_(t+1)
+        # <=>  S_t + delta_t - S_(t+1) = delta_(t+1)
 
         # Für die gewünschte Anzahl der zu lernenden Situationen in der Vergangenheit wird nun mit den passenden
-        #  Daten der Backpropagation Algorithmus (BPA) ausgeführt.
+        # Daten der Backpropagation Algorithmus (BPA) ausgeführt.
         for i in range(1, self.tmax):
             # (ab 1, da 0 die aktuelle Situation war, diese wurde jedoch schon oben abgearbeitet)
 
-            # Siehe "Errechnen des Referenz-Deltas" ca. Zeile 248. Aus der Referenz kann nun ein passendes Delta für
-            #  diesen Datensatz mit seinem Outputwert gebildet werden.
+            # Siehe "Errechnen des Referenz-Deltas" bei Beginn des BPA.
+            # Aus der Referenz kann nun ein passendes Delta für diesen Datensatz
+            # mit seinem Outputwert gebildet werden.
             delta = poi - self.RS[i][-1]
 
             # Wie schon im oberen BPA beschrieben, wird der Fehler vom Output-Layer Richtung Input-Layer propagiert.
             for l in range(len(self.W) -1, -1, -1):
 
-                # Da im nächsten Schritt die Gewichte verändert werden, wir jedoch für das Berechnen des nächsten Deltas
-                #  noch die originalen Gewichte benötigen, errechnen wir deshalb schon jetzt das Delta des nächsten
-                #  Layers:
+                # Da im nächsten Schritt die Gewichte verändert werden, wir jedoch für das Berechnen des nächsten
+                # Deltas noch die originalen Gewichte benötigen, errechnen wir deshalb schon jetzt
+                # das Delta des nächsten Layers:
                 delta_next = _tanh_deriv(self.RH[i][l]) * delta.dot(self.W[l].T)
 
-                # Anpassen der Gewichte zu den nächsten Layern:
+                # Anpassen der Gewichte zu dem nächsten Layer:
                 self.B[l] += epsilon * delta
                 self.W[l] += epsilon * delta * self.RS[i][l].T
 
-                # Anpassen der Gewichte zu den rekurrenten Daten, wobei erstes (Input) und letztes (Output) Layer haben
-                # keine Rekursion ...
-                if l < len(self.W)-1: #erstes (input) und letztes (output) Layer haben keine Rekursion!
-                # ... daher müssen auch keine Gewichte angepasst werden!
-                   self.RW[l] += epsilon * delta * self.RS[i+1][l+1].T
+                # Anpassen der Gewichte von den rekurrenten Schichten,
+                # wobei erstes (Input) und letztes (Output) Layer keine Rekursion haben.
+                if l < len(self.W)-1:  # erstes (input) und letztes (output) Layer haben keine Rekursion!
+                    self.RW[l] += epsilon * delta * self.RS[i+1][l+1].T
 
-                # für das nächste Layer kann nun das Delta für gültig erklärt werden.
+                # Hier wird das neue Delta für das nächste Layer gesetzt
                 delta = delta_next
-
-
-
 
 
     def save(self, file):
         """
-        Speichert die Konfiguration des MLPs in eine Datei, sie kann über load(file) wieder eingelesen werden.
+        Speichert die Konfiguration des MLPs in eine Datei.
+
         :param file: Dateiname der Datei
-        :type file: str
+        :type file: String
+
         :return: none
         :rtype: void
         """
-        raise NotImplementedError() #(Note: Im GIT befindet sich eine halbfunktionierende Lösung...)
+        raise NotImplementedError()  # (Notiz: Im GIT befindet sich eine halbfunktionierende Lösung...)
+
 
     def load(self, file):
         """
-        Läd die Konfiguration des MLPs aus einer Datei, sie kann über save(file) gespoeichert werden.
+        Lädt die Konfiguration des MLPs aus einer Datei, sie kann über save(file) gespeichert werden.
+
         :param file: Dateiname der Datei
-        :type file: str
+        :type file: String
+
         :return: none
         :rtype: void
         """
-        raise NotImplementedError() #(Note: Im GIT befindet sich eine halbfunktionierende Lösung...)
+        raise NotImplementedError()  # (Notiz: Im GIT befindet sich eine halbfunktionierende Lösung...)
+
 
     def debug(self):
         """
         Debug-Funktion die die Konfiguration als Liste ausgibt. Sie gibt einen schnellen überblick
         über die interne Struktur.
+
         :return: Debugdaten
         :rtype: dict
         """
         dataset = {
-            'W':self.W,
-            'B':self.B,
-            'RD':self.RS,
-            'RW':self.RW,
-            's':self.s,
-            'h':self.h
+            'W': self.W,
+            'B': self.B,
+            'RD': self.RS,
+            'RW': self.RW,
+            's': self.s,
+            'h': self.h
         }
         return dataset
