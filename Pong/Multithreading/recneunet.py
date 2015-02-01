@@ -1,9 +1,14 @@
 #!/usr/bin/env python3.4
 # -*- coding: utf-8 -*-
-"""In dieser Datei befindet sich das MLP in etwa wie wir es im Praktikum zu Neuralen Netzen kennengelernt haben.
-Es unterscheidet sich dahin, dass wir die Prediction- (Feedforward) und Learn- (Backpropagation) Funktion
-aufgeteilt haben. Dies hat für uns den Vorteil, dass immer alle Werte für eine evtl. Backpropagation zur
-Verfügung stehen. Weiterhin wird für jede Hidden-Schicht eine Rekurenz erstellt. Näheres dazu in der Implementation
+
+"""
+In dieser Datei befindet sich das rekurrente MLP, ähnlich der Implementation die wir am Anfang des Praktikums
+entwickelt haben, entstanden aus den Informationen, die wir im Praktikum erhielten.
+Es unterscheidet sich dahingehend, dass wir die Prädiktion (Feedforward) und das Lernen (Backpropagation)
+Funktionalität aufgeteilt haben. Dies hat für uns den Vorteil, dass immer alle Werte für eine evtl.
+Backpropagation zur Verfügung stehen.
+Weiterhin wird für jede Hidden-Schicht eine entsprechende rekurrente Schicht erstellt.
+Näheres dazu in der Implementation.
 """
 
 __author__ = "Daniel Speck, Florian Kock"
@@ -17,27 +22,31 @@ __status__ = "Development"
 import numpy as n
 import copy as c
 
+
 def _tanh(x):
     """
-    Übertragungsfunktion für die Feedforward-Berechnung
+    Transferfunktion für die Feedforward-Berechnungen
+
     :param x: Parameter x in f(x) = tanh(x)
-    :type x: numpy
+    :type x: numpy ndarray
+
     :return: Funktionswert f aus f(x) = tanh(x)
-    :rtype: numpy
+    :rtype: numpy ndarray
     """
     return n.tanh(x)
 
 
 def _tanh_deriv(x):
     """
-    Übertragungsfunktion bei der Backpropagation
+    Ableitung der Transferfunktion für Backpropagation-Berechnungen
+
     :param x: Parameter x in f(x) = 1 - tanh(x)^2
-    :type x: numpy
+    :type x: numpy ndarray
+
     :return: Funktionswert f aus f(x) = 1 - tanh(x)^2
-    :rtype: numpy
+    :rtype: numpy ndarray
     """
     return 1.0 - n.power(n.tanh(x), 2)
-
 
 
 class NeuralNetwork:
@@ -46,37 +55,47 @@ class NeuralNetwork:
         Diese Funktion initialisiert das KNN. Sie setzt Standard- bzw. Zufallswerte und baut die Datenstruktur für die
         dynamische Berechnung auf.
 
-        :param layer: Der Aufbau des KNN wird hier übergeben. Diese Struktur ist folgendermaßen zu Verstehen: Das KNN
-        wird vom Input-Layer aus beschrieben mit jeweils einer Zahl größer Null die die Anzahl der Neuronen im
-        entsprechnenden Layer angibt. Hierbei wird das Input- und s-Layer mit einbezogen. Eine folgende
-        Konfiguration [5,8,10,4] kann also verstanden als ein KNN mit 5 Input Neuronen,
-        8 Hiddenneuronen in der 1. Schicht, 10 Hiddenneuronen in der 2. Schicht und 4 Ausgabeneuronen.
-        Die Hiddenschichten haben jeweils in eine rekurente Schicht die sie dazu befähigt "in die Vergangenheit zu
-        sehen." len(layer) > 1.
+        :param layer: Der Aufbau des KNN wird hier übergeben. Diese Struktur ist wie folgt zu Verstehen:
+        Das KNN wird vom Input-Layer aus beschrieben mit jeweils einer ganzen Zahl größer Null, welche die Anzahl
+        der Neuronen im entsprechnenden Layer angibt.
+        Hierbei wird das Input- und Output-Layer mit einbezogen.
+        Eine folgende Konfiguration [5,8,10,4] kann also verstanden werden als ein KNN mit 5 Input Neuronen,
+        im Input-Layer, 8 Hiddenneuronen im 1. Hidden-Layer, 10 Hiddenneuronen im 2. Hidden-Layer
+        und 4 Ausgabeneuronen im Output-Layer.
+        Die Hidden-Layer haben jeweils in eine rekurrente Schicht, die sie dazu befähigt "in die Vergangenheit zu
+        sehen.", indem sie zeitlich zurückliegende Eingabedaten erneut im Hidden-Layer mit berücksichtig.
+        len(layer) > 1.
         :type layer: list
 
-        :param tmax: Hier wird definiert, wie viele Zeitschritte bzw Iterationen sich das KNN merken soll um beim Lernen
-        ebenfalls vergangenen Zeiten einzubeziehen bei denen nicht klar war, ob der jeweilige Zustand gut oder
-        schlecht war. tmax > 0. (Im Beispiel von Pong: Wärend der Ball auf dem Spielfeld noch unterwegs ist)
+        :param tmax: Hier wird definiert, wie viele Zeitschritte bzw. Iterationen sich das KNN merken soll,
+        um beim Lernen diese vergangenen Aktivierungen der zurückliegenden Zeitschritte einzubeziehen.
+        Zu den jeweiligen vorherigen Zeitschritten war nicht klar, ob der jeweilige Zustand gut oder
+        schlecht zu bewerten war (delayed feedback problem).
+        Ein Feedback wird immer erst dann gegeben, wenn der Ball auf den Schläger trifft oder die Torauslinie
+        passiert.
+        tmax > 0. (Im Beispiel von Pong: Während der Ball auf dem Spielfeld noch unterwegs ist)
         :type tmax: int
 
         :return: none
         :rtype: void
         """
 
-        #Sichern der Daten für spätere Funktionen (z.B. dem Lernen)
+        # Sichern der Daten für spätere Funktionen (z.B. zum Lernen)
         self.tmax = tmax
 
-        # Initialisiere das Array für die Gewichte zwischen den Neuronen
+        # Initialisiere die Liste, um später die Arrays für die Gewichte zwischen den Neuronen zu speichern
         self.W = []
-        # Initialisiere das Array der Biase für alle Schichten
+
+        # Initialisiere die Liste, um später die Arrays für die Biase aller Schichten zu speichern
         self.B = []
-        # Initialisiere das Array für die rekurrenten Gewichte
+
+        # Initialisiere die Liste, um später die Arrays für die Gewichte der rekurrenten Schichten zu speichern
         self.RW = []
+
         # Initialisiere den Speicher für die vergangenen Vorhersagen. Gleichzeitig ist hier auch der Speicher der
         # rekurenten Daten enthalten.
-        self.RH = []
-        self.RS = []
+        self.RH = []  # Aktivierungen
+        self.RS = []  # Output
 
         # Anlegen der Struktur für die Gewichte (W) und Bias (B)
         for i in range(1, len(layer)):
