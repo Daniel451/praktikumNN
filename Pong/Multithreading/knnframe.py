@@ -3,7 +3,7 @@
 
 """
 Hier ist der Frame für die Anbindung von Spiel (Pong) zu KNN enthalten.
-Hier geht es vor allem um die Anbindung von unserem NeuralNetwork.py.
+Hier geht es vor allem um die Anbindung von unserem recneunet.py.
 """
 
 __author__ = "Daniel Speck, Florian Kock"
@@ -14,7 +14,7 @@ __maintainer__ = "Daniel Speck, Florian Kock"
 __email__ = "2speck@informatik.uni-hamburg.de, 2kock@informatik.uni-hamburg.de"
 __status__ = "Development"
 
-from NeuralNetwork import NeuralNetwork
+from recneunet import NeuralNetwork
 from concol import ConCol
 
 import logging
@@ -90,9 +90,9 @@ class Knnframe:
         #   Lernschritte in die Vergangenheit:
         #
         #   - 8 Speicherstellen für das zeitverzögerte Lernen von Situationen vor einer Belohnung
-        #   (siehe hierzu die NeuralNetwork.py)
+        #   (siehe hierzu die recneunet.py)
         #
-        self.knn = NeuralNetwork([2, 3, 1], 10)
+        self.knn = NeuralNetwork([2, 9, 1], 10)
 
     @staticmethod
     def createlogfile(logfilename):
@@ -139,7 +139,7 @@ class Knnframe:
         :rtype: float
         """
 
-        # Rufe die passende Funktion im KNN auf, hierbei ist zu beachten, das es, wie in NeuralNetwork.py beschrieben
+        # Rufe die passende Funktion im KNN auf, hierbei ist zu beachten, das es, wie in recneunet.py beschrieben
         # praktisch immer ein 2D (Numpy-)Array ist. Daher die doppelte Klammerung [[ ]]: ".shape=1,2"
         #
         # Ebenfalls muss diese Eingabe zur Konfiguration des KNN passen. Hier ist es mit 2 Input-Neuronen erstellt,
