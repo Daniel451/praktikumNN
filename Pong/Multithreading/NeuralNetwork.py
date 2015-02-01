@@ -143,8 +143,6 @@ class NeuralNetwork:
         # Input Daten wandeln zu einem numpy Array, wenn sie es nicht schon sind.
         s = n.atleast_2d(s_in)
 
-
-
         # Initialisierung des h Zwischenspeichers
         self.h = []
         # Das erste Layer braucht nicht berechnet zu werden, es kann direkt als Activation übernommen werden.
@@ -153,105 +151,100 @@ class NeuralNetwork:
         # Initialisierung des s Zwischenspeichers
         self.s = []
         # Das erste Layer braucht nicht berechnet zu werden, es kann direkt als Output übernommen werden, da die
-        # lineare Funktion genutzt wird.
+        # lineare Funktion im Inputlayer genutzt wird.
         self.s.append(s)
 
+        # Jeder Ebene der Gewichte durchgehen, also über die "Verbindngslayer" iterieren. Das Nullte befindet sich
+        #  zwischen der Input und der ersten Hiddenschicht.
+        for l in range(0, len(self.W)):
 
-        for l in range(0, len(self.W)):  #für alle hidden Layer...
-
-            #print('Trying to Calculate Layer: ' + str(l))
-            #print('s:')
-            #pprint.pprint(s)
-
-            #print('self.W[l]:')
-            #pprint.pprint(self.W[l])
-
-            #print('s.dot(self.W[l]):')
-            #pprint.pprint(s.dot(self.W[l]))
-
-            #print('self.B[l]:')
-            #pprint.pprint(self.B[l])
-
-
-            if l < len(self.W)-1 : #es ist nicht das input noch das output layer!
-                #print('self.RS[0][l+1]:')
-                #pprint.pprint(self.RS[0][l+1])
-
-                #print('self.RW[l]:')
-                #pprint.pprint(self.RW[l])
-
-                #print('self.RS[0][l+1].dot(self.RW[l]:')
-                #pprint.pprint(self.RS[0][l+1].dot(self.RW[l]))
-
+            # Wenn wir uns unter der Output schicht befinden, dann...
+            if l < len(self.W)-1 :
+                # Für alle Hiddenlayer sollen die rekurrenten Daten berücksichtigt werden...
                 h = s.dot(self.W[l]) + self.RS[0][l+1].dot(self.RW[l]) + self.B[l]
-                #h = s.dot(self.W[l])  + self.B[l]
-            else:
-
-                h = s.dot(self.W[l]) + self.B[l]
-
-
-
-            # Last layer is linear!
-            if len(self.W) - 1 == l:  # siehe oben...
-                s = h
-            else:
+                # ... um dann mittels der Übertragungsfunktion den Output von den Neuronen zu errechnen.
                 s = _tanh(h)
+                # Mathematik: (Hier möge auf die im Kurs verwendeten Unterlagen verwiesen sein.)
+            else: # ... sonst sind wir in der Outputschicht,
+                  #   hier ist die Rekurenz nicht erwünscht, außerdem ...
+                h = s.dot(self.W[l]) + self.B[l]
+                 # ... soll eine lineare Output-Funktion genutzt werden.
+                s = h
 
-            self.h.append(h)  #merken des h-Wertes!
-            self.s.append(s)  #merken des s-Wertes!
+            # Nun werden die s und h - Werte für jedes Layer gesichert, und...
+            self.h.append(h)
+            self.s.append(s)
 
+        # ... für zukünftige Lernschritte als ganzes "Abbild des KNN" im Ringpuffer gesichert.
+        self.RS.insert(0, self.s) # (Eintragen an 0-Stelle, dann...
+        del self.RS[-1]  # ... den letzen Datensatz löschen. Der Puffer ist wieder genauso lang, wie zuvor, jedoch
+                         # sind alle Abbilder um eine stelle nach hinten verschoben worden.
 
-        self.RS.insert(0, self.s)
-        del self.RS[-1]  # letzen Datensatz löschen, da dann 2*self.tmax+1 lang
-
+        # Ausgeben der Outputs (s) der letzten Schicht.
         return s
-
-        #seems to be ok...
 
 
 
     def reward(self, diff, epsilon = 0.2):
-
+        """
+        Die Lernfunktion, hier Reward, da jetzt bekannt ist, ob die Aktion gut oder schlecht war, kann, anhand
+        eines Deltas, die Gewichte zu den Neuronen verbessern. Beim nächsten Aufruf von Predict() sollten dann
+        schon eine bessere, genauere Vorhersage generiert werden können.
+        :param diff: Differenz, Delta, zwischen dem Soll und dem Ist-Punkt. Diese müssen zu der Struktur der
+        Outputneuronen stimmen. z.B.: [[ 1 , 0.3 ]] bei zwei Outputneuronen.
+        :type diff: numpy
+        :param epsilon: Lernfaktor
+        :type epsilon: float
+        :return: none
+        :rtype: void
+        """
 
         # +========================================+
         # +********* Backpropagation-Algo *********+
         # +========================================+
-        #print('learning with last '+ str(self.tmax) +' Datasets ...')
 
-        # Das NN ist im untrainierten Zustand (Zufallszahlen in den Gewichten) sehr warscheinlich falsch, es gibt einen Error-Wert: delta:
-        delta = n.atleast_2d(diff)  #Erzeugt delta zum ersten Mal: SollAusgabe - IstAusgabe mittels der Trainingsdaten.
+        # Delta Daten wandeln zu einem numpy Array, wenn sie es nicht schon sind.
+        delta = n.atleast_2d(diff)
 
+        # Jeder Ebene der Gewichte durchgehen, also über die "Verbindngslayer" iterieren. Das Nullte befindet sich
+        #  zwischen der Input und der ersten Hiddenschicht. Hier jedoch vom Output Layer nach vorn zum Input Layer
+        for l in range(len(self.W) -1, -1, -1):
 
-        starttime = time.time()
-
-        for l in range(len(self.W) -1, -1, -1):  #für alle Layer, diesmal jedoch von hinten nach von!
-            #print('Layer: ' + str(l) )
-            #Wenn ich es richtig sehe, sind, für den delta_next die gewichte uninterressant!
-
+            # Da im nächsten Schritt die Gewichte verändert werden, wir jedoch für das Berechnen des nächsten Deltas
+            #  noch die originalen Gewichte benötigen, errechnen wir deshalb schon jetzt das Delta des nächsten
+            #  Layers:
             delta_next = _tanh_deriv(self.h[l]) * delta.dot(self.W[l].T)
+            # Mathematik: (Hier möge auf die im Kurs verwendeten Unterlagen verwiesen sein.)
 
-
-
+            # Anpassen der Gewichte zu den nächsten Layern:
             self.B[l] += epsilon * delta
             self.W[l] += epsilon * delta * self.s[l].T
 
+            # Anpassen der Gewichte zu den rekurrenten Daten, wobei erstes (Input) und letztes (Output) Layer haben
+            # keine Rekursion ...
+            if l < len(self.W)-1:
+                # ... daher müssen auch keine Gewichte angepasst werden!
+                self.RW[l] += epsilon * delta * self.RS[0][l+1].T
 
-            if l < len(self.W)-1: #erstes (input) und letztes (output) Layer haben keine Rekursion!
-            # daher muessen auch keine Gewichte angepasst werden!
-               self.RW[l] += epsilon * delta * self.RS[0][l+1].T
-
+            # für das nächste Layer können nun das Delta für Gültig erklärt werden.
             delta = delta_next
-                #print('---------------------------------------')
-                # wie oben schon kurz angesprochen, hier wird nun delta_next zu delta, damit der passende Wert für das nächste Layer zur Verfügung steht.
-                # Da delta von der Gewichtsanpassung und die Gewichte für das delta_next gebraucht wird, muss es so auseinander gezogen werden.
-        # erster Datensatz gelernt, nun um einen Zeitschritt in die Vergangenheit gehen: t = t_(x-i)
+
 
         epsilon = 0.02
 
 
+        delta = n.atleast_2d(diff)
         for i in range(1, self.tmax):
-            #delta = n.atleast_2d(poi-self.RS[i][-1])
-            delta = n.atleast_2d(diff) # todo: vieleicht wäre eine ordentlich angepasster diff besser!
+            #TODO: Testen, kann auch gut falsch sein:
+            #      S_t + delta_t = S_t+1 + delta_t+1
+            # <=>  S_t + delta_t - S_t+1 = delta_t+1
+            delta = self.RS[i-1][-1] + delta - self.RS[i][-1]
+
+            # i'm happy with that, i think! :)
+
+
+            # !!!! OLD !!!! delta = n.atleast_2d(diff)
+
 
             ## RS[i] = [array([[-0.91446288, -0.47661583]]), array([[ 0.24259971,  0.16527083,  0.17044024]]), array([[-0.27864748]])]
             ###  [[-0.27864748]]
@@ -261,18 +254,6 @@ class NeuralNetwork:
 
                 delta_next = _tanh_deriv(self.RS[i][l]) * delta.dot(self.W[l].T)
 
-
-                #print('<delta>')
-                #pprint.pprint(delta)
-                #print('</delta>')
-
-                #print('<s>')
-                #pprint.pprint(self.s[l])
-                #print('</s>')
-
-                #print('<self.W[l]>')
-                #pprint.pprint(self.W[l])
-                #print('</self.W[l]>')
 
                 self.B[l] += epsilon * delta
                 self.W[l] += epsilon * delta * self.RS[i][l].T
@@ -285,24 +266,14 @@ class NeuralNetwork:
                 delta = delta_next
 
 
-        #print('==============================================')
-        #print('...done in ' + str(time.time()-starttime) + 'sec')
 
 
 
+    def save(self, file):
+        raise NotImplementedError() #(Note: Im GIT befindet sich eine Halbfunktionierende Lösung...)
 
-    def save(self, file):  #untested: sichere Gewichte und Bias
-        print(file)
-        pprint.pprint(self.B)
-        #n.savez(file, W=self.W) #, B=self.B)    #, R=self.RW)
-        n.savez(file, W=self.W, RW=self.RW,B=[self.B])    #, R=self.RW)
-
-    def load(self, file):  #untested: lade Gewichte und Bias
-        #TODO Schön waere eine Ueberpruefung ob konsistent zu config!
-        data = n.load(file + '.npz')
-        self.W = data['W']
-        self.B = data['B']
-        self.RW = data['R']
+    def load(self, file):
+        raise NotImplementedError() #(Note: Im GIT befindet sich eine Halbfunktionierende Lösung...)
 
     def debug(self):
         dataset = {
@@ -310,7 +281,7 @@ class NeuralNetwork:
             'B':self.B,
             'RD':self.RS,
             'RW':self.RW,
-            'O':self.s,
-            'A':self.h
+            's':self.s,
+            'h':self.h
         }
         return dataset
