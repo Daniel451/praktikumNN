@@ -230,8 +230,8 @@ class NeuralNetwork:
             delta = delta_next
 
 
-        #epsilon = 0.02
-        epsilon = epsilon / 10
+        #epsilon = 0.002
+        epsilon = epsilon / (self.tmax )
 
         #delta = n.atleast_2d(diff)
 
