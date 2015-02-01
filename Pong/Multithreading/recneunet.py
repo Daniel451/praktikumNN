@@ -99,29 +99,29 @@ class NeuralNetwork:
 
         # Anlegen der Struktur für die Gewichte (W) und Bias (B)
         for i in range(1, len(layer)):
-            # Erzeuge zwischen jedem Layer eine Gewichtematrix mit m*n zufälligen (-0.5 bis +0.5) Gewichten.
+            # Erzeuge zwischen jedem Layer eine Gewichtsmatrix mit m*n zufälligen (-0.5 bis +0.5) Gewichten.
             # m ist die Anzahl der Neuronen in der unteren Schicht und
             # n ist die Anzahl der Neuronen in der oberen Schicht.
             # Somit ergibt sich eine Liste aus Matrizen die wie folgt aussehen könnte:
             # angenommene Konfiguration: [3,5,7,2] -> list( (3x5), (5x7), (7x2) )
             self.W.append((n.random.random((layer[i-1], layer[i])) - 0.5))
-            # Erzeuge zwischen jedem Layer eine Gewichtematrix mit 1*n zufälligen (-0.5 bis +0.5) Gewichten.
+            # Erzeuge zwischen jedem Layer eine Gewichtsmatrix mit 1*n zufälligen (-0.5 bis +0.5) Gewichten.
             # n ist die Anzahl der Neuronen in der oberen Schicht.
             # Somit ergibt sich eine Liste aus Matrizen die wie folgt aussehen könnte:
             # angenommene Konfiguration: [3,5,7,2] -> list( (1x5), (1x7), (1x2) )
-            self.B.append((n.random.random((1,layer[i])) - 0.5))
+            self.B.append((n.random.random((1, layer[i])) - 0.5))
 
         # Anlegen der Struktur für die rekurrenten Gewichte (RW).
-        # Input- und s-Layer erhalten keine Rekurenz!
+        # Input- und Output-Layer erhalten keine Rekurenz!
         for i in range(1, len(layer)-1):
-            # Erzeuge zwischen jedem Layer eine Gewichtematrix mit m*m zufälligen (-0.05 bis +0.05) Gewichten.
+            # Erzeuge zwischen jedem Layer eine Gewichtsmatrix mit m*m zufälligen (-0.05 bis +0.05) Gewichten.
             # m ist die Anzahl der Neuronen in der oberen Schicht.
             # Somit ergibt sich eine Liste aus Matrizen die wie folgt aussehen könnte:
             # angenommene Konfiguration: [3,5,7,2] -> list( (5x5), (7x7) )
-            self.RW.append((n.random.random((layer[i], layer[i])) - 0.5)*0.1)
+            self.RW.append((n.random.random((layer[i], layer[i])) - 0.5) * 0.1)
 
         # Anlegen von leeren (Nullen) Daten für die Vergangenheit. Diese werden wie in einem Ringpuffer gespeichert
-        #  und später bei jedem Predict erwgänzt. Sobald der Puffer voll ist, wird das älteste Element daraus
+        # und später bei jedem Predict ergänzt. Sobald der Puffer voll ist, wird das älteste Element daraus
         # entfernt bzw. überschrieben.
 
         # Template erzeugen
@@ -133,28 +133,30 @@ class NeuralNetwork:
             # angenommene Konfiguration: [3,5,7,2] -> list( (1x3), (1x5), (1x7) (1x2) )
             __temp_R.append(n.zeros((1, layer[i])))
 
-        # Ringpuffer füllen falls frühzeitig (t < tmax) die Lernfunktion aufgerufen wird.
+        # Ringpuffer füllen falls frühzeitig (t < tmax) die Lernfunktion aufgerufen wird
         for t in range(0, self.tmax+1):
-            # für alle Zeitschritte von 0 bis tmax wird jeweils ein leers Template hinzugefügt.
+            # Für alle Zeitschritte von 0 bis tmax wird jeweils ein leeres Template hinzugefügt.
             self.RH.append(c.deepcopy(__temp_R))
             self.RS.append(c.deepcopy(__temp_R))
 
-
-        # Speicher für die Activation der Neuronen initialisieren
+        # Speicher für die Aktivierung der Neuronen initialisieren
         self.h = []
-        # Speicher für den s der Neuronen initialisieren
+
+        # Speicher für den Output der Neuronen initialisieren
         self.s = []
 
 
     def predict(self, s_in):
         """
-        Die Vorhesagefunktion soll aus einem Input einen passenden Output erzeugen. Dieses wird durch die angepassten,
-        dazu mehr in der reward()-Funktion, Gewichte erreicht.
+        Die Vorhesagefunktion soll aus einem Input einen passenden Output erzeugen.
+        Dieses wird durch die angepassten (mehr dazu in der reward()-Funktion) Gewichte erreicht.
+
         :param s_in: Input für das KNN. Diese müssen zu der Struktur der Inputneuronen stimmen. z.B.: [[ 1 , 0.3 ]] bei
         zwei Inputneuronen.
-        :type s_in: numpy
+        :type s_in: numpy ndarray
+
         :return: Die Ausgabe des KNN entspricht immer dem Ausgabelayer. z.B.: [[ 1 , 0.3 , 0.8 ]] bei 3 Outputneuronen.
-        :rtype: numpy
+        :rtype: numpy ndarray
         """
 
         # +====================================+
