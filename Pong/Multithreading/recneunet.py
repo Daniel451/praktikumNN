@@ -14,10 +14,8 @@ __maintainer__ = "Daniel Speck, Florian Kock"
 __email__ = "2speck@informatik.uni-hamburg.de, 2kock@informatik.uni-hamburg.de"
 __status__ = "Development"
 
-import pprint
 import numpy as n
 import copy as c
-import time
 
 def _tanh(x):
     """
