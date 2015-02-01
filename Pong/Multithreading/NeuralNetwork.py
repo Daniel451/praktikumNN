@@ -230,15 +230,18 @@ class NeuralNetwork:
             delta = delta_next
 
 
-        epsilon = 0.02
+        #epsilon = 0.02
+        epsilon = epsilon / 10
 
+        #delta = n.atleast_2d(diff)
 
-        delta = n.atleast_2d(diff)
+        poi = self.RS[0][-1] + n.atleast_2d(diff)
         for i in range(1, self.tmax):
             #TODO: Testen, kann auch gut falsch sein:
             #      S_t + delta_t = S_t+1 + delta_t+1
             # <=>  S_t + delta_t - S_t+1 = delta_t+1
-            delta = self.RS[i-1][-1] + delta - self.RS[i][-1]
+
+            delta = poi - self.RS[i][-1]
 
             # i'm happy with that, i think! :)
 
