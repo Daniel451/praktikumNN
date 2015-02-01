@@ -299,7 +299,8 @@ class court:
         ### Initialisierungen ###
         #########################
 
-        # Setze den Ball auf eine Position weiter. Die Schrittweite wird durch mainloopdelay gesetzt.
+        # Setzt den Ball eine Position weiter.
+        # Die Schrittweite wird durch den Faktor self.speed gesetzt, der den Einheitsvektor dirVec skaliert
         self.posVec += self.dirVec * self.speed
 
         # Hat der Schläger den Ball getroffen?
@@ -314,19 +315,19 @@ class court:
 
         # Falls 10 oder mehr Treffer also jeder mindestens 5x getroffen hat, dann wird abgebrochen
         # und neu gestartet, damit die aktuelle Endlosschleife unterbrochen wird. Hier würde das KNN
-        #  nichts mehr lernen.
+        # sonst nichts Neues mehr lernen.
         if self.bouncecount > 10:  #TODO: Abbruch und neu init sollte besser in der Mitte geschehen!
             self.__initvectors()
 
-        # Abprallen auf der Unterseite bei Y = 0
+        # Abprallen an der Unterseite bei Y = 0
         if self.posVec[1] < 0:
-            self.posVec[1] = self.posVec[1] * -1.0
-            self.dirVec[1] = self.dirVec[1] * -1.0
+            self.posVec[1] *= -1.0
+            self.dirVec[1] *= -1.0
         
-        # Abprallen auf der Oberseite bei Y = y_max (hier vermutlich 9)
+        # Abprallen an der Oberseite bei Y = y_max (hier vermutlich 9)
         if self.posVec[1] > self.y_max:
             self.posVec[1] = 2 * self.y_max - self.posVec[1]
-            self.dirVec[1] = self.dirVec[1] * -1.0
+            self.dirVec[1] *= -1.0
         
         # Prüfe auf Treffer auf der linken Seite (Spieler 0)
         self.__tickBounceLeft()
@@ -336,19 +337,22 @@ class court:
 
 
     def __tickBounceLeft(self):
-        """Checken, ob der Ball links bei Spieler 0 aus dem Spielfeld fliegt oder vom Schläger getroffen wird
+        """
+        Checken, ob der Ball links bei Spieler 0 aus dem Spielfeld fliegt oder vom Schläger getroffen wird
+
         :return: void
         """
 
-        # Wenn der Ortsvektor kleiner ist als 0, dann hat er die Linie von Spieler 0 überschritten, dann...
+        # Wenn der Ortsvektor kleiner ist als 0, dann hat er die Torauslinie von Spieler 0 überschritten
         if self.posVec[0] < 0:
 
-            #Berechne den theoretischen, genauen Aufprallpunkt (poi: PointOfImpact) auf der Linie von Spieler 0 (Y = 0)
+            # Berechne den theoretischen, genauen Aufprallpunkt (poi: PointOfImpact)
+            # auf der Linie von Spieler 0 (Y = 0)
 
             factor = (0 - self.posVec[0]) / self.dirVec[0]
             poi = self.posVec + (factor * self.dirVec)
 
-            self.poi[0] = poi[1]  #Speichere diesen für eine evtl. spätere Nutzung von z.B. scaled_sensor_err(player)
+            self.poi[0] = poi[1]  # Speichere diesen für eine evtl. spätere Nutzung von z.B. scaled_sensor_err(player)
 
             # Prüfe ob der Ball dann den Schläger getroffen hätte, wenn ja, dann...
             if (poi[1] > self.bat[0] - self.batsize) and (poi[1] < self.bat[0] + self.batsize):
@@ -356,10 +360,10 @@ class court:
             else:  # wenn jedoch nicht, dann...
                 self.Points[1] += 1  # ... Punkte von Spieler 1 (rechts) erhöhen
                 self._out[0] = True  # und merken, das der Ball außerhalb des Spielfelds
-                #   war, z.B. für out(player)
+                # war, z.B. für out(player)
 
             # Ball abprallen lassen, falls:
-            # -> Das infinite true ist, also das Spiel endlos dauern soll ohne Zurücksetzen der Ballposition
+            # -> Infinite true ist, also das Spiel endlos dauern soll ohne Zurücksetzen der Ballposition
             # -> Der Schläger den Ball getroffen hat
             if self.infinite or self._bathit[0]:
                 self.posVec[0] *= -1.0  # Einfallswinklel = Ausfallswinkel
@@ -375,8 +379,8 @@ class court:
         """Checken, ob der Ball rechts bei Spieler 1 aus dem Spielfeld fliegt oder vom Schläger getroffen wird
         :return: void
         """
-        # Wenn der Ortsvektor größer ist als x_max (hier vermutlich 16), dann hat er die Linie
-        # von Spieler 1 überschritten, dann...
+        # Wenn der Ortsvektor größer ist als x_max (hier vermutlich 16), dann hat er die Torauslinie
+        # von Spieler 1 überschritten
         if self.posVec[0] > self.x_max:
 
             # Berechne den theoretischen, genauen Aufprallpunkt (poi: PointOfImpact) auf der Linie von
@@ -409,41 +413,52 @@ class court:
 
 
     def move(self, player, action):
-        """Bewegt den Schläger eines Spielers
+        """
+        Bewegt den Schläger eines Spielers
         Diese Funktion ist etwas Trickreich, da als "action"-Parameter sowohl ein String als direkter
         up/down-Befehl akzeptiert wird, als auch ein Float der den Schläger direkt setzt.
-        :param player Int vom Spieler (0 oder 1), dessen Schläger bewegt werden soll
-        :param action str "d" oder "u" (Schläger hoch oder runter bewegen)
-        :param action float Schläger auf die entsprechende Position setzen
+
+        :param player: Spieler 0 oder 1 (dessen Schläger bewegt werden soll)
+        :type player: Int
+
+        :param action: Wenn str, dann zwischen "d" oder "u" unterscheiden (Schläger hoch oder runter bewegen)
+        :type action: String
+
+        :param action: Wenn float, dann Schläger auf die entsprechende Position setzen
+        :type action: float
+
         :return: void
         """
-        # Wenn ein String, dann im Befehls-Mode:
+
+        # Wenn ein String, dann im Befehls-Modus:
         if type(action) == str:
 
-            # Schläger nach oben bewegen
+            # Den Schläger nach oben bewegen
             if action == 'u':
                 self.bat[player] += self.batstep
-                if self.bat[player] > self.y_max:  # Korrektur, falls oberer Spielfeldrand erreicht wurde
+                if self.bat[player] > self.y_max:  # Korrektur, falls der obere Spielfeldrand erreicht wurde
                     self.bat[player] = self.y_max
 
-            # Schläger nach unten bewegen
+            # Den Schläger nach unten bewegen
             if action == 'd':
                 self.bat[player] -= self.batstep
-                if self.bat[player] < 0.0:  # Korrektur, falls unterer Spielfeldrand erreicht wurde
+                if self.bat[player] < 0.0:  # Korrektur, falls der untere Spielfeldrand erreicht wurde
                     self.bat[player] = 0.0
-        # Sonst im Setzen-Mode:
+
+        # Sonst im Setzen-Modus:
         elif type(action) == float:
-            self.bat[player] = action  # Der Schläger wird direkt auf die gewünschte Position gesetzt.
-            if self.bat[player] < 0.0:  # Korrektur, falls unterer Spielfeldrand erreicht wurde
+            self.bat[player] = action  # Der Schläger wird direkt auf die gewünschte Position gesetzt
+            if self.bat[player] < 0.0:  # Korrektur, falls der untere Spielfeldrand erreicht wurde
                 self.bat[player] = 0.0
-            if self.bat[player] > self.y_max:  # Korrektur, falls oberer Spielfeldrand erreicht wurde
+            if self.bat[player] > self.y_max:  # Korrektur, falls der obere Spielfeldrand erreicht wurde
                 self.bat[player] = self.y_max
 
 
     def v_getSize(self):
         """
         visu-getter
-        :return float Liste [Float: X,Float: Y] der Spielfeldgröße
+
+        :return float Liste [Float: X, Float: Y] der Spielfeldgröße
         """
         return [self.x_max, self.y_max]
 
@@ -451,6 +466,7 @@ class court:
     def v_getSpeed(self):
         """
         visu-getter
+
         :return float Ballgeschwindigkeit
         """
         return self.speed
@@ -459,6 +475,7 @@ class court:
     def v_getBatSize(self):
         """
         visu-getter
+
         :return float Schlägerlänge (Größe)
         """
         return self.batsize
@@ -467,6 +484,7 @@ class court:
     def v_getDirVec(self):
         """
         visu-getter
+
         :return float Bewegungsvektor
         """
         return self.dirVec
@@ -475,6 +493,7 @@ class court:
     def v_getPosVec(self):
         """
         visu-getter
+
         :return float Ortsvektor Liste [Float: X,Float: Y]
         """
         return self.posVec
@@ -483,6 +502,7 @@ class court:
     def v_getbat(self):
         """
         visu-getter
+
         :return: Liste [batSpieler0, batSpieler1] -> Position des Schlägermittelpunktes von Spieler 0 / 1
         """
         return self.bat
@@ -491,7 +511,7 @@ class court:
     def v_getPoint(self):
         """
         visu-getter
+
         :return: Liste [X,Y] des Punktestundes für Spieler 0 / 1
         """
         return self.Points
-
