@@ -447,7 +447,7 @@ class court:
 
         # Sonst im Setzen-Modus:
         elif type(action) == float:
-            self.bat[player] = action  # Der Schläger wird direkt auf die gewünschte Position gesetzt
+            self.bat[player] = (action + 1) * self.y_max / 2  # Der Schläger wird direkt auf die gewünschte Position gesetzt
             if self.bat[player] < 0.0:  # Korrektur, falls der untere Spielfeldrand erreicht wurde
                 self.bat[player] = 0.0
             if self.bat[player] > self.y_max:  # Korrektur, falls der obere Spielfeldrand erreicht wurde

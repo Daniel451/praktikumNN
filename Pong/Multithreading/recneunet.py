@@ -163,13 +163,14 @@ class NeuralNetwork:
             # Wenn wir uns unter der Output schicht befinden, dann...
             if l < len(self.W)-1 :
                 # Für alle Hiddenlayer sollen die rekurrenten Daten berücksichtigt werden...
-                h = s.dot(self.W[l]) + self.RS[0][l+1].dot(self.RW[l]) + self.B[l]
+                h = s.dot(self.W[l]) / len(self.W[l]) + self.RS[0][l+1].dot(self.RW[l]) / len(self.RW[l]) + self.B[l]
                 # ... um dann mittels der Übertragungsfunktion den Output von den Neuronen zu errechnen.
                 s = _tanh(h)
                 # Mathematik: (Hier möge auf die im Kurs verwendeten Unterlagen verwiesen sein.)
+
             else: # ... sonst sind wir in der Outputschicht,
                   #   hier ist die Rekurenz nicht erwünscht, außerdem ...
-                h = s.dot(self.W[l]) + self.B[l]
+                h = s.dot(self.W[l]) / len(self.W[l]) + self.B[l]
                  # ... soll eine lineare Output-Funktion genutzt werden.
                 s = h
 
@@ -240,9 +241,9 @@ class NeuralNetwork:
 
         # Die Lernrate für die zurückligenden Ballpositionen muss recht klein sein, da sonst die Gewichte sich nicht
         #  auf passende Werte einstellen können.
-        epsilon /= (self.tmax * 10) # Die Positionierung der aktuellen Situation ist deutlich wichtiger, hängt
+        epsilon /= self.tmax # Die Positionierung der aktuellen Situation ist deutlich wichtiger, hängt
                                     #  aber auch von der Anzahl der zu lernenden Schritte ab.
-
+        #epsilon = 0.0
         # Errechnen des Referenz-Deltas, das dazu genutzt wird, die vergangenen Situationen zu bewerten.
         poi = self.RS[0][-1] + n.atleast_2d(diff)
             #      S_t + delta_t = S_(t+1) + delta_(t+1)

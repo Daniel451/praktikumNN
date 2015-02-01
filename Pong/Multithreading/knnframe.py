@@ -92,7 +92,7 @@ class Knnframe:
         #   - 8 Speicherstellen für das zeitverzögerte Lernen von Situationen vor einer Belohnung
         #   (siehe hierzu die recneunet.py)
         #
-        self.knn = NeuralNetwork([2, 9, 1], 10)
+        self.knn = NeuralNetwork([2, 20, 1], 20)
 
     @staticmethod
     def createlogfile(logfilename):
