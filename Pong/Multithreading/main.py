@@ -46,13 +46,13 @@ import datetime
 
 #Todo: kommentieren! irgendwie...
 
-class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+class TreadTCPServ(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
-class MyTCPServer(socketserver.ThreadingTCPServer):
+class VisTCPServ(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
 
-class MyTCPServerHandler(socketserver.BaseRequestHandler):
+class VisTCPServHandler(socketserver.BaseRequestHandler):
     def handle(self):
         while True:
             try:
@@ -343,17 +343,17 @@ if __name__ == '__main__':
 
 
     # Erstelle GUI-Server mit den bekannten Verbindungsdaten
-    guiserver = ThreadedTCPServer((bindaddress, bindport), MyTCPServerHandler)
+    guiserver = TreadTCPServ((bindaddress, bindport), VisTCPServHandler)
     ip, port = guiserver.server_address
 
     # Bereite einen parallelen Thread vor (die Hauptschleife wird dann nicht geblockt)
-    server_thread = threading.Thread(target=guiserver.serve_forever)
+    visserv = threading.Thread(target=guiserver.serve_forever)
 
     # Starte GUI-Server, damit er Verbindungen annehmen kann
-    server_thread.daemon = True
-    server_thread.start()
+    visserv.daemon = True
+    visserv.start()
 
-    logging.info("Server loop running in thread: " + str(server_thread.name))
+    logging.info("Server loop running in thread: " + str(visserv.name))
     logging.info("listening on: " + str(ip) + ':' + str(port) )
     logging.info("starting main loop... ")
 
