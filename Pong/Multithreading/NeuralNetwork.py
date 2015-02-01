@@ -237,47 +237,47 @@ class NeuralNetwork:
                 # ... daher müssen auch keine Gewichte angepasst werden!
                 self.RW[l] += epsilon * delta * self.RS[0][l+1].T
 
-            # für das nächste Layer können nun das Delta für Gültig erklärt werden.
+            # für das nächste Layer kann nun das Delta für gültig erklärt werden.
             delta = delta_next
 
+        # Die Lernrate für die zurückligenden Ballpositionen muss recht klein sein, da sonst die Gewichte sich nicht
+        #  auf passende Werte einstellen können.
+        epsilon /= (self.tmax * 10) # Die Positionierung der aktuellen Situation ist deutlich wichtiger, hängt
+                                    #  aber auch von der Anzahl der zu lernenden Schritte ab.
 
-        #epsilon = 0.002
-        epsilon = epsilon / (self.tmax * 0.001) #TODO: Funktioniert nicht so richtig, ich weiß nicht warum...
-        epsilon = 0.0
-        #delta = n.atleast_2d(diff)
-
+        # Errechnen des Referenz-Deltas, das dazu genutzt wird, die vergangenen Situationen zu bewerten.
         poi = self.RS[0][-1] + n.atleast_2d(diff)
+            #      S_t + delta_t = S_(t+1) + delta_(t+1)
+            # <=>  S_t + delta_t - S_(t+1) = delta_(t+1)
+
+        # Für die gewünschte Anzahl der zu lernenden Situationen in der Vergangenheit wird nun mit den passenden
+        #  Daten der Backpropagation Algorithmus (BPA) ausgeführt.
         for i in range(1, self.tmax):
-            #TODO: Testen, kann auch gut falsch sein:
-            #      S_t + delta_t = S_t+1 + delta_t+1
-            # <=>  S_t + delta_t - S_t+1 = delta_t+1
+            # (ab 1, da 0 die aktuelle Situation war, diese wurde jedoch schon oben abgearbeitet)
 
+            # Siehe "Errechnen des Referenz-Deltas" ca. Zeile 248. Aus der Referenz kann nun ein passendes Delta für
+            #  diesen Datensatz mit seinem Outputwert gebildet werden.
             delta = poi - self.RS[i][-1]
-            print(delta)
 
-            # i'm happy with that, i think! :)
+            # Wie schon im oberen BPA beschrieben, wird der Fehler vom Output-Layer Richtung Input-Layer propagiert.
+            for l in range(len(self.W) -1, -1, -1):
 
-
-            # !!!! OLD !!!! delta = n.atleast_2d(diff)
-
-
-            ## RS[i] = [array([[-0.91446288, -0.47661583]]), array([[ 0.24259971,  0.16527083,  0.17044024]]), array([[-0.27864748]])]
-            ###  [[-0.27864748]]
-            for l in range(len(self.W) -1, -1, -1):  #für alle Layer, diesmal jedoch von hinten nach von!
-                #print('Layer: ' + str(l) )
-                #Wenn ich es richtig sehe, sind, für den delta_next die gewichte uninterressant!
-
+                # Da im nächsten Schritt die Gewichte verändert werden, wir jedoch für das Berechnen des nächsten Deltas
+                #  noch die originalen Gewichte benötigen, errechnen wir deshalb schon jetzt das Delta des nächsten
+                #  Layers:
                 delta_next = _tanh_deriv(self.RH[i][l]) * delta.dot(self.W[l].T)
 
-
+                # Anpassen der Gewichte zu den nächsten Layern:
                 self.B[l] += epsilon * delta
                 self.W[l] += epsilon * delta * self.RS[i][l].T
 
-
+                # Anpassen der Gewichte zu den rekurrenten Daten, wobei erstes (Input) und letztes (Output) Layer haben
+                # keine Rekursion ...
                 if l < len(self.W)-1: #erstes (input) und letztes (output) Layer haben keine Rekursion!
-                # daher muessen auch keine Gewichte angepasst werden!
+                # ... daher müssen auch keine Gewichte angepasst werden!
                    self.RW[l] += epsilon * delta * self.RS[i+1][l+1].T
 
+                # für das nächste Layer kann nun das Delta für gültig erklärt werden.
                 delta = delta_next
 
 
@@ -286,18 +286,31 @@ class NeuralNetwork:
 
     def save(self, file):
         """
-        Speichert die Konfiguration des
-        :param file:
-        :type file:
-        :return:
-        :rtype:
+        Speichert die Konfiguration des MLPs in eine Datei, sie kann über load(file) wieder eingelesen werden.
+        :param file: Dateiname der Datei
+        :type file: str
+        :return: none
+        :rtype: void
         """
         raise NotImplementedError() #(Note: Im GIT befindet sich eine halbfunktionierende Lösung...)
 
     def load(self, file):
+        """
+        Läd die Konfiguration des MLPs aus einer Datei, sie kann über save(file) gespoeichert werden.
+        :param file: Dateiname der Datei
+        :type file: str
+        :return: none
+        :rtype: void
+        """
         raise NotImplementedError() #(Note: Im GIT befindet sich eine halbfunktionierende Lösung...)
 
     def debug(self):
+        """
+        Debug-Funktion die die Konfiguration als Liste ausgibt. Sie gibt einen schnellen überblick
+        über die interne Struktur.
+        :return: Debugdaten
+        :rtype: dict
+        """
         dataset = {
             'W':self.W,
             'B':self.B,
