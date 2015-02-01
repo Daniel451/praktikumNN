@@ -16,6 +16,7 @@ __status__ = "Development"
 
 import pprint
 import numpy as n
+import copy as c
 import time
 
 def _tanh(x):
@@ -76,6 +77,7 @@ class NeuralNetwork:
         self.RW = []
         # Initialisiere den Speicher für die vergangenen Vorhersagen. Gleichzeitig ist hier auch der Speicher der
         # rekurenten Daten enthalten.
+        self.RH = []
         self.RS = []
 
         # Anlegen der Struktur für die Gewichte (W) und Bias (B)
@@ -106,18 +108,20 @@ class NeuralNetwork:
         # entfernt bzw. überschrieben.
 
         # Template erzeugen
-        __temp_RS = []
+        __temp_R = []
         for i in range(0, len(layer)):
             # Erzeugt für jedes Layer eine 1*i Matrix mit Nullen
             # i ist die Anzahl der Neuronen in der aktuellen Schicht.
             # Somit ergibt sich eine Liste aus Matrizen die wie folgt aussehen könnte:
             # angenommene Konfiguration: [3,5,7,2] -> list( (1x3), (1x5), (1x7) (1x2) )
-            __temp_RS.append(n.zeros((1, layer[i])))
+            __temp_R.append(n.zeros((1, layer[i])))
 
         # Ringpuffer füllen falls frühzeitig (t < tmax) die Lernfunktion aufgerufen wird.
         for t in range(0, self.tmax+1):
             # für alle Zeitschritte von 0 bis tmax wird jeweils ein leers Template hinzugefügt.
-            self.RS.append(__temp_RS)
+            self.RH.append(c.deepcopy(__temp_R))
+            self.RS.append(c.deepcopy(__temp_R))
+
 
         # Speicher für die Activation der Neuronen initialisieren
         self.h = []
@@ -176,9 +180,16 @@ class NeuralNetwork:
             self.s.append(s)
 
         # ... für zukünftige Lernschritte als ganzes "Abbild des KNN" im Ringpuffer gesichert.
-        self.RS.insert(0, self.s) # (Eintragen an 0-Stelle, dann...
+        self.RH.insert(0, c.deepcopy(self.h)) # (Eintragen an 0-Stelle, dann...
+        del self.RH[-1]  # ... den letzen Datensatz löschen. Der Puffer ist wieder genauso lang, wie zuvor, jedoch
+                         # sind alle Abbilder um eine Stelle nach hinten verschoben worden.
+
+
+        self.RS.insert(0, c.deepcopy(self.s)) # (Eintragen an 0-Stelle, dann...
         del self.RS[-1]  # ... den letzen Datensatz löschen. Der Puffer ist wieder genauso lang, wie zuvor, jedoch
-                         # sind alle Abbilder um eine stelle nach hinten verschoben worden.
+                         # sind alle Abbilder um eine Stelle nach hinten verschoben worden.
+
+
 
         # Ausgeben der Outputs (s) der letzten Schicht.
         return s
@@ -231,8 +242,8 @@ class NeuralNetwork:
 
 
         #epsilon = 0.002
-        epsilon = epsilon / (self.tmax )
-
+        epsilon = epsilon / (self.tmax * 0.001) #TODO: Funktioniert nicht so richtig, ich weiß nicht warum...
+        epsilon = 0.0
         #delta = n.atleast_2d(diff)
 
         poi = self.RS[0][-1] + n.atleast_2d(diff)
@@ -242,6 +253,7 @@ class NeuralNetwork:
             # <=>  S_t + delta_t - S_t+1 = delta_t+1
 
             delta = poi - self.RS[i][-1]
+            print(delta)
 
             # i'm happy with that, i think! :)
 
@@ -255,7 +267,7 @@ class NeuralNetwork:
                 #print('Layer: ' + str(l) )
                 #Wenn ich es richtig sehe, sind, für den delta_next die gewichte uninterressant!
 
-                delta_next = _tanh_deriv(self.RS[i][l]) * delta.dot(self.W[l].T)
+                delta_next = _tanh_deriv(self.RH[i][l]) * delta.dot(self.W[l].T)
 
 
                 self.B[l] += epsilon * delta
@@ -273,10 +285,17 @@ class NeuralNetwork:
 
 
     def save(self, file):
-        raise NotImplementedError() #(Note: Im GIT befindet sich eine Halbfunktionierende Lösung...)
+        """
+        Speichert die Konfiguration des
+        :param file:
+        :type file:
+        :return:
+        :rtype:
+        """
+        raise NotImplementedError() #(Note: Im GIT befindet sich eine halbfunktionierende Lösung...)
 
     def load(self, file):
-        raise NotImplementedError() #(Note: Im GIT befindet sich eine Halbfunktionierende Lösung...)
+        raise NotImplementedError() #(Note: Im GIT befindet sich eine halbfunktionierende Lösung...)
 
     def debug(self):
         dataset = {
