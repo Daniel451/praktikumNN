@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Die Visu sorgt für die Visualisierung der Applikation, also des Spielfedes, des Balles, der Schläger, usw.
-Die Visu läuft in einem eigenen Thread.
+Die Visu sorgt für die Visualisierung der Applikation, also des Spielfedes und aller seiner Komponenten (Balles,
+Schläger, usw.).
+Die Visu läuft in einem eigenen Thread unter Benutzung des multiprocessing-Moduls von Python, dies erlaubt,
+dass die Visu unabhängig von der Hauptapplikation (main.py) ausgeführt werden kann und umgekehrt.
 """
 
 __author__ = "Daniel Speck, Florian Kock"
@@ -24,42 +26,68 @@ import time
 
 
 def netw_communication(conn):
+    """
+    Etabliert eine Netzwerkverbindung für die Kommunikation zwischen den Threads.
+    Wartet darauf, dass die Hauptapplikation gestartet wird und Daten liefert.
+
+    :param conn: Netzwerkkommuniationsobjekt, welches von Pipe erstellt und später an Process übergeben wird
+
+    :return:
+    """
+
     nc = NetwCon()
-    connected = False
+    connected = False  # initial besteht keine Verbindung
+
+    # Solange noch keine Verbindung besteht
     while not connected:
-        print('Try to connect...')
-        connected = nc.connect()
-        if not connected:
-            time.sleep(1)
+        print('Try to connect...')  # Konsolenausgabe
+        connected = nc.connect()    # Versuch der Verbindungsherstellung
+        if not connected:           # Falls keine Verbindung hergestellt werden konnte
+            time.sleep(1)           # Warten und im nächsten Schleifendurchlauf erneut versuchen
     print('connected, lets go...')
 
     while True:
-        if conn.poll(None):  # warte auf neue Daten...
-            
-            frame = conn.recv() # Daten sind da...
-            #print(frame.instruction)
-            nc.send({'instruction' : frame.instruction})
+        if conn.poll(None):  # Es wird auf neue Daten gewartet
 
-            #if  frame.instruction == 'INIT' or frame.instruction == 'REFRESH':
+            # Neue Daten wurden empfangen und werden verarbeitet
+            frame = conn.recv()
+            nc.send({'instruction': frame.instruction})
+
             retval = nc.receive()
-            #print(retval)
 
             conn.send(retval)
             
             if frame.instruction == 'EXIT':
                 break
+
+    # Verbindung schließen
     nc.close()
     conn.close()
 
+
 class NetwCon:
+    """
+    Netzwerk-Kommunikationsmodul, stellt die Verbindung her und sendet/empfängt Daten.
+    """
 
     def __init__(self, sock=None):
+        """
+
+        :param sock:
+        :return:
+        """
         if sock is None:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         else:
             self.sock = sock
 
     def connect(self, host='localhost', port=6769):
+        """
+
+        :param host:
+        :param port:
+        :return:
+        """
         try:
             self.sock.connect((host, port))
             return True
@@ -71,6 +99,13 @@ class NetwCon:
             
         
     def send(self, data):
+        """
+        Versucht Daten via JSON-Enkodierung (UTF8 Datenformat) zu packen und zu senden
+
+        :param data: Zu sendende Daten
+
+        :return: void
+        """
         try:
             self.sock.send(bytes(json.dumps(data), 'UTF-8'))
         except socket.error as e:
@@ -78,6 +113,11 @@ class NetwCon:
             sys.exit(1)
             
     def receive(self):
+        """
+        Versucht Daten zu empfangen und per JSON-Dekodierung (UTF8 Datenformat) zu interpretieren
+
+        :return: Empfangene Daten
+        """
         try:
             result = json.loads(self.sock.recv(8*1024).decode('UTF-8'))
         except socket.error as e:
@@ -86,21 +126,67 @@ class NetwCon:
         return result
         
     def close(self):
+        """
+        Schließt die Verbindung
+
+        :return: void
+        """
         self.sock.close()
 
 
 class Application(Frame):
-    
+    """
+    Visu-Applikationsklasse, welche Daten über Benutzerinteraktionen (z.B. Buttons) über das Netzwerk sendet
+    und für die GUI, die grafische Darstellung des aktuellen Applikationszustandes, verantwortlich ist.
+
+    Die Klasse übernimmt neben dem initialen Erstellen der GUI auch das stetige Updaten der Zeichnung.
+    """
+
+
+    def __init__(self, conn, master=None):
+        """
+        Konstruktur der Klasse, setzt initiale Zustände, zeichnet das Spielfeld, ruft dessen
+        Aktualisierung auf.
+
+        :param conn: Netzwerkverbindung
+
+        :param master:
+
+        :return:
+        """
+        Frame.__init__(self, master)  # Konstruktor der Super-Klasse aufrufen
+        self.init = True              # Initialisierungswert
+        self.pack()                   # Platzierungseinstellungen: Standard ist Top ohne Whitespaces zwischen Objekten
+        self.conn = conn              # Netzwerkkommunikationsobjekt
+        self.createWidgets()          # GUI-Objekte (Spielfeld, Ball, ...) zeichnen
+        self.factor = 50.0            # Faktor für die einfache Skalierung der GUI-Objekte
+        self.points = [0, 0]          # Container für den aktuellen Punktestand
+        self.update()                 # GUI updaten (neu zeichnen)
+
+
     def QGoS(self):
+        """
+
+        :return:
+        """
         print("Send EXIT Signal to Server...")
         conn.send(TelegrammFrame('EXIT'))
 
 
     def save(self):
+        """
+
+        :return:
+        """
         print("Send Save Signal to Server...")
         conn.send(TelegrammFrame('saveConfig'))
 
+
     def Togglespeed(self):
+        """
+
+        :return:
+        """
         print('send Speed Toggle')
         conn.send(TelegrammFrame('CHSPEED'))
         if conn.poll(None):  # warte auf neue Daten...
@@ -108,6 +194,10 @@ class Application(Frame):
 
 
     def createWidgets(self):
+        """
+
+        :return:
+        """
 
         self.bSAVE = Button(self)
         self.bSAVE["text"] = "Save Config"
@@ -129,24 +219,15 @@ class Application(Frame):
         self.togglespeed["command"] = self.Togglespeed
         self.togglespeed.pack({"side": "left"})
 
-
-        
         self.court = Canvas(self.master, width=900, height=500)
         self.court.pack({"side": "left"})
         
-        
-    
-    def __init__(self, conn, master=None):
-        Frame.__init__(self, master)
-        self.init = True
-        self.pack()
-        self.conn = conn
-        self.createWidgets()
-        self.factor = 50.0
-        self.points = [0,0]
-        self.update()
-        
+
     def update(self):
+        """
+
+        :return:
+        """
         if self.init:
             conn.send(TelegrammFrame('INIT')) #Frage init Daten an...
             
@@ -159,7 +240,7 @@ class Application(Frame):
                 self.p2name = data['p2name']
                 self.timestamp = time.time()
                 
-                self.drawCurt()
+                self.drawCourt()
                 self.init = False
                 
         conn.send(TelegrammFrame('REFRESH')) #Frage init Daten an...
@@ -179,8 +260,13 @@ class Application(Frame):
         self.lastrefresh = self.timestamp
         self.timestamp = time.time()
         self.after(50, self.update)
-            
+
+
     def updateCurt(self):
+        """
+
+        :return:
+        """
         r = 5
         self.court.coords(self.c_bat1,  10, (self.factor * self.bat[0]) + (self.factor * self.batsize),10,(self.factor * self.bat[0]) - (self.factor * self.batsize) )
         self.court.coords(self.c_bat2,  self.factor * self.size[0]+10, (self.factor * self.bat[1]) + (self.factor * self.batsize),self.factor * self.size[0]+10, 
@@ -198,7 +284,11 @@ class Application(Frame):
         self.court.update()
         
         
-    def drawCurt(self):
+    def drawCourt(self):
+        """
+
+        :return:
+        """
         
         # court
 

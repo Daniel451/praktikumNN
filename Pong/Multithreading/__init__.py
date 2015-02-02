@@ -1,6 +1,9 @@
 #!/usr/bin/env python3.4
 # -*- coding: utf-8 -*-
-"""The __init__.py file is required to make Python treat the directories as containing packages"""
+
+"""
+The __init__.py file is required to make Python treat the directories as containing packages
+"""
 
 __author__ = "Daniel Speck, Florian Kock"
 __copyright__ = "Copyright 2014, Praktikum Neuronale Netze"
