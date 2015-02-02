@@ -316,7 +316,7 @@ class court:
         # Falls 10 oder mehr Treffer also jeder mindestens 5x getroffen hat, dann wird abgebrochen
         # und neu gestartet, damit die aktuelle Endlosschleife unterbrochen wird. Hier würde das KNN
         # sonst nichts Neues mehr lernen.
-        if self.bouncecount > 10:  #TODO: Abbruch und neu init sollte besser in der Mitte geschehen!
+        if self.bouncecount > 10:
             self.__initvectors()
 
         # Abprallen an der Unterseite bei Y = 0

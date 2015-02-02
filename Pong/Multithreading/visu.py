@@ -202,22 +202,25 @@ class Application(Frame):
         self.bSAVE = Button(self)
         self.bSAVE["text"] = "Save Config"
         self.bSAVE["command"] =  self.save
+        self.bSAVE["state"] = DISABLED
         self.bSAVE.pack({"side": "left"})
 
         self.bQUIT = Button(self)
-        self.bQUIT["text"] = "QUIT client only"
+        self.bQUIT["text"] = "Quit visu only"
         self.bQUIT["command"] =  self.quit
         self.bQUIT.pack({"side": "left"})
         
         self.bQGoS = Button(self)
-        self.bQGoS["text"] = "QUIT game on guiserver",
+        self.bQGoS["text"] = "Quit"
         self.bQGoS["command"] = self.QGoS
         self.bQGoS.pack({"side": "left"})
 
         self.togglespeed = Button(self)
-        self.togglespeed["text"] = "Toggle Speed",
+        self.togglespeed["text"] = "Toggle Speed"
         self.togglespeed["command"] = self.Togglespeed
         self.togglespeed.pack({"side": "left"})
+
+
 
         self.court = Canvas(self.master, width=900, height=500)
         self.court.pack({"side": "left"})
