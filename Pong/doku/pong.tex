@@ -285,17 +285,17 @@ Unsere Applikation ist in mehrere Dateien und Module aufgeteilt. In der Abbildun
 \subsection{Die Haupanwendung - main.py}
 \label{main.py}
 
-Die Hauptapplikation besteht im Wesentlichen aus einer Hauptschleife, die die Spielzüge (im Quellcode 'Ticks' genannt) kontrolliert. Der relevante Teil befindet sich hierzu in der \textit{main.py} in den Zeilen von ca. 360 bis 460.
+Die Hauptapplikation besteht im Wesentlichen aus einer Hauptschleife, die die Spielzüge (im Quellcode 'Ticks' genannt) kontrolliert. Der relevante Teil befindet sich hierzu in der \textit{main.py}.
+Sie liefert in jedem Spielzug vom Spielfeld (siehe \ref{court.py}) die Ballpositionen an die Spieler (siehe \ref{knnframe.py}), um anschließend deren Aktion wieder dem Spielfeld zuzuführen.
 
-Sie liefert in jedem Spielzug vom Spielfeld (siehe \ref{curt.py}) die Ballpositionen an die Spieler (siehe \ref{knnframe.py}), um anschließend deren Aktion wieder dem Spielfeld zuzuführen.
+\subsubsection{Das Spielfeld - court.py}
+\label{court.py}
+Das Spielfeld implementiert eine Simulation der Spielumgebung. Diese besteht aus zwei Schlägern und einem Ball in einem rechteckigen Rahmen. Bei jedem Aufruf von \textit{tick()} berechnet das Spielfeld den nächsten Zustand des Balles, hierbei wird ebenfalls geprüft, ob der Ball die Bande, den Rahmen, überschritten hat und korrigiert dies. Ein solcher Abprall ist der Physik nachempfunden ('Einfallswinkel = Ausfallswinkel').
 
-\subsubsection{Das Spielfeld - curt.py}
-\label{curt.py}
-Das Spielfeld implementiert eine Simulation der Spielumgebung. Diese besteht aus zwei Schlägern und einem Ball in einem rechteckigen Rahmen. Bei jedem Aufruf von \textit{tick()} berechnet das Spielfeld den nächsten Zustand des Balles, hierbei wird ebenfalls geprüft, ob er die Bande, den Rahmen, überschritten hat und korrigiert dies. Ein solcher Abprall ist der Physik nachempfunden ('Einfallswinkel = Ausfallswinkel').
+Das Ziel des Spieles ist es, den Ball mit dem Schläger zurückzuspielen, gelangt der Ball jedoch über die Linie, bedeutet dies, das der Ball wieder in der Mitte neu initialisiert wird. Hierfür ist die Funktion \textit{\_\_initvectors()} zuständig. Sie setzt den Ball mit einer zufälligen Höhe auf die Mittellinie (Ortsvektor), um ihm dann mit einem zufälligen Einheitsvektor, welcher jeweils zwischen -45 bis + 45 Grad zur Horizontalen zu jedem Spieler zeigen kann, eine Richtung zu geben.
 
-Das Ziel des Spieles ist es, den Ball mit dem Schläger zurückzuspielen, gelangt der Ball jedoch über die Linie, bedeutet dies, das der Ball wieder in der Mitte neu initialisiert wird. Hierfür ist die Funktion \textit{\_\_initvectors()} zuständig. Sie setzt den Ball mit einer zufälligen Höhe auf die Mittellinie (Ortsvektor), um ihm dann mit einem zufälligen Einheitsvektor, welcher jeweils zwischen -45 bis + 45 Grad zu jedem Spieler zeigen kann, eine Richtung zu geben.
-
-Die Schläger könnnen, über die die Funktion \textit{move(player, action)} verschoben werden. Der Parameter \textit{action} kann entweder ein \textit{float} mit genauen Positionsdaten (-1 bis +1) oder ein \textit{string} mit Aktionen:
+Die Schläger könnnen, über die die Funktion \textit{move(player, action)} verschoben werden. Der Parameter \textit{action} kann entweder ein \textit{float} mit genauen Positionsdaten in dem Intervall
+$ [-1 , 1] $ oder ein \textit{string} mit Aktionen sein:
 \begin{itemize}
   \item \textit{'u':str} für einen Schritt aufwärts 
   \item \textit{'d':str} für einen Schritt abwärts 
@@ -303,27 +303,29 @@ Die Schläger könnnen, über die die Funktion \textit{move(player, action)} ver
 \end{itemize}
 In der Applikation nutzen wir jedoch nur die einfache, direkte Positionierung über eine \textit{float}-Zahl.
 
-Für die Visualisierung stellt das Spielfeld Inspektionsfunktionen zur verfügung die immer mit \textit{'v\_'} beginnen. Sie werden ausschließlich zu diesem Zweck genutzt und finden keine weitere Anwendung in der Logik der Applikation.
+Für die Visualisierung stellt das Spielfeld Inspektionsfunktionen zur Verfügung, die immer mit \textit{'v\_'} beginnen. Sie werden ausschließlich zu diesem Zweck genutzt und finden keine weitere Anwendung in der Logik der Applikation.
 
 \subsubsection{Das Framework um das KNN - knnframe.py}
 \label{knnframe.py}
 
-Das Rekurente Netz in der Datei \textit{recneunet.py} (siehe \ref{recneunet.py}) ist möglichst allgemein gehalten. Es sollte nicht spezifisch für dieses Problem geschrieben sein. Es könnte, so war unsere Intention, leicht portiert werden um weitere Probleme lösen zu können, deren Lösungswege ebenfalls die Rekurrenz bedingen.
+Das rekurrente Netz in der Datei \textit{recneunet.py} (siehe \ref{recneunet.py}) ist möglichst allgemein gehalten. Es sollte nicht spezifisch für dieses Problem geschrieben sein. Es könnte, so war unsere Intention, leicht portiert werden um weitere Probleme zu lösen, deren Strategien ebenfalls der Rekurrenz bedingen.
 
 Das Framework adaptiert und konfiguriert das Netz an die Probleme des Spieles Pong. Es sorgt dafür, das jeweils \textit{positive} und \textit{negative} Belohnungen (siehe \ref{rewards}) dem Netz zugeführt werden und es entsprechend daraus lernen kann.
 
-Eine weitere Aufgabe ist es, Daten über den aktuellen Zustand zu sammeln um damit eine Aussage zu haben, wie gut das Netz trainiert ist und welche Qualität die Vorhersagen haben. Ursprünglich war es ebenfalls abgedacht, diese für einen dynamischen Lernenfortschritt zu nutzen wovon wir jedoch während des Verlaufes aus Zeitgründen wieder abgekommen sind. 
+Eine weitere Aufgabe ist es, Daten über den aktuellen Zustand zu sammeln um damit eine Aussage zu haben, ob das Netz hinreichend trainiert ist und welche Qualität die Vorhersagen geben. Ursprünglich war es ebenfalls angedacht, diese für einen dynamischen Lernfortschritt zu nutzen, wovon wir jedoch während des Verlaufes aus Zeitgründen wieder abgekommen sind. 
 
 
 
-\subsubsection{rekurrentes künstliches neuronales Netzwerk - recneunet.py}
+\subsubsection{Rekurrentes künstliches neuronales Netzwerk - recneunet.py}
 \label{recneunet.py}
 
-Das rekurrente künstliche neuronale Netzwerk ist von der Grundstruktur her aufgebaut wie ein MLP welches wir zu Anfang des Kurses kennengelernt haben. Wir haben jedoch ein paar Modifikationen eingeführt um dem Netz es möglich zu machen, das gestellte Problem zu lösen.:
+Das rekurrente künstliche neuronale Netzwerk ist von der Grundstruktur her aufgebaut wie ein MLP welches wir zu Anfang des Kurses kennengelernt haben. Weitere  Modifikationen wurden von uns eingeführt, um dem Netz es zu ermöglichen, das gestellte Problem zu lösen.:
 
-Unser Netz kann Daten aus der Vergangenheit speichern und somit für zukünftige Aussagen nutzen. Dies ist wichtig, da eines der Haupt-Probleme darin bestand, dass über einen langen Zeitraum keine Aussage über die Qualität der Vorhersagen getroffen werden kann. Im Spiel Pong bewegt sich der Ball eine lange Zeit lang über das Spielfeld und es ist nicht ohne physikalisches Wissen möglich einen Aufprallpunkt zu berechnen. So kann keine Aussage darüber getroffen werden, ob die aktuelle Schlägerposition gut oder schlecht ist bzw. wie sie am besten korrigiert werden sollte. (siehe Abbildung~\ref{fig:delayedlearning} auf Seite~\pageref{fig:delayedlearning})
-Durch das Aufnehmen der Daten in einem \textit{Ringpuffer} entsteht eine gewisse \textit{Sicht} auf vergangene Aktionen und Vorhersagen wenn eine, die Letzte, der Aussagen bewertet werden kann. Hierdurch werden dann Rückschlüsse auf die letzten Vorhersagen generiert und daraus kann gelernt werden. Die Anzahl der Lernschritte in die Vergangenheit ist in der Variable \textit{t\_max} abgebildet. Sie kann beim Erstellen des KNN-Objektes durch \textit{knnframe.py} (siehe \ref{knnframe.py}) neben der Struktur (Layer und Anzahl der Neuronen je Layer) festgelegt werden. 
-Die Daten werden in \textit{Listen} und \textit{Numpy-Arrays} gespeichert welche immer mit einem \textit{R} im Namen beginnen:
+Unser Netz kann vergangene Vorhersagen speichern und somit für zukünftige Aussagen nutzen. Dies ist wichtig, da eines der Haupt-Probleme darin bestand, dass über einen langen Zeitraum keine Aussage über die Qualität der eigenen, aktuellen Vorhersagen getroffen werden kann (\textit{delayed feedback problem}). Im Spiel Pong bewegt sich der Ball kontinuierlich über das Spielfeld und es ist nicht (ohne physikalisches Wissen der Welt) möglich einen Aufprallpunkt zu bestimmen. So kann keine Aussage darüber getroffen werden, ob die aktuelle Schlägerposition positiv oder negativ ist bzw. wie sie am besten korrigiert werden sollte (siehe Abbildung~\ref{fig:delayedlearning} auf Seite~\pageref{fig:delayedlearning}).
+
+Durch das Aufnehmen der Daten in einem \textit{Ringpuffer} entsteht eine gewisse \textit{Sicht} auf vergangene Aktionen und Vorhersagen, wenn eine - die Letzte - der Aussagen bewertet werden kann. Hierdurch können dann Rückschlüsse auf die letzten Vorhersagen gezogen und daraus gelernt werden. Die Anzahl der Lernschritte in die Vergangenheit ist in der Variable \textit{t\_max} abgebildet. Sie kann beim Erstellen des KNN-Objektes durch \textit{knnframe.py} (siehe \ref{knnframe.py}) neben der Struktur (Layer und Anzahl der Neuronen je Layer) festgelegt werden. 
+
+Die Daten werden in \textit{Listen} und \textit{Numpy-Arrays} gespeichert, welche immer mit einem \textit{R} im Namen beginnen:
 \begin{itemize}
   \item RW: Rekurrente Gewichte
   \item RH: Rekurrente Aktivierungen
@@ -336,44 +338,50 @@ Die Daten werden in \textit{Listen} und \textit{Numpy-Arrays} gespeichert welche
 \end{figure}
 
 
-Um keine Daten doppelt zu Speichern greift auch die nächste Modifikation auf diese Daten zurück: Das Netz nutzt für zukünftige Vorhersagen Daten aus vergangenen Aussagen. Hierzu wird für jedes \textit{Hidden-Layer} auf den internen Datenspeicher zugegriffen, welcher vom lernen aus der Vergangenheit aus dem vorherigen Absatz angelegt wurde. Auf diese Daten, greift das Netz bei jeder neuen Vorhersage zu und kann somit, in unserem Fall, eine Ballrichtung erkennen. 
+Um den Speicher effizient zu nutzen, greift auch die nächste Modifikation auf diese Daten zurück: Das Netz nutzt für zukünftige Vorhersagen Daten aus vergangenen Aussagen. Hierzu wird für jedes \textit{Hidden-Layer} auf den internen Datenspeicher zugegriffen, welcher vom Lernen aus der Vergangenheit aus dem vorherigen Absatz angelegt wurde. Auf diese Daten, greift das Netz bei jeder neuen Vorhersage zu und kann somit, in unserem Fall, eine Ballrichtung erkennen. 
 
 
 \subsubsection{Belohnungen}
 \label{rewards}
 
-\textit{Positive} und \textit{negative} Belohnungen sind eigentlich aus dem SARSA-Algorithmus bekannt. Wir haben Anfangs gedacht eben diesen für unser Problem einzusetzen. Da jedoch durch die vielen Zustände ein sehr großer \textit{Statespace} (alle Positionen multipliziert mit allen Winkel) erhalten würden, haben wir schnell diese Idee verwerfen müssen. Geblieben sind jedoch die Belohnungen. Diese werden im Framework um das KNN (siehe \ref{knnframe.py}) dazu genutzt, das Netz anzuweisen aus seinen gespeicherten Daten entsprechend zu lernen. Der Algorithmus kann als Abgewandeltes \textit{überwachtes Lernen} bezeichnet werden. Dies ist im neuronalen Netzwerk (siehe \ref{recneunet.py}) beschrieben.
+\textit{Positive} und \textit{negative} Belohnungen sind eigentlich aus dem SARSA-Algorithmus bekannt. Wir haben Anfangs gedacht, eben diesen für unser Problem einzusetzen. Da jedoch durch die vielen Zustände ein sehr großer \textit{Statespace} (alle Positionen multipliziert mit allen Winkel) entstehen würde, haben wir schnell diese Idee verwerfen müssen. Geblieben sind jedoch die Belohnungen. 
+
+In unserer Applikation erzeugt ein Ball, der den Schläger getroffen hat, eine positive Belohnung. Eine Negative erhält der Spieler, wenn sich der Ball über die eigene Linie bewegt.
+
+Diese werden im Framework um das KNN (siehe \ref{knnframe.py}) dazu genutzt, das Netz anzuweisen aus seinen gespeicherten Daten entsprechend zu lernen. Der Algorithmus kann als Abgewandeltes \textit{überwachtes Lernen} bezeichnet werden. Dies ist im neuronalen Netzwerk (siehe \ref{recneunet.py}) beschrieben.
 
 
 \subsection{Die Visualisierung - visu.py}
 \label{visu.py}
 
-Die Visualisierung der dient der einfachen Diagnose, des Zustands der Hauptapplikation welche keine eigene Visualisierung bereitstellt. Die Verbindung wird via TCP/IP über den \textit{Port 6769} hergestellt und ist aktuell nur vom \textit{localhost} erreichbar.
+Die Visualisierung dient der einfachen Diagnose des Zustands der Hauptapplikation, welche keine eigene Repräsentation der Daten bereitstellt. Die Verbindung wird via TCP/IP über den \textit{Port 6769} hergestellt und ist aktuell nur vom \textit{localhost} erreichbar.
 
 \begin{figure}[hbtp]
 	 \centerline{\includegraphics[width=0.95\textwidth]{visu}}
 	 {\caption{Bildschirmfoto der Visualisierung}\label{fig:visu}}
 \end{figure}
 
-Probleme beim Beenden entstehen je nach Konstellation durch noch geöffnete Ports, die einem Prozess der durch den Benutzer terminiert wurde noch reserviert sind. Hier hilft es, einen Moment zu warten oder die Visualisierung zu starten. Durch den versuch die Verbindung zwischen Client und Server herzustellen, merkt das Betriebssystem schnell ob der Server-Thread noch lebt.
-Wir empfehlen den Server und den Klienten über die Buttons in der Visu zu beenden. Hierbei werden die entsprechenden Ports wie vorgesehen geschlossen und wieder freigegeben.
+Probleme können beim Beenden je nach Konstellation durch noch geöffnete Ports entstehen, die einem Prozess zugeteilt sind, welcher durch den Benutzer terminiert wurde. 
+Hier hilft es einen Moment zu warten oder die Visualisierung zu starten. 
+Durch den Versuch die Verbindung zwischen Klient und Server herzustellen, erkennt das Betriebssystem rasch ob der Server-Thread noch ausgeführt wird.
+Wir empfehlen den Server und den Klienten über die Schaltflächen in der Visualisierung zu beenden. Hierbei werden die entsprechenden Ports wie vorgesehen geschlossen und wieder freigegeben.
 
 
 \subsection{Protokoll - telegramframe.py}
 \label{telegramframe.py}
 
-Da die Applikation modularisiert und parallelisiert ausgeführt wird, wird ein einfaches Protokoll benötigt, welches die Module miteinander kommunizieren lassen kann. Dieses ist in der Datei \textit{telegramframe.py} definiert. 
+Da die Applikation modularisiert und parallelisiert ausgeführt wird, ist ein simples Protokoll unabdingbar. Jenes Protokoll befähigt die Module zur gegenseitigen Kommunikation. Dieses ist in der Datei \textit{telegramframe.py} definiert. 
 
 
-\subsection{Weitere Datein}
+\subsection{Weitere Dateien}
 \label{otherfiles}
 
 
-Neben den angesprochenen Datein gibt es noch ein paar weitere die für das ausführen des Programms benötigt werden:
+Neben den angesprochenen Dateien gibt es noch weitere, die für das erfolgreiche Ausführen des Programms benötigt werden:
 
 \begin{itemize}
   \item \textit{concol.py} \tabto{4cm}- Enthält Definitionen für farbige Ausgaben in der \tabto{5cm} Konsole
-  \item \textit{\_\_init\_\_.py} \tabto{4cm}- Systemdatei, die es Python erlaubt im Verzeichnis \tabto{5cm} nach benötigten Paketen (imports) zu suchen.  
+  \item \textit{\_\_init\_\_.py} \tabto{4cm}- Systemdatei, die es Python erlaubt im Verzeichnis \tabto{5cm} nach benötigten Paketen (imports) zu suchen 
   \item \textit{log\_player\_0.log} \tabto{4cm}- Wird von der Applikation erstellt, Protokoll-Datei \tabto{5cm} von Spieler 0 
   \item \textit{log\_player\_1.log} \tabto{4cm}- Wird von der Applikation erstellt, Protokoll-Datei \tabto{5cm} von Spieler 1 
   \item \textit{log\_pong.log} \tabto{4cm}- Wird von der Applikation erstellt, Protokoll-Datei \tabto{5cm}der Hauptschleife 
