@@ -218,15 +218,19 @@ class Knnframe:
     def v_gethitratio(self):
         """
         Stellt für die Visualisation Daten zur Vefügungung.
+
         :return: Treffer zu nicht Treffer
         :rtype: float
         """
+
         return self.hitratio
 
     def v_getrewcount(self):
         """
         Stellt für die Visualisation Daten zur Vefügungung.
+
         :return: Anzahl der Belohnungen
         :rtype: int
         """
+
         return self.reward_count

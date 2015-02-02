@@ -164,30 +164,39 @@ class Application(Frame):
         self.update()                 # GUI updaten (neu zeichnen)
 
 
-    def QGoS(self):
+    def quitserver(self):
+        """
+        Beende den Server, sendet ihm die Beendenanforderung
+
+        :return: none
+        :rtype: void
         """
 
-        :return:
-        """
-        print("Send EXIT Signal to Server...")
+        print("send EXIT signal to Server...")
         conn.send(TelegrammFrame('EXIT'))
 
 
-    def save(self):
+    def savedata(self):
+        """
+        Sendet dem Server die Speicheranforderung
+
+        :return: none
+        :rtype: void
         """
 
-        :return:
-        """
-        print("Send Save Signal to Server...")
+        print("send save signal to Server...")
         conn.send(TelegrammFrame('saveConfig'))
 
 
-    def Togglespeed(self):
+    def togglespeed(self):
+        """
+        Sendet dem Server die Geschwindigkeitsänderungsanforderung
+
+        :return: none
+        :rtype: void
         """
 
-        :return:
-        """
-        print('send Speed Toggle')
+        print('send speed toggle signal to Server...')
         conn.send(TelegrammFrame('CHSPEED'))
         if conn.poll(None):  # warte auf neue Daten...
             print(conn.recv()) # Daten sind da...
@@ -195,72 +204,80 @@ class Application(Frame):
 
     def createWidgets(self):
         """
+        Erstellt die GUI Elemente im Fenster
 
         :return:
         """
-        self.master.title("Pong mit rekurrentem Netz")
 
-        self.bSAVE = Button(self)
+        self.master.title("Pong mit rekurrentem Netz") # Setzt Fenstertitel
+
+        self.bSAVE = Button(self)                   # Erzeugt den Button: 'Save Config'
         self.bSAVE["text"] = "Save Config"
-        self.bSAVE["command"] =  self.save
+        self.bSAVE["command"] =  self.savedata
         self.bSAVE["state"] = DISABLED
         self.bSAVE.pack({"side": "left"})
 
-        self.bQUIT = Button(self)
-        self.bQUIT["text"] = "Quit visu only"
+        self.bQUIT = Button(self)                   # Erzeugt den Button: 'Quit Visu only'
+        self.bQUIT["text"] = "Quit Visu only"
         self.bQUIT["command"] =  self.quit
         self.bQUIT.pack({"side": "left"})
         
-        self.bQGoS = Button(self)
+        self.bQGoS = Button(self)                   # Erzeugt den Button: 'Quit'
         self.bQGoS["text"] = "Quit"
-        self.bQGoS["command"] = self.QGoS
+        self.bQGoS["command"] = self.quitserver
         self.bQGoS.pack({"side": "left"})
 
-        self.togglespeed = Button(self)
+        self.togglespeed = Button(self)              # Erzeugt den Button: 'Toggle Speed'
         self.togglespeed["text"] = "Toggle Speed"
-        self.togglespeed["command"] = self.Togglespeed
+        self.togglespeed["command"] = self.togglespeed
         self.togglespeed.pack({"side": "left"})
 
         self.bottomframe = Frame(self.master)
         self.bottomframe.pack( side = BOTTOM )
 
-        self.infoboxsize = 23
+        self.infoboxsize = 23 # Parameter zur Breitenfestlegung der Infoboxen
 
+        # Infobox für Spieler0
         self.p0 = Text(self.bottomframe, height=6, width=self.infoboxsize)
         self.p0.pack({"side": LEFT})
         self.p0.insert(END, "Player 0\n")
 
+        # Erstellt die Zeichenfläche für das Spielfeld
         self.court = Canvas(self.bottomframe, width=900, height=500)
         self.court.pack({"side": LEFT})
 
+        # Infobox für Spieler1
         self.p1 = Text(self.bottomframe, height=6, width=self.infoboxsize)
         self.p1.pack({"side": LEFT})
         self.p1.insert(END, "Player 1\n")
 
     def update(self):
         """
+        Update Funktion für die GUI-Elemente, wird regelmäßig aufgerufen
 
-        :return:
+        :return: none
         """
-        if self.init:
+        if self.init: # Wenn noch nie Initialisiert wurde, dann initialisiere!
             conn.send(TelegrammFrame('INIT')) #Frage init Daten an...
             
             if conn.poll(None):  # warte auf neue Daten...
                 data = conn.recv() # Daten sind da...
-                
+
+                # Kopiere Daten in Variablen
                 self.size = data['size']
                 self.batsize = data['batsize']
                 self.p1name = data['p1name']
                 self.p2name = data['p2name']
                 self.timestamp = time.time()
                 
-                self.drawCourt()
-                self.init = False
+                self.drawCourt()       # Zeichne das Spielfeld neu bzw. initial
+                self.init = False      # Initialisierung wurde abgeschlossen
                 
-        conn.send(TelegrammFrame('REFRESH')) #Frage init Daten an...
+        conn.send(TelegrammFrame('REFRESH')) #Frage Refresh Daten an...
         if conn.poll(None):  # warte auf neue Daten...
             data = conn.recv() # Daten sind da...
-            
+
+            # Kopiere Daten in Variablen
             self.speed = data['mainloopdelay']
             self.posvec = data['posvec']
             self.dirvec = data['dirvec']
@@ -271,6 +288,8 @@ class Application(Frame):
             self.rewcount = data['rewcount']
             self.hitratio = data['hitratio']
 
+
+            # Bereite einen String vor, der in die Infobox geschrieben wird (Spieler0)
             info = 'Player 0\n\n'
             info += 'Bat positon'.ljust(18, ".")\
                     + (str(round(self.bat[0], 2)).ljust(4, "0")).rjust(self.infoboxsize - 18, ".") + '\n'
@@ -281,9 +300,10 @@ class Application(Frame):
             info += 'Hitratio'.ljust(18, ".")\
                     + (str(round(self.hitratio[0], 2)).ljust(4, "0")).rjust(self.infoboxsize - 18, ".") + '\n'
 
-            self.p0.delete("1.0",END)
-            self.p0.insert(END, info)
+            self.p0.delete("1.0",END) # lösche Infobox
+            self.p0.insert(END, info) # schreibe Infobox mit neuen Informationen
 
+            # Bereite einen String vor, der in die Infobox geschrieben wird (Spieler0)
             info = 'Player 1\n\n'
             info += 'Bat positon'.ljust(18, ".")\
                     + (str(round(self.bat[1], 2)).ljust(4, "0")).rjust(self.infoboxsize - 18, ".") + '\n'
@@ -294,31 +314,37 @@ class Application(Frame):
             info += 'Hitratio'.ljust(18, ".") \
                     + (str(round(self.hitratio[1], 2)).ljust(4, "0")).rjust(self.infoboxsize - 18, ".") + '\n'
 
-            self.p1.delete("1.0",END)
-            self.p1.insert(END, info)
+            self.p1.delete("1.0",END) # lösche Infobox
+            self.p1.insert(END, info) # schreibe Infobox mit neuen Informationen
 
-            self.updateCurt()
+            self.updateCurt()  # Zeiche das Spielfeld neu
             
         self.lastrefresh = self.timestamp
         self.timestamp = time.time()
-        self.after(50, self.update)
+        self.after(50, self.update) # wieder aufrufen nach 50 ms
 
 
     def updateCurt(self):
         """
+        Neuzeichnen des Spielfeldes
 
-        :return:
+        :return: none
         """
-        r = 5
-        self.court.coords(self.c_bat1,  10, (self.factor * self.bat[0]) + (self.factor * self.batsize),10,(self.factor * self.bat[0]) - (self.factor * self.batsize) )
-        self.court.coords(self.c_bat2,  self.factor * self.size[0]+10, (self.factor * self.bat[1]) + (self.factor * self.batsize),self.factor * self.size[0]+10, 
+        r = 5 # radius vom Ball
+        # Schläger für Spieler 0 zeichnen
+        self.court.coords(self.c_bat0,  10, (self.factor * self.bat[0]) + (self.factor * self.batsize),10,(self.factor * self.bat[0]) - (self.factor * self.batsize) )
+
+        # Schläger für Spieler 1 zeichnen
+        self.court.coords(self.c_bat1,  self.factor * self.size[0]+10, (self.factor * self.bat[1]) + (self.factor * self.batsize),self.factor * self.size[0]+10,
             (self.factor * self.bat[1]) - (self.factor * self.batsize) )
-                                        
+
+        # Ball zeichnen
         self.court.coords(self.c_ball,  self.posvec[0]*self.factor-r + 10, self.posvec[1]*self.factor-r, self.posvec[0]*self.factor+r+ 10, self.posvec[1]*self.factor+r )
                                         
-                                        
+        # Richtungsvektor zeichnen
         self.court.coords(self.c_direction, self.posvec[0]*self.factor+ 10, self.posvec[1]*self.factor, self.posvec[0]*self.factor + self.dirvec[0] * self.factor + 10, self.posvec[1]*self.factor + self.dirvec[1] * self.factor)
 
+        #Punkte von den Spilern zeichnen
         self.court.itemconfig(self.p0points,text=str(self.points[0]))
         self.court.itemconfig(self.p1points,text=str(self.points[1]))
 
@@ -328,28 +354,28 @@ class Application(Frame):
         
     def drawCourt(self):
         """
+        Spielfeld initial zeichnen
 
-        :return:
+        :return:none
         """
         
-        # court
-
+        # Zeichen das Spielfeld
         self.court.create_rectangle(5,0, self.factor * self.size[0]+15,self.factor * self.size[1],fill="black")
+
         
-        #create_line(x1, y1, x2, y2, width=1, fill="black")
-        
-        # vertical middle line
+        # Vertikale Mittellinie zeichnen
         self.court.create_line(self.factor * self.size[0]/2+10, 0, self.factor * self.size[0]/2+10, self.factor * self.size[1], fill="white", dash=(4, 4))
         
-        #Player1 - Bat
-        self.c_bat1 = self.court.create_line(
+        # Spieler0 Schläger zeichnen
+        self.c_bat0 = self.court.create_line(
             10,
             50,
             10,
             70,  
             fill="white",width=8)
-        #Player2 - Bat
-        self.c_bat2 = self.court.create_line(
+
+        # Spieler1 Schläger zeichnen
+        self.c_bat1 = self.court.create_line(
             self.factor * self.size[0]+10,
             70,
             self.factor * self.size[0]+10,
@@ -357,27 +383,32 @@ class Application(Frame):
             fill="white",width=8)
         
         r = 5
+        # Ball zeichen
         self.c_ball = self.court.create_oval(100-r + 10, 100-r, 100+r+ 10, 100+r,fill="white")
-        
+
+        # Richtungsvektor zeichnen
         self.c_direction = self.court.create_line( 100, 100, 
                                 110, 110, fill="white",arrowshape=(8,10,3),arrow="last")
 
+        # Spielstände zeichnen
         self.p1points = self.court.create_text(self.factor * self.size[0] / 2  + 10 + 150 ,20,text = str(self.points[1]),fill='white',font = ('ARIAL',30))
         self.p0points = self.court.create_text(self.factor * self.size[0] / 2  - 10 - 150 ,20,text = str(self.points[0]),fill='white',font = ('ARIAL',30))
 
-        root.after(1000,self.updateCurt)
+        root.after(1000,self.updateCurt) # Update nach 1s aufrufen
         
 
 if __name__ == '__main__':
-    conn, communication_conn = Pipe()
-    nwc = Process(target=netw_communication, args=(communication_conn,))
-    nwc.start()
+
+    conn, communication_conn = Pipe() # Kommunikationskanal zwischen Socketserver und GUI öffnen
+    nwc = Process(target=netw_communication, args=(communication_conn,)) # Prozess vorbereiten
+    nwc.start() # Prozess starten
     
-    
+    # Neues Fenster öffnen
     root = Tk()
     app = Application(conn, master=root)
+
+
+    app.mainloop() # Hauptscheife starten
+    root.destroy() # Fenster beenden
     
-    app.mainloop()
-    root.destroy()
-    
-    nwc.join()
+    nwc.join() # Warten auf beenden des Socketservers

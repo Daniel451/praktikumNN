@@ -323,7 +323,7 @@ class NeuralNetwork:
 
     def load(self, file):
         """
-        Lädt die Konfiguration des MLPs aus einer Datei, sie kann über save(file) gespeichert werden.
+        Lädt die Konfiguration des MLPs aus einer Datei, sie kann über savedata(file) gespeichert werden.
 
         :param file: Dateiname der Datei
         :type file: String

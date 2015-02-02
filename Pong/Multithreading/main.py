@@ -44,38 +44,50 @@ import datetime
 
 
 
-#Todo: kommentieren! irgendwie...
 
 class TreadTCPServ(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    """
+    Thread für den Visualisierungsserver
+    """
     pass
 
 class VisTCPServ(socketserver.ThreadingTCPServer):
+    """
+    Server für den Visualisierungsserver
+    """
+
     allow_reuse_address = True
 
 class VisTCPServHandler(socketserver.BaseRequestHandler):
+    """
+    Serverhandler für den Visualisierungsserver
+    """
+
     def handle(self):
-        while True:
-            try:
+        """
+        Wird aufgerufen, wenn daten über die Port ankommen
+        """
+
+        while True: # Biete Dienst für immer an...
+            try:    #  Daten kommen json-Kodiert an, versuche zu dekodieren!
                 data = json.loads(self.request.recv(8*1024).decode('UTF-8').strip())
 
             except Exception as e:
-                print("Exception while receiving message: ", e)
+                print("Exception while receiving message: ", e) # konnte Daten nicht dekodieren.
                 return
             
-            try:
+            try:  # versuchen, dekodierte Daten auszufüheren
                 instruction = data['instruction']
 
-                if instruction == 'EXIT':
-                    # send some 'ok' back
+                if instruction == 'EXIT':   # Programm soll beendet werden,
                     print('Exiting...')
                     self.request.sendall(bytes(json.dumps({'return':'ok'}), 'UTF-8'))
-                    self.__shutdown_request = True
-                    exitapp()
-                    self.__is_shut_down.wait()
-                    sys.exit(1)
+                    exitapp()               # Setze Beendenmarker für Hauptschleife
+                    self.__is_shut_down.wait() # Warte auf beenden des Servers (Port wieder freigeben)
+                    sys.exit(1) # Thread des Servers beenden
                     break
                 
-                elif instruction == 'INIT':
+                elif instruction == 'INIT':  # Initialisierungsdaten wurden angefordert...
                     self.request.sendall(bytes(json.dumps({
                                                             'return': 'ok',
                                                             'size': court.v_getSize(),
@@ -83,7 +95,7 @@ class VisTCPServHandler(socketserver.BaseRequestHandler):
                                                             'p1name': 'John A. Nunez',
                                                             'p2name': 'Cynthia J. Wilson',
                                                             }), 'UTF-8'))
-                elif instruction == 'REFRESH':
+                elif instruction == 'REFRESH': # Visualisierungsdaten wurden angefordert...
 
                     global v_hitratio
                     global v_rewcount
@@ -108,17 +120,18 @@ class VisTCPServHandler(socketserver.BaseRequestHandler):
                                                             'hitratio': v_hitratio,
                                                             'rewcount': v_rewcount,
                                                             }), 'UTF-8'))
-                elif instruction == 'saveConfig':
+
+                elif instruction == 'saveConfig': # Anforderung zur Speicherung der Daten wurde angefordert
                     x = TelegrammFrame('saveConfig')
                     connPlayer0.send(x)
                     connPlayer1.send(x)
 
-                elif instruction == 'CHSPEED':
+                elif instruction == 'CHSPEED': # Anforderung zur Änderung der Geschwindigkeit wurde angefordert
                     self.request.sendall(bytes(json.dumps({'return': 'ok'}), 'UTF-8'))
                     print ('change mainloopdelay to...')
                     changespeed()
 
-                else:
+                else:   # Unbekannte Anforderung wurde empfangen
                     self.request.sendall(bytes(json.dumps({'return': 'not ok'}), 'UTF-8'))
 
             except Exception as e:
@@ -188,7 +201,7 @@ def startplayer(conn, playerid, loadconfig=None):
                 # Anforderung die Konfiguration zu speichern erhalten
 
                 # Bilde den Pfad und Dateinamen aus Zeit/Datum und Spieler ID
-                path = 'save/config_' + str(playerid) + '_'\
+                path = 'savedata/config_' + str(playerid) + '_'\
                        + datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S')
 
                 # Rufe die entsprechende Funktion im Interface des Frameworks zum Speichern für das KNN auf
