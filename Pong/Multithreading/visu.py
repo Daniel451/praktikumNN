@@ -195,7 +195,6 @@ class Application(Frame):
         :return: none
         :rtype: void
         """
-
         print('send speed toggle signal to Server...')
         conn.send(TelegrammFrame('CHSPEED'))
         if conn.poll(None):  # warte auf neue Daten...
@@ -208,7 +207,6 @@ class Application(Frame):
 
         :return:
         """
-
         self.master.title("Pong mit rekurrentem Netz") # Setzt Fenstertitel
 
         self.bSAVE = Button(self)                   # Erzeugt den Button: 'Save Config'
@@ -227,10 +225,10 @@ class Application(Frame):
         self.bQGoS["command"] = self.quitserver
         self.bQGoS.pack({"side": "left"})
 
-        self.togglespeed = Button(self)              # Erzeugt den Button: 'Toggle Speed'
-        self.togglespeed["text"] = "Toggle Speed"
-        self.togglespeed["command"] = self.togglespeed
-        self.togglespeed.pack({"side": "left"})
+        self.bTogSp = Button(self)              # Erzeugt den Button: 'Toggle Speed'
+        self.bTogSp["text"] = "Toggle Speed"
+        self.bTogSp["command"] = self.togglespeed
+        self.bTogSp.pack({"side": "left"})
 
         self.bottomframe = Frame(self.master)
         self.bottomframe.pack( side = BOTTOM )
