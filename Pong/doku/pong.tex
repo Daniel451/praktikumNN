@@ -31,6 +31,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Bind packages:
 \usepackage{hyperref}
+\usepackage{tabto}
 \usepackage{acronym}                    % Acronyms
 \usepackage{algorithmic}								% Algorithms and Pseudocode
 \usepackage{algorithm}									% Algorithms and Pseudocode
@@ -341,18 +342,42 @@ Um keine Daten doppelt zu Speichern greift auch die nächste Modifikation auf di
 \subsubsection{Belohnungen}
 \label{rewards}
 
-\textit{positive} und \textit{negative} Belohnungen sind eigentlich aus dem SARSA-Algorithmus bekannt. Wir haben Anfangs gedacht eben diesen für unser Problem einzusetzen. Da jedoch durch die vielen Zustände ein sehr großer \textit{Statespace} (alle Positionen * alle Winkel) erhalten würden, haben wir schnell diese Idee verwerfen müssen. Geblieben sind jedoch die Belohnungen. Diese werden im Framework um das KNN (siehe \ref{knnframe.py}) dazu genutzt, das Netz anzuweisen aus seinen gespeicherten Daten entsprechend zu lernen. Der Algorithmus kann als Abgewandeltes \textit{überwachtes Lernen} bezeichnet werden. Dies ist im neuronalen Netzwerk (siehe \ref{recneunet.py}) beschrieben.
+\textit{Positive} und \textit{negative} Belohnungen sind eigentlich aus dem SARSA-Algorithmus bekannt. Wir haben Anfangs gedacht eben diesen für unser Problem einzusetzen. Da jedoch durch die vielen Zustände ein sehr großer \textit{Statespace} (alle Positionen multipliziert mit allen Winkel) erhalten würden, haben wir schnell diese Idee verwerfen müssen. Geblieben sind jedoch die Belohnungen. Diese werden im Framework um das KNN (siehe \ref{knnframe.py}) dazu genutzt, das Netz anzuweisen aus seinen gespeicherten Daten entsprechend zu lernen. Der Algorithmus kann als Abgewandeltes \textit{überwachtes Lernen} bezeichnet werden. Dies ist im neuronalen Netzwerk (siehe \ref{recneunet.py}) beschrieben.
 
 
 \subsection{Die Visualisierung - visu.py}
 \label{visu.py}
 
-Die Visualisierung der dient der einfachen Diagnose, des Zustands der Hauptapplikation welche keine eigene Visualisierung bereitstellt. Die Verbindung geschieht über TCP/IP über den Port 6769 und ist aktuell nur vom localhost erreichbar.
+Die Visualisierung der dient der einfachen Diagnose, des Zustands der Hauptapplikation welche keine eigene Visualisierung bereitstellt. Die Verbindung wird via TCP/IP über den \textit{Port 6769} hergestellt und ist aktuell nur vom \textit{localhost} erreichbar.
 
 \begin{figure}[hbtp]
 	 \centerline{\includegraphics[width=0.95\textwidth]{visu}}
 	 {\caption{Bildschirmfoto der Visualisierung}\label{fig:visu}}
 \end{figure}
+
+Probleme beim Beenden entstehen je nach Konstellation durch noch geöffnete Ports, die einem Prozess der durch den Benutzer terminiert wurde noch reserviert sind. Hier hilft es, einen Moment zu warten oder die Visualisierung zu starten. Durch den versuch die Verbindung zwischen Client und Server herzustellen, merkt das Betriebssystem schnell ob der Server-Thread noch lebt.
+Wir empfehlen den Server und den Klienten über die Buttons in der Visu zu beenden. Hierbei werden die entsprechenden Ports wie vorgesehen geschlossen und wieder freigegeben.
+
+
+\subsection{Protokoll - telegramframe.py}
+\label{telegramframe.py}
+
+Da die Applikation modularisiert und parallelisiert ausgeführt wird, wird ein einfaches Protokoll benötigt, welches die Module miteinander kommunizieren lassen kann. Dieses ist in der Datei \textit{telegramframe.py} definiert. 
+
+
+\subsection{Weitere Datein}
+\label{otherfiles}
+
+
+Neben den angesprochenen Datein gibt es noch ein paar weitere die für das ausführen des Programms benötigt werden:
+
+\begin{itemize}
+  \item \textit{concol.py} \tabto{4cm}- Enthält Definitionen für farbige Ausgaben in der \tabto{5cm} Konsole
+  \item \textit{\_\_init\_\_.py} \tabto{4cm}- Systemdatei, die es Python erlaubt im Verzeichnis \tabto{5cm} nach benötigten Paketen (imports) zu suchen.  
+  \item \textit{log\_player\_0.log} \tabto{4cm}- Wird von der Applikation erstellt, Protokoll-Datei \tabto{5cm} von Spieler 0 
+  \item \textit{log\_player\_1.log} \tabto{4cm}- Wird von der Applikation erstellt, Protokoll-Datei \tabto{5cm} von Spieler 1 
+  \item \textit{log\_pong.log} \tabto{4cm}- Wird von der Applikation erstellt, Protokoll-Datei \tabto{5cm}der Hauptschleife 
+\end{itemize}
 
 
 
