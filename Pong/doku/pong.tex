@@ -1,0 +1,395 @@
+\documentclass[12pt,twoside]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Meta informations:
+\newcommand{\trauthor}{Daniel Speck und Florian Kock}
+\newcommand{\trtype}{Praktikum Paper} %{Seminararbeit} %{Proseminararbeit}
+\newcommand{\trcourse}{Dokumentation der erstellten Applikation}
+\newcommand{\trtitle}{Pong, gespielt von KNNs}
+\newcommand{\trmatrikelnummer}{6321317, 6346646}
+\newcommand{\tremail}{2speck@informatik.uni-hamburg.de, 2kock@informatik.uni-hamburg.de}
+\newcommand{\trarbeitsbereich}{Knowledge Technology, WTM}
+\newcommand{\trdate}{\today}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Languages:
+
+% Falls die Ausarbeitung in Deutsch erfolgt:
+ \usepackage[german]{babel}
+ \usepackage[T1]{fontenc}
+ \usepackage{german}
+% \usepackage[latin1]{inputenc}
+% \usepackage[latin9]{inputenc}	 				
+ \selectlanguage{german}
+ 
+ %\usepackage[latin1]{inputenc}
+\usepackage[utf8]{inputenc}
+
+% If the thesis is written in English:
+%\usepackage[english]{babel} 						
+%\selectlanguage{english}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bind packages:
+\usepackage{hyperref}
+\usepackage{tabto}
+\usepackage{acronym}                    % Acronyms
+\usepackage{algorithmic}								% Algorithms and Pseudocode
+\usepackage{algorithm}									% Algorithms and Pseudocode
+\usepackage{amsfonts}                   % AMS Math Packet (Fonts)
+\usepackage{amsmath}                    % AMS Math Packet
+\usepackage{amssymb}                    % Additional mathematical symbols
+\usepackage{amsthm}
+\usepackage{booktabs}                   % Nicer tables
+%\usepackage[font=small,labelfont=bf]{caption} % Numbered captions for figures
+\usepackage{color}                      % Enables defining of colors via \definecolor
+\definecolor{uhhRed}{RGB}{254,0,0}		  % Official Uni Hamburg Red
+\definecolor{uhhGrey}{RGB}{122,122,120} % Official Uni Hamburg Grey
+\usepackage{fancybox}                   % Gleichungen einrahmen
+\usepackage{fancyhdr}										% Packet for nicer headers
+%\usepackage{fancyheadings}             % Nicer numbering of headlines
+
+%\usepackage[outer=3.35cm]{geometry} 	  % Type area (size, margins...) !!!Release version
+%\usepackage[outer=2.5cm]{geometry} 		% Type area (size, margins...) !!!Print version
+%\usepackage{geometry} 									% Type area (size, margins...) !!!Proofread version
+\usepackage[outer=3.15cm]{geometry} 	  % Type area (size, margins...) !!!Draft version
+\geometry{a4paper,body={5.8in,9in}}
+
+\usepackage{graphicx}                   % Inclusion of graphics
+%\usepackage{latexsym}                  % Special symbols
+\usepackage{longtable}									% Allow tables over several parges
+\usepackage{listings}                   % Nicer source code listings
+\usepackage{multicol}										% Content of a table over several columns
+\usepackage{multirow}										% Content of a table over several rows
+\usepackage{rotating}										% Alows to rotate text and objects
+\usepackage[hang]{subfigure}            % Allows to use multiple (partial) figures in a fig
+%\usepackage[font=footnotesize,labelfont=rm]{subfig}	% Pictures in a floating environment
+\usepackage{tabularx}										% Tables with fixed width but variable rows
+\usepackage{url,xspace,boxedminipage}   % Accurate display of URLs
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Configurationen:
+
+\hyphenation{whe-ther} 									% Manually use: "\-" in a word: Staats\-ver\-trag
+
+%\lstloadlanguages{C}                   % Set the default language for listings
+\DeclareGraphicsExtensions{.pdf,.svg,.jpg,.png,.eps} % first try pdf, then eps, png and jpg
+\graphicspath{{./src/}} 								% Path to a folder where all pictures are located
+\pagestyle{fancy} 											% Use nicer header and footer
+
+% Redefine the environments for floating objects:
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\renewcommand{\topfraction}{0.9} 			  %Standard: 0.7
+\renewcommand{\bottomfraction}{0.5}		  %Standard: 0.3
+\renewcommand{\textfraction}{0.1}		  	%Standard: 0.2
+\renewcommand{\floatpagefraction}{0.8} 	%Standard: 0.5
+
+% Tables with a nicer padding:
+\renewcommand{\arraystretch}{1.2}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Additional 'theorem' and 'definition' blocks:
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+%\newtheorem{theorem}{Satz}[section]		% Wenn in Deutsch geschrieben wird.
+\newtheorem{axiom}{Axiom}[section] 	
+%\newtheorem{axiom}{Fakt}[chapter]			% Wenn in Deutsch geschrieben wird.
+%Usage:%\begin{axiom}[optional description]%Main part%\end{fakt}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+%Additional types of axioms:
+\newtheorem{lemma}[axiom]{Lemma}
+\newtheorem{observation}[axiom]{Observation}
+
+%Additional types of definitions:
+\theoremstyle{remark}
+%\newtheorem{remark}[definition]{Bemerkung} % Wenn in Deutsch geschrieben wird.
+\newtheorem{remark}[definition]{Remark} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Provides TODOs within the margin:
+\newcommand{\TODO}[1]{\marginpar{\emph{\small{{\bf TODO: } #1}}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Abbreviations and mathematical symbols
+\newcommand{\modd}{\text{ mod }}
+\newcommand{\RS}{\mathbb{R}}
+\newcommand{\NS}{\mathbb{N}}
+\newcommand{\ZS}{\mathbb{Z}}
+\newcommand{\dnormal}{\mathit{N}}
+\newcommand{\duniform}{\mathit{U}}
+
+\newcommand{\erdos}{Erd\H{o}s}
+\newcommand{\renyi}{-R\'{e}nyi}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document:
+\begin{document}
+\renewcommand{\headheight}{14.5pt}
+
+\fancyhead{}
+\fancyhead[LE]{ \slshape \trauthor}
+\fancyhead[LO]{}
+\fancyhead[RE]{}
+\fancyhead[RO]{ \slshape \trtitle}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Cover Header:
+\begin{titlepage}
+	\begin{flushleft}
+		Universit\"at Hamburg\\
+		Department Informatik\\
+		\trarbeitsbereich\\
+	\end{flushleft}
+	\vspace{3.5cm}
+	\begin{center}
+		\huge \trtitle\\
+	\end{center}
+	\vspace{3.5cm}
+	\begin{center}
+		\normalsize\trtype\\
+		[0.2cm]
+		\Large\trcourse\\
+		[1.5cm]
+		\Large \trauthor\\
+		[0.2cm]
+		\normalsize Matr.Nr. \trmatrikelnummer\\
+		[0.2cm]
+		\normalsize\tremail\\
+		[1.5cm]
+		\Large \trdate
+	\end{center}
+	\vfill
+\end{titlepage}
+
+	%backsite of cover sheet is empty!
+\thispagestyle{empty}
+\hspace{1cm}
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Abstract:
+
+% Abstract gives a brief summary of the main points of a paper:
+\section*{Abstrakt}
+
+Unsere Aufgabe des letzten Semesters war es, in dem Praktikum Neuronale Netze eine Aufgabe zu lösen. Wir haben uns für das in den 70ern populäre Spiel Pong entschieden. 
+Dieses war dahingehend interessant, da es gleich mehrere Probleme zu lösen gab:
+  \begin{itemize}
+  \item die zeitverzögerte Bewertung
+  \item das Erkennen der Flugrichtung durch Rekurrenz
+\end{itemize}
+
+
+
+\begin{quote}
+Das Spielprinzip von Pong ist simpel und ähnelt dem des Tischtennis: Ein Punkt („Ball“) bewegt sich auf dem Bildschirm hin und her. Jeder der beiden Spieler steuert einen senkrechten Strich („Schläger“), den er mit einem Drehknopf (Paddle) nach oben und unten verschieben kann. Lässt man den „Ball“ am „Schläger“ vorbei, erhält der Gegner einen Punkt. 
+(Wikipedia)
+\end{quote}
+
+
+
+
+% Lists:
+\setcounter{tocdepth}{2} 					% depth of the table of contents (for Seminars 2 is recommented)
+\tableofcontents
+\pagenumbering{arabic}
+
+\newpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Content:
+
+% the actual content, usually separated over a number of sections
+% each section is assigned a label, in order to be able to put a
+% crossreference to it
+
+\section{Vorbedingungen und Anforderungen}
+
+Um die Applikation erfolgreich ausführen zu können sind folgende Anforderungen an die Laufzeitumgebung notwendig:
+
+
+\begin{itemize}
+\item Python3.4
+\begin{centering}
+\includegraphics[width=0.3\textwidth]{python-logo-master-v3-TM.png}
+\end{centering}
+\item NumPy
+\begin{centering}
+\includegraphics[width=0.3\textwidth]{NumPy_logo.png}
+\end{centering}
+\item The Python Standard Library 
+\begin{itemize}
+ \item multiprocessing
+ \item threading
+ \item sys
+ \item random
+ \item os.path
+ \item logging
+ \item json
+ \item socketserver
+ \item tkinter
+ \item socket
+ \item time
+ \item datetime
+ \item copy
+\end{itemize} 
+
+\end{itemize} 
+ 
+ 
+
+\section{Schnelleinstieg}
+
+Der Schnelleinstieg führt über folgende Befehle: (Wenn die Vorbedingungen gegeben sind!)
+
+
+Starten des Hauptprogramms: 
+\begin{lstlisting}[frame=single,language=bash]  % Start your code-block
+
+> ls
+__init__.py	 knnframe.py 	telegramframe.py
+__pycache__	 main.py		    visu.py
+concol.py	 recneunet.py
+court.py	 save
+> python3.4 main.py 
+... starting application ...
+\end{lstlisting}
+
+Starten der Visualisierung zum Hauptprogramm:
+\begin{lstlisting}[frame=single,language=bash]  % Start your code-block
+
+> ls
+__init__.py	 knnframe.py	  telegramframe.py
+__pycache__	 main.py		  visu.py
+concol.py	 recneunet.py
+court.py	 save
+> python3.4 visu.py 
+... starting visualisation ...
+\end{lstlisting}
+
+
+\section{Aufbau der Applikation}
+
+Unsere Applikation ist in mehrere Dateien und Module aufgeteilt. In der Abbildung~\ref{fig:ApplicationArchitecture} auf Seite~\pageref{fig:ApplicationArchitecture} ist die Grundstruktur dargestellt. Die einzelnen Module sind separiert in die Haupt-Anwendung (main.py) \ref{main.py} und die Visualisierung (visu.py) \ref{visu.py}.  
+
+\begin{figure}[hbtp]
+	 \centerline{\includegraphics[]{ApplicationArchitecture.pdf}}
+	 {\caption{Schematischer Aufbau der Pong-Applikation}\label{fig:ApplicationArchitecture}}
+\end{figure}
+
+
+\subsection{Die Haupanwendung - main.py}
+\label{main.py}
+
+Die Hauptapplikation besteht im Wesentlichen aus einer Hauptschleife, die die Spielzüge (im Quellcode 'Ticks' genannt) kontrolliert. Der relevante Teil befindet sich hierzu in der \textit{main.py}.
+Sie liefert in jedem Spielzug vom Spielfeld (siehe \ref{court.py}) die Ballpositionen an die Spieler (siehe \ref{knnframe.py}), um anschließend deren Aktion wieder dem Spielfeld zuzuführen.
+
+\subsubsection{Das Spielfeld - court.py}
+\label{court.py}
+Das Spielfeld implementiert eine Simulation der Spielumgebung. Diese besteht aus zwei Schlägern und einem Ball in einem rechteckigen Rahmen. Bei jedem Aufruf von \textit{tick()} berechnet das Spielfeld den nächsten Zustand des Balles, hierbei wird ebenfalls geprüft, ob der Ball die Bande, den Rahmen, überschritten hat und korrigiert dies. Ein solcher Abprall ist der Physik nachempfunden ('Einfallswinkel = Ausfallswinkel').
+
+Das Ziel des Spieles ist es, den Ball mit dem Schläger zurückzuspielen, gelangt der Ball jedoch über die Linie, bedeutet dies, das der Ball wieder in der Mitte neu initialisiert wird. Hierfür ist die Funktion \textit{\_\_initvectors()} zuständig. Sie setzt den Ball mit einer zufälligen Höhe auf die Mittellinie (Ortsvektor), um ihm dann mit einem zufälligen Einheitsvektor, welcher jeweils zwischen -45 bis + 45 Grad zur Horizontalen zu jedem Spieler zeigen kann, eine Richtung zu geben.
+
+Die Schläger könnnen, über die die Funktion \textit{move(player, action)} verschoben werden. Der Parameter \textit{action} kann entweder ein \textit{float} mit genauen Positionsdaten in dem Intervall
+$ [-1 , 1] $ oder ein \textit{string} mit Aktionen sein:
+\begin{itemize}
+  \item \textit{'u':str} für einen Schritt aufwärts 
+  \item \textit{'d':str} für einen Schritt abwärts 
+  \item \textit{'n':str} für stehenbleiben
+\end{itemize}
+In der Applikation nutzen wir jedoch nur die einfache, direkte Positionierung über eine \textit{float}-Zahl.
+
+Für die Visualisierung stellt das Spielfeld Inspektionsfunktionen zur Verfügung, die immer mit \textit{'v\_'} beginnen. Sie werden ausschließlich zu diesem Zweck genutzt und finden keine weitere Anwendung in der Logik der Applikation.
+
+\subsubsection{Das Framework um das KNN - knnframe.py}
+\label{knnframe.py}
+
+Das rekurrente Netz in der Datei \textit{recneunet.py} (siehe \ref{recneunet.py}) ist möglichst allgemein gehalten. Es sollte nicht spezifisch für dieses Problem geschrieben sein. Es könnte, so war unsere Intention, leicht portiert werden um weitere Probleme zu lösen, deren Strategien ebenfalls der Rekurrenz bedingen.
+
+Das Framework adaptiert und konfiguriert das Netz an die Probleme des Spieles Pong. Es sorgt dafür, das jeweils \textit{positive} und \textit{negative} Belohnungen (siehe \ref{rewards}) dem Netz zugeführt werden und es entsprechend daraus lernen kann.
+
+Eine weitere Aufgabe ist es, Daten über den aktuellen Zustand zu sammeln um damit eine Aussage zu haben, ob das Netz hinreichend trainiert ist und welche Qualität die Vorhersagen geben. Ursprünglich war es ebenfalls angedacht, diese für einen dynamischen Lernfortschritt zu nutzen, wovon wir jedoch während des Verlaufes aus Zeitgründen wieder abgekommen sind. 
+
+
+
+\subsubsection{Rekurrentes künstliches neuronales Netzwerk - recneunet.py}
+\label{recneunet.py}
+
+Das rekurrente künstliche neuronale Netzwerk ist von der Grundstruktur her aufgebaut wie ein MLP welches wir zu Anfang des Kurses kennengelernt haben. Weitere  Modifikationen wurden von uns eingeführt, um dem Netz es zu ermöglichen, das gestellte Problem zu lösen.:
+
+Unser Netz kann vergangene Vorhersagen speichern und somit für zukünftige Aussagen nutzen. Dies ist wichtig, da eines der Haupt-Probleme darin bestand, dass über einen langen Zeitraum keine Aussage über die Qualität der eigenen, aktuellen Vorhersagen getroffen werden kann (\textit{delayed feedback problem}). Im Spiel Pong bewegt sich der Ball kontinuierlich über das Spielfeld und es ist nicht (ohne physikalisches Wissen der Welt) möglich einen Aufprallpunkt zu bestimmen. So kann keine Aussage darüber getroffen werden, ob die aktuelle Schlägerposition positiv oder negativ ist bzw. wie sie am besten korrigiert werden sollte (siehe Abbildung~\ref{fig:delayedlearning} auf Seite~\pageref{fig:delayedlearning}).
+
+Durch das Aufnehmen der Daten in einem \textit{Ringpuffer} entsteht eine gewisse \textit{Sicht} auf vergangene Aktionen und Vorhersagen, wenn eine - die Letzte - der Aussagen bewertet werden kann. Hierdurch können dann Rückschlüsse auf die letzten Vorhersagen gezogen und daraus gelernt werden. Die Anzahl der Lernschritte in die Vergangenheit ist in der Variable \textit{t\_max} abgebildet. Sie kann beim Erstellen des KNN-Objektes durch \textit{knnframe.py} (siehe \ref{knnframe.py}) neben der Struktur (Layer und Anzahl der Neuronen je Layer) festgelegt werden. 
+
+Die Daten werden in \textit{Listen} und \textit{Numpy-Arrays} gespeichert, welche immer mit einem \textit{R} im Namen beginnen:
+\begin{itemize}
+  \item RW: Rekurrente Gewichte
+  \item RH: Rekurrente Aktivierungen
+  \item RS: Rekurrenter Output
+\end{itemize}
+
+\begin{figure}[hbtp]
+	 \centerline{\includegraphics[]{delayed.pdf}}
+	 {\caption{Lernen aus Daten der Vergangenheit}\label{fig:delayedlearning}}
+\end{figure}
+
+
+Um den Speicher effizient zu nutzen, greift auch die nächste Modifikation auf diese Daten zurück: Das Netz nutzt für zukünftige Vorhersagen Daten aus vergangenen Aussagen. Hierzu wird für jedes \textit{Hidden-Layer} auf den internen Datenspeicher zugegriffen, welcher vom Lernen aus der Vergangenheit aus dem vorherigen Absatz angelegt wurde. Auf diese Daten, greift das Netz bei jeder neuen Vorhersage zu und kann somit, in unserem Fall, eine Ballrichtung erkennen. 
+
+
+\subsubsection{Belohnungen}
+\label{rewards}
+
+\textit{Positive} und \textit{negative} Belohnungen sind eigentlich aus dem SARSA-Algorithmus bekannt. Wir haben Anfangs gedacht, eben diesen für unser Problem einzusetzen. Da jedoch durch die vielen Zustände ein sehr großer \textit{Statespace} (alle Positionen multipliziert mit allen Winkel) entstehen würde, haben wir schnell diese Idee verwerfen müssen. Geblieben sind jedoch die Belohnungen. 
+
+In unserer Applikation erzeugt ein Ball, der den Schläger getroffen hat, eine positive Belohnung. Eine Negative erhält der Spieler, wenn sich der Ball über die eigene Linie bewegt.
+
+Diese werden im Framework um das KNN (siehe \ref{knnframe.py}) dazu genutzt, das Netz anzuweisen aus seinen gespeicherten Daten entsprechend zu lernen. Der Algorithmus kann als Abgewandeltes \textit{überwachtes Lernen} bezeichnet werden. Dies ist im neuronalen Netzwerk (siehe \ref{recneunet.py}) beschrieben.
+
+
+\subsection{Die Visualisierung - visu.py}
+\label{visu.py}
+
+Die Visualisierung dient der einfachen Diagnose des Zustands der Hauptapplikation, welche keine eigene Repräsentation der Daten bereitstellt. Die Verbindung wird via TCP/IP über den \textit{Port 6769} hergestellt und ist aktuell nur vom \textit{localhost} erreichbar.
+
+\begin{figure}[hbtp]
+	 \centerline{\includegraphics[width=0.95\textwidth]{visu}}
+	 {\caption{Bildschirmfoto der Visualisierung}\label{fig:visu}}
+\end{figure}
+
+Probleme können beim Beenden je nach Konstellation durch noch geöffnete Ports entstehen, die einem Prozess zugeteilt sind, welcher durch den Benutzer terminiert wurde. 
+Hier hilft es einen Moment zu warten oder die Visualisierung zu starten. 
+Durch den Versuch die Verbindung zwischen Klient und Server herzustellen, erkennt das Betriebssystem rasch ob der Server-Thread noch ausgeführt wird.
+Wir empfehlen den Server und den Klienten über die Schaltflächen in der Visualisierung zu beenden. Hierbei werden die entsprechenden Ports wie vorgesehen geschlossen und wieder freigegeben.
+
+
+\subsection{Protokoll - telegramframe.py}
+\label{telegramframe.py}
+
+Da die Applikation modularisiert und parallelisiert ausgeführt wird, ist ein simples Protokoll unabdingbar. Jenes Protokoll befähigt die Module zur gegenseitigen Kommunikation. Dieses ist in der Datei \textit{telegramframe.py} definiert. 
+
+
+\subsection{Weitere Dateien}
+\label{otherfiles}
+
+
+Neben den angesprochenen Dateien gibt es noch weitere, die für das erfolgreiche Ausführen des Programms benötigt werden:
+
+\begin{itemize}
+  \item \textit{concol.py} \tabto{4cm}- Enthält Definitionen für farbige Ausgaben in der \tabto{5cm} Konsole
+  \item \textit{\_\_init\_\_.py} \tabto{4cm}- Systemdatei, die es Python erlaubt im Verzeichnis \tabto{5cm} nach benötigten Paketen (imports) zu suchen 
+  \item \textit{log\_player\_0.log} \tabto{4cm}- Wird von der Applikation erstellt, Protokoll-Datei \tabto{5cm} von Spieler 0 
+  \item \textit{log\_player\_1.log} \tabto{4cm}- Wird von der Applikation erstellt, Protokoll-Datei \tabto{5cm} von Spieler 1 
+  \item \textit{log\_pong.log} \tabto{4cm}- Wird von der Applikation erstellt, Protokoll-Datei \tabto{5cm}der Hauptschleife 
+\end{itemize}
+
+
+
+
+\end{document}
+
+
