@@ -198,6 +198,7 @@ class Application(Frame):
 
         :return:
         """
+        self.master.title("Pong mit rekurrentem Netz")
 
         self.bSAVE = Button(self)
         self.bSAVE["text"] = "Save Config"
