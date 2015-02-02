@@ -84,6 +84,10 @@ class VisTCPServHandler(socketserver.BaseRequestHandler):
                                                             'p2name': 'Cynthia J. Wilson',
                                                             }), 'UTF-8'))
                 elif instruction == 'REFRESH':
+
+                    global v_hitratio
+                    global v_rewcount
+
                     self.request.sendall(bytes(json.dumps({
                                                             'return': 'ok',
                                                             'mainloopdelay': court.v_getSpeed(),
@@ -101,6 +105,8 @@ class VisTCPServHandler(socketserver.BaseRequestHandler):
                                                             # Skalierte Positionsdaten des Balls für KNNs
                                                             'sensor_posX': court.scaled_sensor_x(),
                                                             'sensor_posY': court.scaled_sensor_y(),
+                                                            'hitratio': v_hitratio,
+                                                            'rewcount': v_rewcount,
                                                             }), 'UTF-8'))
                 elif instruction == 'saveConfig':
                     x = TelegrammFrame('saveConfig')
@@ -229,10 +235,13 @@ def requestprediction(player, requesttelegramm):
 
     # Gebe Anforderung weiter und erwarte eine Aktion vom Spieler
     action = player.predict(requesttelegramm.getdata('xpos'), requesttelegramm.getdata('ypos'), requesttelegramm.getdata('mypos'))
-
+    hitratio = player.v_gethitratio()
+    rewcount = player.v_getrewcount()
     # Baue Aktion zu einem Telegramm zusammen
     returnframe = TelegrammFrame('Return')
     returnframe.add('move',action)
+    returnframe.add('hitratio',hitratio)
+    returnframe.add('rewcount',rewcount)
 
     # Telegramm zurückgeben
     return returnframe
@@ -314,6 +323,10 @@ if __name__ == '__main__':
     global exitrequest
     exitrequest = False
 
+    global v_hitratio
+    v_hitratio = [-1.0,-1.0]
+    global v_rewcount
+    v_rewcount = [-1.0,-1.0]
     # Erstelle das Spielfeld
     court = court()
 
@@ -446,11 +459,15 @@ if __name__ == '__main__':
             frame = connPlayer0.recv()                 # ... wenn vorhanden, dann abfragen und ...
             if frame.instruction == 'Return':
                 court.move(0, frame.getdata('move'))   # ...anschließend von Spielfeld ausführen lassen.
+                v_hitratio[0] = frame.getdata('hitratio')
+                v_rewcount[0] = frame.getdata('rewcount')
 
         if connPlayer1.poll(None):                     # Warten auf Daten von Spieler0, ...
             frame = connPlayer1.recv()                 # ... wenn vorhanden, dann abfragen und ...
             if frame.instruction == 'Return':
                 court.move(1, frame.getdata('move'))   # ...anschließend von Spielfeld ausführen lassen.
+                v_hitratio[1] = frame.getdata('hitratio')
+                v_rewcount[1] = frame.getdata('rewcount')
 
         # Wiederholen, bis ...
         if exitrequest:  # ...die Beendenanforderung erhalten wurde

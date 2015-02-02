@@ -54,9 +54,9 @@ class Knnframe:
         # Nicht-Treffern (Outs) gezählt und in ein Verhältnis gebracht.
         # Dies geschieht über einen gleitenden Durchschnitt.
 
-        # Anzahl der letzten x Belohnungen, die in die Berechnung der Hitrate eingehen sollen.
+        # Anzahl der letzten x Belohnungen, die in die Berechnung der Hitratio eingehen sollen.
         # (Formel hierzu: siehe unten in reward_pos() bzw. reward_neg())
-        self.timesteps = 20.0
+        self.timesteps = 100.0
 
         # Das initiale Verhältnis von Treffern zu Outs (100% Treffer = 1.0, 100% Outs = 0.0).
         self.hitratio = 0.5
@@ -214,3 +214,19 @@ class Knnframe:
         # Die eigentlichen Informationen sind jedoch in der dedizierten Visualisierung zu sehen.
         print(ConCol.OKBLUE + 'Player ' + str(self.playerid) + ': got negative reward! Hitratio is now: '
               + str(self.hitratio) + " (" + str(self.reward_count) + " rewards total)" + ConCol.ENDC)
+
+    def v_gethitratio(self):
+        """
+        Stellt für die Visualisation Daten zur Vefügungung.
+        :return: Treffer zu nicht Treffer
+        :rtype: float
+        """
+        return self.hitratio
+
+    def v_getrewcount(self):
+        """
+        Stellt für die Visualisation Daten zur Vefügungung.
+        :return: Anzahl der Belohnungen
+        :rtype: int
+        """
+        return self.reward_count

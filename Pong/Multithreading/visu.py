@@ -220,11 +220,19 @@ class Application(Frame):
         self.togglespeed["command"] = self.Togglespeed
         self.togglespeed.pack({"side": "left"})
 
+        self.bottomframe = Frame(self.master)
+        self.bottomframe.pack( side = BOTTOM )
 
+        self.p0 = Text(self.bottomframe, height=5, width=30)
+        self.p0.pack({"side": LEFT})
+        self.p0.insert(END, "Player 0\n")
 
-        self.court = Canvas(self.master, width=900, height=500)
-        self.court.pack({"side": "left"})
-        
+        self.court = Canvas(self.bottomframe, width=900, height=500)
+        self.court.pack({"side": LEFT})
+
+        self.p1 = Text(self.bottomframe, height=5, width=30)
+        self.p1.pack({"side": LEFT})
+        self.p1.insert(END, "Player 1\n")
 
     def update(self):
         """
@@ -257,7 +265,28 @@ class Application(Frame):
             self.posY = data['sensor_posY']
             self.bat = data['bat']
             self.points = data['points']
-            
+            self.rewcount = data['rewcount']
+            self.hitratio = data['hitratio']
+
+
+            info = 'Player 0\n'
+            info += 'Bat positon: ' + str(round(self.bat[0],2)) + '\n'
+            info += 'Points: ' + str(self.points[0]) + '\n'
+            info += 'Rewards: ' + str(self.rewcount[0]) + '\n'
+            info += 'Hitratio: ' + str(round(self.hitratio[0],2)) + '\n'
+
+            self.p0.delete("1.0",END)
+            self.p0.insert(END, info)
+
+            info = 'Player 1\n'
+            info += 'Bat positon: ' + str(round(self.bat[1],2)) + '\n'
+            info += 'Points: ' + str(self.points[1]) + '\n'
+            info += 'Rewards: ' + str(self.rewcount[1]) + '\n'
+            info += 'Hitratio: ' + str(round(self.hitratio[1],2)) + '\n'
+
+            self.p1.delete("1.0",END)
+            self.p1.insert(END, info)
+
             self.updateCurt()
             
         self.lastrefresh = self.timestamp
