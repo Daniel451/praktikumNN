@@ -223,14 +223,16 @@ class Application(Frame):
         self.bottomframe = Frame(self.master)
         self.bottomframe.pack( side = BOTTOM )
 
-        self.p0 = Text(self.bottomframe, height=5, width=30)
+        self.infoboxsize = 23
+
+        self.p0 = Text(self.bottomframe, height=6, width=self.infoboxsize)
         self.p0.pack({"side": LEFT})
         self.p0.insert(END, "Player 0\n")
 
         self.court = Canvas(self.bottomframe, width=900, height=500)
         self.court.pack({"side": LEFT})
 
-        self.p1 = Text(self.bottomframe, height=5, width=30)
+        self.p1 = Text(self.bottomframe, height=6, width=self.infoboxsize)
         self.p1.pack({"side": LEFT})
         self.p1.insert(END, "Player 1\n")
 
@@ -268,21 +270,28 @@ class Application(Frame):
             self.rewcount = data['rewcount']
             self.hitratio = data['hitratio']
 
-
-            info = 'Player 0\n'
-            info += 'Bat positon: ' + str(round(self.bat[0],2)) + '\n'
-            info += 'Points: ' + str(self.points[0]) + '\n'
-            info += 'Rewards: ' + str(self.rewcount[0]) + '\n'
-            info += 'Hitratio: ' + str(round(self.hitratio[0],2)) + '\n'
+            info = 'Player 0\n\n'
+            info += 'Bat positon'.ljust(18, ".")\
+                    + (str(round(self.bat[0], 2)).ljust(4, "0")).rjust(self.infoboxsize - 18, ".") + '\n'
+            info += 'Points'.ljust(18, ".")\
+                    + (str(self.points[0])).rjust(self.infoboxsize - 18, ".") + '\n'
+            info += 'Rewards'.ljust(18, ".")\
+                    + (str(self.rewcount[0])).rjust(self.infoboxsize - 18, ".") + '\n'
+            info += 'Hitratio'.ljust(18, ".")\
+                    + (str(round(self.hitratio[0], 2)).ljust(4, "0")).rjust(self.infoboxsize - 18, ".") + '\n'
 
             self.p0.delete("1.0",END)
             self.p0.insert(END, info)
 
-            info = 'Player 1\n'
-            info += 'Bat positon: ' + str(round(self.bat[1],2)) + '\n'
-            info += 'Points: ' + str(self.points[1]) + '\n'
-            info += 'Rewards: ' + str(self.rewcount[1]) + '\n'
-            info += 'Hitratio: ' + str(round(self.hitratio[1],2)) + '\n'
+            info = 'Player 1\n\n'
+            info += 'Bat positon'.ljust(18, ".")\
+                    + (str(round(self.bat[1], 2)).ljust(4, "0")).rjust(self.infoboxsize - 18, ".") + '\n'
+            info += 'Points'.ljust(18, ".") \
+                    + (str(self.points[1])).rjust(self.infoboxsize - 18, ".") + '\n'
+            info += 'Rewards'.ljust(18, ".") \
+                    + (str(self.rewcount[1])).rjust(self.infoboxsize - 18, ".") + '\n'
+            info += 'Hitratio'.ljust(18, ".") \
+                    + (str(round(self.hitratio[1], 2)).ljust(4, "0")).rjust(self.infoboxsize - 18, ".") + '\n'
 
             self.p1.delete("1.0",END)
             self.p1.insert(END, info)
