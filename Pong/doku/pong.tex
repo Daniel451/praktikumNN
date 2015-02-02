@@ -5,7 +5,7 @@
 \newcommand{\trtype}{Praktikum Paper} %{Seminararbeit} %{Proseminararbeit}
 \newcommand{\trcourse}{Dokumentation der erstellten Applikation}
 \newcommand{\trtitle}{Pong, gespielt von KNNs}
-\newcommand{\trmatrikelnummer}{?????? ??????}
+\newcommand{\trmatrikelnummer}{6321317 6346646}
 \newcommand{\tremail}{2speck@informatik.uni-hamburg.de, 2kock@informatik.uni-hamburg.de}
 \newcommand{\trarbeitsbereich}{Knowledge Technology, WTM}
 \newcommand{\trdate}{\today}
@@ -14,15 +14,19 @@
 % Languages:
 
 % Falls die Ausarbeitung in Deutsch erfolgt:
-% \usepackage[german]{babel}
-% \usepackage[T1]{fontenc}
+ \usepackage[german]{babel}
+ \usepackage[T1]{fontenc}
+ \usepackage{german}
 % \usepackage[latin1]{inputenc}
 % \usepackage[latin9]{inputenc}	 				
-% \selectlanguage{german}
+ \selectlanguage{german}
+ 
+ %\usepackage[latin1]{inputenc}
+\usepackage[utf8]{inputenc}
 
 % If the thesis is written in English:
-\usepackage[english]{babel} 						
-\selectlanguage{english}
+%\usepackage[english]{babel} 						
+%\selectlanguage{english}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Bind packages:
@@ -167,8 +171,25 @@
 % Abstract:
 
 % Abstract gives a brief summary of the main points of a paper:
-\section*{Abstract}
-  Your text here...
+\section*{Abstrakt}
+
+Unsere Aufgabe des letzten Semesters war es, in dem Praktikum Neuronale Netze eine Aufgabe zu lösen. Wir haben uns für das, in den 70ern populäre Spiel, Pong entschieden. 
+Dieses war dahingehend interessant, da es gleich mehrere Probleme zu lösen gab:
+  \begin{itemize}
+  \item die Zeitverzögerte Bewertung
+  \item das erkennen der Flugrichtung durch Rekurrenz
+\end{itemize}
+
+
+
+\begin{quote}
+Das Spielprinzip von Pong ist simpel und ähnelt dem des Tischtennis: Ein Punkt („Ball“) bewegt sich auf dem Bildschirm hin und her. Jeder der beiden Spieler steuert einen senkrechten Strich („Schläger“), den er mit einem Drehknopf (Paddle) nach oben und unten verschieben kann. Lässt man den „Ball“ am „Schläger“ vorbei, erhält der Gegner einen Punkt. 
+(Wikipedia)
+\end{quote}
+
+Im Anschließenden werden wir die Grundlagen unseres Programmes beschreiben.
+
+
 
 % Lists:
 \setcounter{tocdepth}{2} 					% depth of the table of contents (for Seminars 2 is recommented)
@@ -183,27 +204,64 @@
 % each section is assigned a label, in order to be able to put a
 % crossreference to it
 
-\section{Introduction}
-\label{sec:introduction}
+\section{Vorbedingungen und Anforderungen}
+
+Um die Applikation erfolgreich ausführen zu können sind folgende Anforderungen an die Laufzeitumgebung notwendig:
+
+
+\begin{itemize}
+\item Python3.4
+\begin{centering}
+\includegraphics[width=0.3\textwidth]{python-logo-master-v3-TM.png}
+\end{centering}
+\item NumPy
+\begin{centering}
+\includegraphics[width=0.3\textwidth]{NumPy_logo.png}
+\end{centering}
+\end{itemize} 
+ 
+ 
+
+\section{Schnelleinstieg}
+
+Der Schnellst
+
+
+\section{Aufbau der Lösung}
+
+
+
 
 Your text here...
 
 \section{Conclusion}
-\label{sec:concl}
+
 
 Your text here...
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% hier werden - zum Ende des Textes - die bibliographischen Referenzen
-% eingebunden
-%
-% Insbesondere stehen die eigentlichen Informationen in der Datei
-% ``bib.bib''
-%
-\newpage
-\bibliographystyle{plain}
-\addcontentsline{toc}{chapter}{Bibliography}% Add to the TOC
-\bibliography{bib}
+
+\begin{figure}[hbtp]
+	 \centerline{\includegraphics[]{ApplicationArchitecture.pdf}}
+	 {\caption{Network of transputers and the structure of individual
+processes.}\label{fig:samplefig}}
+\end{figure}
+
+
+\section{remove this!}
+\label{sec:concl}
+
+\begin{lstlisting}[frame=single,language=Python]  % Start your code-block
+def netw_communication(conn):
+    nc = NetwCon()
+    connected = False
+    while not connected:
+        print('Try to connect...')
+        connected = nc.connect()
+        if not connected:
+            time.sleep(1)
+    print('connected, lets go...')
+\end{lstlisting}
+
 
 \end{document}
 
