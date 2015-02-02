@@ -30,6 +30,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Bind packages:
+\usepackage{hyperref}
 \usepackage{acronym}                    % Acronyms
 \usepackage{algorithmic}								% Algorithms and Pseudocode
 \usepackage{algorithm}									% Algorithms and Pseudocode
@@ -195,7 +196,7 @@ Im Anschließenden werden wir die Grundlagen unseres Programmes beschreiben.
 \setcounter{tocdepth}{2} 					% depth of the table of contents (for Seminars 2 is recommented)
 \tableofcontents
 \pagenumbering{arabic}
-\clearpage
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Content:
@@ -218,21 +219,95 @@ Um die Applikation erfolgreich ausführen zu können sind folgende Anforderungen
 \begin{centering}
 \includegraphics[width=0.3\textwidth]{NumPy_logo.png}
 \end{centering}
+\item The Python Standard Library 
+\begin{itemize}
+ \item multiprocessing
+ \item threading
+ \item sys
+ \item random
+ \item os.path
+ \item logging
+ \item json
+ \item socketserver
+ \item tkinter
+ \item socket
+ \item time
+ \item datetime
+ \item copy
+ 
+ 
+\end{itemize} 
+
 \end{itemize} 
  
  
 
 \section{Schnelleinstieg}
 
-Der Schnellst
+Der Schnelleinstieg führt über folgende Befehle: (Wenn die Vorbedingungen gegeben sind!)
 
 
-\section{Aufbau der Lösung}
+Starten des Hauptprogramms: 
+\begin{lstlisting}[frame=single,language=bash]  % Start your code-block
+
+> ls
+__init__.py	 knnframe.py 	telegramframe.py
+__pycache__	 main.py		    visu.py
+concol.py	 recneunet.py
+court.py	 save
+> python3.4 main.py 
+... starting application ...
+\end{lstlisting}
+
+Starten der Visualisierung zum Hauptprogramm:
+\begin{lstlisting}[frame=single,language=bash]  % Start your code-block
+
+> ls
+__init__.py	 knnframe.py	  telegramframe.py
+__pycache__	 main.py		  visu.py
+concol.py	 recneunet.py
+court.py	 save
+> python3.4 visu.py 
+... starting visualisation ...
+\end{lstlisting}
+
+
+\section{Aufbau der Applikation}
+
+Unsere Applikation ist in mehrere Datein und Module aufgeteilt. In der Abbildung~\ref{fig:ApplicationArchitecture} auf Seite~\pageref{fig:ApplicationArchitecture} ist die Grundstruktur zu erkennen. Die einzelnen Module werden unterschieden in die Haupt-Anwendung (main.py) \ref{main.py} und die Visualisierung (visu.py) \ref{visu.py}.  
+
+\begin{figure}[hbtp]
+	 \centerline{\includegraphics[]{ApplicationArchitecture.pdf}}
+	 {\caption{Schematischer Aufbau der Pong-Applikation}\label{fig:ApplicationArchitecture}}
+\end{figure}
+
+
+\subsection{Die Haupanwendung - main.py}
+\label{main.py}
+
+Die Hauptapplikation besteht im wesentlichen aus einer Hauptschleife, die die Spielzüge (im Quellcode 'Ticks' genannt) kontrolliert. Der relevante Teil befindet sich hierzu in der \textit{main.py} in den Zeilen von ca. 360 bis 460.
+
+Sie liefert in jedem Spielzug vom Spielfeld (siehe \ref{curt.py}) die Ballpositionen an die Spieler (siehe \ref{knnframe.py}) um anschließend deren Aktion wieder dem Spielfeld zuzuführen.
+
+\subsubsection{Die Haupanwendung - curt.py}
+\label{curt.py}
+Das Spielfeld implementiert eine Simulation der Spielumgebung. Diese besteht, aus zwei Schlägern und einem Ball in einem rechteckigen Rahmen. Bei jedem Aufruf von \textit{tick()} berechnet das Spielfeld den nächsten Zustand des Balles, hierbei wird ebenfalls geprüft, ob der er die Bande, den Rahmen, überschritten hat und korrigiert dies. Ein solcher Abprall ist der Physik nachempfunden ("Einfallswinkel = Ausfallswinkel").
+Das Ziel des Spieles ist es, den Ball mit dem Schläger zurückzuspielen, gelangt der Ball jedoch über die Linie, bedeutet dies, das der Ball wieder in der Mitte gestartet wird. Hierfür ist die \textit{__initvectors()} zuständig. Sie initialisiert die 
+
+
+\subsubsection{Die Haupanwendung - knnframe.py}
+\label{knnframe.py}
+
+
+\subsection{Die Visualisierung - visu.py}
+\label{visu.py}
+
+Die Visualisierung der dient der einfachen Diagnose, des Zustands der Hauptapplikation welche keine eigene Visualisierung bereitstellt. Die Verbindung geschieht über TCP/IP über den Port 6769 und ist aktuell nur vom localhost erreichbar.
+
+TODO: Screenshot und erklärung der Funktionen! 
 
 
 
-
-Your text here...
 
 \section{Conclusion}
 
@@ -240,11 +315,7 @@ Your text here...
 Your text here...
 
 
-\begin{figure}[hbtp]
-	 \centerline{\includegraphics[]{ApplicationArchitecture.pdf}}
-	 {\caption{Network of transputers and the structure of individual
-processes.}\label{fig:samplefig}}
-\end{figure}
+
 
 
 \section{remove this!}
