@@ -1,6 +1,9 @@
 #!/usr/bin/env python3.4
 # -*- coding: utf-8 -*-
-"""Definiert die Farben für verschiedene Ausgaben in der Konsole."""
+
+"""
+Definiert die Farben für verschiedene Ausgaben in der Konsole.
+"""
 
 __author__ = "Daniel Speck, Florian Kock"
 __copyright__ = "Copyright 2014, Praktikum Neuronale Netze"
