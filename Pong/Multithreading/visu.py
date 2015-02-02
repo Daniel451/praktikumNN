@@ -1,6 +1,10 @@
 #!/usr/bin/env python3.4
 # -*- coding: utf-8 -*-
-""" bla bla bla"""   #TODO: Write summary about this file!
+
+"""
+Die Visu sorgt für die Visualisierung der Applikation, also des Spielfedes, des Balles, der Schläger, usw.
+Die Visu läuft in einem eigenen Thread.
+"""
 
 __author__ = "Daniel Speck, Florian Kock"
 __copyright__ = "Copyright 2014, Praktikum Neuronale Netze"
@@ -12,10 +16,12 @@ __status__ = "Development"
 
 from tkinter import *
 from multiprocessing import Process, Pipe
+from telegramframe import TelegrammFrame
+
 import socket
 import json
-from telegramframe import TelegrammFrame
 import time
+
 
 def netw_communication(conn):
     nc = NetwCon()
@@ -27,9 +33,6 @@ def netw_communication(conn):
             time.sleep(1)
     print('connected, lets go...')
 
-    
-    
-    
     while True:
         if conn.poll(None):  # warte auf neue Daten...
             
